@@ -50,10 +50,16 @@ class Msg {
   /// `{d: Dir index, b: bomb pressed}`.
   static const input = 'in';
 
+  /// `{c: number}` latency probe; answered with [pong] echoing `c`.
+  static const ping = 'ping';
+
   // server -> client
 
-  /// `{id}` reply to hello.
+  /// `{id, ping: true}` reply to hello (`ping` = server answers [ping]).
   static const welcome = 'welcome';
+
+  /// `{c}` echo of a [ping].
+  static const pong = 'pong';
 
   /// `{rooms: [RoomSummary]}` lobby list.
   static const rooms = 'rooms';

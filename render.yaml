@@ -1,10 +1,14 @@
 # Render Blueprint for the online battle server (free plan, see README "Online").
 # Rooms live in memory, so keep exactly one instance.
+# Frankfurt is closest to players in Turkey/Europe (~50 ms vs ~200 ms to the US).
+# Render can't move a service between regions, so this is a new service; the
+# old US service (blast-buddies-server) can be deleted once the app uses this one.
 services:
   - type: web
-    name: blast-buddies-server
+    name: blast-buddies-eu
     runtime: docker
     plan: free
+    region: frankfurt
     dockerfilePath: ./server.Dockerfile
     dockerContext: .
     healthCheckPath: /health

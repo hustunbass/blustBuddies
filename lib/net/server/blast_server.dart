@@ -145,6 +145,9 @@ class BlastServer {
           _ready(c, m['ready'] == true);
         case Msg.input:
           _input(c, m);
+        case Msg.ping:
+          final t = m['c'];
+          if (t is num) _send(c, {'t': Msg.pong, 'c': t});
         default:
           _error(c, ErrorCode.badRequest);
       }
@@ -173,7 +176,7 @@ class BlastServer {
     }
     final name = cleanText(m['name'], Limits.name);
     c.name = name.isEmpty ? 'Player ${c.id}' : name;
-    _send(c, {'t': Msg.welcome, 'id': c.id});
+    _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true});
     _sendRoomList(c);
   }
 

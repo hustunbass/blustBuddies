@@ -290,12 +290,6 @@ abstract class AppLocalizations {
   /// **'Battle setup'**
   String get battleSetup;
 
-  /// No description provided for @humanPlayers.
-  ///
-  /// In en, this message translates to:
-  /// **'Human players'**
-  String get humanPlayers;
-
   /// No description provided for @botPlayers.
   ///
   /// In en, this message translates to:
@@ -311,7 +305,7 @@ abstract class AppLocalizations {
   /// No description provided for @battleHint.
   ///
   /// In en, this message translates to:
-  /// **'Players 1-4 share one keyboard on desktop; on phones player 1 uses the touch controls.'**
+  /// **'You battle 1-3 bots. To play with friends on other devices, use Online mode.'**
   String get battleHint;
 
   /// No description provided for @playerN.

@@ -16,9 +16,7 @@ flutter run            # pick an iOS/Android device or simulator
 flutter analyze && flutter test
 ```
 
-Desktop/test controls: arrows or WASD + Space/Enter. In Battle with several
-humans on one keyboard: P1 `WASD`+`Space`, P2 arrows+`Enter`, P3 `IJKL`+`U`,
-P4 `TFGH`+`R`.
+Desktop/test controls: arrows or WASD + Space/Enter.
 
 Regenerate generated assets:
 `python3 tool/gen_audio.py` (placeholder sounds), `python3 tool/gen_icon.py`
@@ -78,7 +76,8 @@ A custom address can still be entered under *Advanced* (testing / LAN).
    1. Push this project to a GitHub repository (private is fine).
    2. Render → **New → Blueprint** → pick the repo → **Apply**.
    3. When the deploy is live, open the shown URL + `/health`
-      (`https://blast-buddies-server-yc0g.onrender.com/health` → `blast-buddies ok`).
+      (→ `blast-buddies ok`). The service runs in Frankfurt (`region` in
+      `render.yaml`), close to players in Turkey/Europe.
    4. If Render assigned a different URL (name taken), put it into
       `defaultServerUrl` as `wss://<host>` **before** archiving the app.
 
@@ -106,6 +105,11 @@ A custom address can still be entered under *Advanced* (testing / LAN).
    starts (un-ready or leaving cancels it), then the match begins. After the
    match everyone returns to the room and can ready up again.
 
+Latency: the client predicts its own player's movement with the same
+movement code as the server and blends in corrections measured against where
+it was one round trip ago (RTT from `ping`/`pong`), so your own buddy reacts
+instantly; other players are smoothed between 30 Hz snapshots.
+
 Server rules: passwords are stored as salted SHA-256 hashes only; 5 wrong
 passwords per minute per connection, then `tooManyAttempts`; names/room names
 are length-limited and sanitised; frames > 4 KB and invalid input are
@@ -124,7 +128,7 @@ internet (Fly.io provides it; elsewhere put Caddy/nginx in front).
 * Power-ups (30 % drop): extra bomb, range, speed, shield, bomb kick.
 * Enemies: wanderer, BFS chaser, speedster. Exit door opens when all are dead.
 * 3 lives, score, 3-minute timer, 12 levels with rising difficulty.
-* Battle: 2–4 players (humans on one keyboard and/or bots), optional 2v2 teams.
+* Battle: you against 1–3 bots, optional 2v2 teams (you + a bot vs 2 bots).
 * Online battle across devices: room list, password rooms, 1v1 / 2v2 / 3 / 4
   free-for-all, ready-up with 3-second countdown.
 * Menus: main, level select, battle setup, pause, result, settings
@@ -144,8 +148,8 @@ internet (Fly.io provides it; elsewhere put Caddy/nginx in front).
 * Battle players have 1 life; the round ends when ≤ 1 is alive or after
   3 minutes (draw). Bots are heuristic (flee blasts, bomb crates/opponents when
   an escape exists).
-* On touch devices only player 1 has on-screen controls; additional human
-  players need a keyboard (or a future second on-screen control set).
+* Local Battle has exactly one human (1–3 bots); playing with friends is done
+  through Online mode on separate devices.
 * Audio files are synthesized placeholders (CC0). Icon/splash are generated
   from `tool/gen_icon.py`; replace with final art before release.
 * Language follows the device (en/tr), there is no in-app language switch.
@@ -165,7 +169,6 @@ See [store/metadata.md](store/metadata.md) (store listings, checklist) and
   phones (the renderer redraws the full grid each frame; a cached floor
   `Picture` is the next optimisation if needed).
 * Signing configuration, final bundle id, privacy policy URL.
-* Second on-screen control set for local multiplayer on one phone/tablet.
 * Gamepad support, more enemy types and boss levels.
-* Online: reconnect to a running match, bots to fill online rooms, client-side
-  prediction for high-latency connections, multiple server regions.
+* Online: reconnect to a running match, bots to fill online rooms, multiple
+  server regions.

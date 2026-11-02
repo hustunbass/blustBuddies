@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:blast_buddies/core/grid/grid_pos.dart';
@@ -51,6 +52,21 @@ void main() {
     final def = parseServerAddress(defaultServerUrl)!;
     expect(def.scheme, 'wss');
     expect(def.host, isNotEmpty);
+  });
+
+  test('server answers pings and the client measures round-trip time', () async {
+    final c = await connect('Ping');
+    expect(c.rtt, inInclusiveRange(0.02, 0.5));
+    final ws = await WebSocket.connect('ws://$address');
+    final got = <Map<String, dynamic>>[];
+    ws.listen((m) => got.add(jsonDecode(m as String) as Map<String, dynamic>));
+    ws.add(jsonEncode({'t': Msg.hello, 'name': 'raw', 'v': protocolVersion}));
+    await waitFor(() => got.any((m) => m['t'] == Msg.welcome));
+    expect(got.firstWhere((m) => m['t'] == Msg.welcome)['ping'], isTrue);
+    ws.add(jsonEncode({'t': Msg.ping, 'c': 12.5}));
+    await waitFor(() => got.any((m) => m['t'] == Msg.pong));
+    expect(got.firstWhere((m) => m['t'] == Msg.pong)['c'], 12.5);
+    await ws.close();
   });
 
   test('connect fails cleanly when no server listens', () async {

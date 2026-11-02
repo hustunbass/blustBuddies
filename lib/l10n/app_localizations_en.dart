@@ -113,9 +113,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get battleSetup => 'Battle setup';
 
   @override
-  String get humanPlayers => 'Human players';
-
-  @override
   String get botPlayers => 'Bots';
 
   @override
@@ -123,7 +120,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get battleHint =>
-      'Players 1-4 share one keyboard on desktop; on phones player 1 uses the touch controls.';
+      'You battle 1-3 bots. To play with friends on other devices, use Online mode.';
 
   @override
   String playerN(int n) {

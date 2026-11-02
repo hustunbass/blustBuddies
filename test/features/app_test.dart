@@ -61,7 +61,7 @@ void main() {
     expect(c.read(prefsProvider).getBool('music'), isFalse);
   });
 
-  testWidgets('battle setup keeps total players within 2..4', (tester) async {
+  testWidgets('battle setup: one human against 1..3 bots', (tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('en')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await pumpApp(tester);
@@ -69,6 +69,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Battle setup'), findsOneWidget);
     expect(find.text('Start battle'), findsOneWidget);
+    expect(find.byIcon(Icons.add_circle_outline), findsOneWidget);
+    IconButton button(IconData i) => tester.widget(find.widgetWithIcon(IconButton, i));
+    expect(button(Icons.remove_circle_outline).onPressed, isNull);
+    for (var i = 0; i < 5; i++) {
+      await tester.tap(find.byIcon(Icons.add_circle_outline));
+      await tester.pump();
+    }
+    expect(find.text('3'), findsOneWidget);
+    expect(button(Icons.add_circle_outline).onPressed, isNull);
+    expect(find.text('AI'), findsNWidgets(3));
   });
 
   testWidgets('battle setup offers 2v2 only with four players', (tester) async {

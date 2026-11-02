@@ -359,7 +359,15 @@ class GameWorld {
     return false;
   }
 
-  void _movePlayer(Player p, double dt) {
+  /// Moves player [id] by its current `moveDir` for [dt] seconds without any
+  /// side effects on other objects (no bomb kicks). Used by online clients to
+  /// predict their own movement before the server confirms it.
+  void predictMove(int id, double dt) {
+    if (id >= players.length || !players[id].alive) return;
+    _movePlayer(players[id], min(dt, 0.05), kick: false);
+  }
+
+  void _movePlayer(Player p, double dt, {bool kick = true}) {
     final d = p.moveDir;
     if (d == Dir.none) return;
     p.facing = d;
@@ -382,7 +390,7 @@ class GameWorld {
       p.x = fx;
       p.y = fy;
     }
-    if (p.stats.canKick) _tryKick(p, d);
+    if (kick && p.stats.canKick) _tryKick(p, d);
     _slide(p, d, dist);
   }
 

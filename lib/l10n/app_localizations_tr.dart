@@ -113,9 +113,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get battleSetup => 'Savaş kurulumu';
 
   @override
-  String get humanPlayers => 'İnsan oyuncular';
-
-  @override
   String get botPlayers => 'Botlar';
 
   @override
@@ -123,7 +120,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get battleHint =>
-      'Masaüstünde 1-4. oyuncular aynı klavyeyi paylaşır; telefonda 1. oyuncu dokunmatik kontrolleri kullanır.';
+      'Sen ve 1-3 bot savaşırsınız. Arkadaşlarınla farklı cihazlardan oynamak için Çevrimiçi modunu kullan.';
 
   @override
   String playerN(int n) {

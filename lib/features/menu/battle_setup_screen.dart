@@ -4,7 +4,7 @@ import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Chooses humans and bots for Battle mode.
+/// Battle mode setup: one human against 1–3 bots.
 class BattleSetupScreen extends StatefulWidget {
   /// Creates the screen.
   const BattleSetupScreen({super.key});
@@ -14,11 +14,9 @@ class BattleSetupScreen extends StatefulWidget {
 }
 
 class _BattleSetupScreenState extends State<BattleSetupScreen> {
-  int _humans = 1;
+  static const _humans = 1;
   int _bots = 1;
   bool _teams = false;
-
-  int get _maxBots => 4 - _humans;
 
   @override
   Widget build(BuildContext context) {
@@ -37,20 +35,10 @@ class _BattleSetupScreenState extends State<BattleSetupScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   _Picker(
-                    label: l.humanPlayers,
-                    value: _humans,
-                    min: 1,
-                    max: 4,
-                    onChanged: (v) => setState(() {
-                      _humans = v;
-                      _bots = _bots.clamp(0, _maxBots);
-                    }),
-                  ),
-                  _Picker(
                     label: l.botPlayers,
                     value: _bots,
-                    min: 0,
-                    max: _maxBots,
+                    min: 1,
+                    max: 3,
                     onChanged: (v) => setState(() => _bots = v),
                   ),
                   const SizedBox(height: 8),
@@ -88,9 +76,7 @@ class _BattleSetupScreenState extends State<BattleSetupScreen> {
                   ),
                   const SizedBox(height: 20),
                   FilledButton(
-                    onPressed: total < 2
-                        ? null
-                        : () => context.pushReplacement(
+                    onPressed: () => context.pushReplacement(
                             '/game',
                             extra: GameArgs.battle(humans: _humans, bots: _bots, teams: teams),
                           ),
