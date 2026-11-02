@@ -50,7 +50,7 @@ are only relayed in real time to other players in the room, not stored).
 game inputs are processed only in real time and kept in server memory for the
 duration of the connection, which Apple does not count as "collected".
 **App Review notes:** "Online mode connects to our game server
-(wss://blast-buddies-server-yc0g.onrender.com). The server may need up to a
+(wss://blast-buddies-eu.onrender.com). The server may need up to a
 minute to wake up on first connect; the app shows 'Waking up the server'. To
 test a match, create a 2-player room on one device and join it from a second
 device (or simulator). Story and Battle (vs bots) work offline."

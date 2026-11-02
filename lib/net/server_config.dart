@@ -3,5 +3,5 @@
 /// or override at build time with `--dart-define=BLAST_SERVER=wss://...`.
 const String defaultServerUrl = String.fromEnvironment(
   'BLAST_SERVER',
-  defaultValue: 'wss://blast-buddies-server-yc0g.onrender.com',
+  defaultValue: 'wss://blast-buddies-eu.onrender.com',
 );
