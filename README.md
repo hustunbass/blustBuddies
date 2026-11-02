@@ -78,7 +78,7 @@ A custom address can still be entered under *Advanced* (testing / LAN).
    1. Push this project to a GitHub repository (private is fine).
    2. Render → **New → Blueprint** → pick the repo → **Apply**.
    3. When the deploy is live, open the shown URL + `/health`
-      (`https://blast-buddies-server.onrender.com/health` → `blast-buddies ok`).
+      (`https://blast-buddies-server-yc0g.onrender.com/health` → `blast-buddies ok`).
    4. If Render assigned a different URL (name taken), put it into
       `defaultServerUrl` as `wss://<host>` **before** archiving the app.
 
