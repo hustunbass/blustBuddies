@@ -69,6 +69,43 @@ void main() {
     await ws.close();
   });
 
+  test('/stats reports players, rooms, matches and load', () async {
+    Future<Map<String, dynamic>> stats() async {
+      final http = HttpClient();
+      final res = await (await http.getUrl(Uri.parse('http://$address/stats'))).close();
+      final body = await res.transform(utf8.decoder).join();
+      http.close();
+      expect(res.headers.contentType?.mimeType, 'application/json');
+      return jsonDecode(body) as Map<String, dynamic>;
+    }
+
+    var s = await stats();
+    expect(s['online'], 0);
+    expect(s['load'], 'ok');
+
+    final a = await connect('A');
+    final b = await connect('B');
+    a.createRoom(name: 'R', capacity: 2, teams: false);
+    await waitFor(() => b.rooms.isNotEmpty);
+    b.joinRoom(b.rooms.single.id);
+    await waitFor(() => a.room?.filled == 2);
+    a.setReady(true);
+    b.setReady(true);
+    await waitFor(() => a.match != null);
+
+    s = await stats();
+    expect(s['online'], 2);
+    expect(s['peakOnline'], 2);
+    expect(s['rooms'], 1);
+    expect(s['matches'], 1);
+    expect(s['inMatch'], 2);
+    expect(s['lagMs'], isA<int>());
+
+    await b.disconnect();
+    await waitFor(() => server.stats()['online'] == 1);
+    expect(server.stats()['peakOnline'], 2);
+  });
+
   test('connect fails cleanly when no server listens', () async {
     final c = OnlineClient(wakeUpTime: Duration.zero);
     expect(await c.connect('127.0.0.1:1', 'x'), isFalse);

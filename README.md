@@ -105,6 +105,13 @@ A custom address can still be entered under *Advanced* (testing / LAN).
    starts (un-ready or leaving cancels it), then the match begins. After the
    match everyone returns to the room and can ready up again.
 
+Monitoring: `GET /stats` (e.g. `https://blast-buddies-eu.onrender.com/stats`)
+returns `online`, `peakOnline` (since the last restart), `inMatch`, `rooms`,
+`matches`, `lagMs` (worst event-loop delay of the last minute) and `load`
+(`ok` < 20 ms, `busy` < 50 ms, else `overloaded`). The same line is written to
+the service log every 5 minutes while anyone is connected. Upgrade the Render
+plan when `load` stays `busy`/`overloaded` during peak hours.
+
 Latency: the client predicts its own player's movement with the same
 movement code as the server and blends in corrections measured against where
 it was one round trip ago (RTT from `ping`/`pong`), so your own buddy reacts

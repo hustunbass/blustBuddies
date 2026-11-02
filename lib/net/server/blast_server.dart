@@ -25,6 +25,7 @@ class BlastServer {
     this.passwordAttempts = 5,
     this.passwordWindow = const Duration(minutes: 1),
     this.log,
+    this.statsLogEvery = const Duration(minutes: 5),
     Random? random,
   }) : _rng = random ?? Random.secure();
 
@@ -52,26 +53,76 @@ class BlastServer {
   /// Optional logger.
   final void Function(String)? log;
 
+  /// How often a stats line is logged while anyone is connected.
+  final Duration statsLogEvery;
+
   final Random _rng;
   HttpServer? _http;
   final Set<_Client> _clients = {};
   final Map<String, _Room> _rooms = {};
   int _nextClientId = 1;
 
+  final Stopwatch _uptime = Stopwatch();
+  Timer? _lagTimer;
+  Timer? _statsTimer;
+  final List<int> _lagSamples = [];
+  int _peakOnline = 0;
+  static const _lagProbe = Duration(milliseconds: 500);
+
   /// Number of open rooms (tests/monitoring).
   int get roomCount => _rooms.length;
+
+  /// Live numbers for `/stats` and the periodic log line.
+  ///
+  /// `lagMs` is how late the event loop runs (worst of the last minute);
+  /// sustained values above ~20 ms mean the CPU can't keep up with the
+  /// matches and the plan should be upgraded.
+  Map<String, Object> stats() {
+    final online = _clients.where((c) => c.name != null).length;
+    final matches = _rooms.values.where((r) => r.match != null);
+    final lag = _lagSamples.isEmpty ? 0 : _lagSamples.reduce(max);
+    return {
+      'online': online,
+      'peakOnline': _peakOnline,
+      'inMatch': matches.fold<int>(0, (n, r) => n + r.members.length),
+      'rooms': _rooms.length,
+      'matches': matches.length,
+      'lagMs': lag,
+      'load': lag < 20 ? 'ok' : (lag < 50 ? 'busy' : 'overloaded'),
+      'uptimeMin': _uptime.elapsed.inMinutes,
+    };
+  }
+
+  void _startMonitoring() {
+    _uptime.start();
+    final sw = Stopwatch()..start();
+    _lagTimer = Timer.periodic(_lagProbe, (_) {
+      final late = sw.elapsedMilliseconds - _lagProbe.inMilliseconds;
+      sw.reset();
+      _lagSamples.add(late < 0 ? 0 : late);
+      if (_lagSamples.length > 120) _lagSamples.removeAt(0);
+    });
+    _statsTimer = Timer.periodic(statsLogEvery, (_) {
+      if (_clients.isEmpty) return;
+      final s = stats();
+      log?.call('stats ${s.entries.map((e) => '${e.key}=${e.value}').join(' ')}');
+    });
+  }
 
   /// Binds to [port] (0 = any free port) and returns the bound port.
   Future<int> start({int port = defaultServerPort, Object? address}) async {
     final http = await HttpServer.bind(address ?? InternetAddress.anyIPv4, port);
     _http = http;
     http.listen(_onRequest);
+    _startMonitoring();
     log?.call('listening on ${http.address.address}:${http.port}');
     return http.port;
   }
 
   /// Stops matches, closes connections and the listener.
   Future<void> close() async {
+    _lagTimer?.cancel();
+    _statsTimer?.cancel();
     for (final r in _rooms.values) {
       r.dispose();
     }
@@ -101,6 +152,13 @@ class BlastServer {
         onError: (_) => _onGone(c),
         cancelOnError: true,
       );
+      return;
+    }
+    if (req.uri.path == '/stats') {
+      req.response
+        ..headers.contentType = ContentType.json
+        ..write(jsonEncode(stats()));
+      await req.response.close();
       return;
     }
     final ok = req.uri.path == '/health' || req.uri.path == '/';
@@ -176,6 +234,8 @@ class BlastServer {
     }
     final name = cleanText(m['name'], Limits.name);
     c.name = name.isEmpty ? 'Player ${c.id}' : name;
+    final online = _clients.where((x) => x.name != null).length;
+    if (online > _peakOnline) _peakOnline = online;
     _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true});
     _sendRoomList(c);
   }
