@@ -1,0 +1,194 @@
+{
+  "@@locale": "en",
+  "appTitle": "Blast Buddies",
+  "storyMode": "Story",
+  "battleMode": "Battle",
+  "howToPlay": "How to Play",
+  "settings": "Settings",
+  "selectLevel": "Select Level",
+  "levelN": "Level {n}",
+  "@levelN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "levelLocked": "Locked",
+  "bestScore": "Best score: {score}",
+  "@bestScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "lives": "Lives",
+  "score": "Score",
+  "time": "Time",
+  "enemiesLeft": "Enemies",
+  "pause": "Pause",
+  "paused": "Paused",
+  "resume": "Resume",
+  "restart": "Restart",
+  "mainMenu": "Main menu",
+  "gameOver": "Game over",
+  "levelComplete": "Level complete!",
+  "allLevelsDone": "You cleared every level!",
+  "nextLevel": "Next level",
+  "tryAgain": "Try again",
+  "finalScore": "Score: {score}",
+  "@finalScore": {
+    "placeholders": {
+      "score": {
+        "type": "int"
+      }
+    }
+  },
+  "playerWins": "Player {n} wins!",
+  "@playerWins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "draw": "Draw!",
+  "playAgain": "Play again",
+  "sound": "Sound effects",
+  "music": "Music",
+  "vibration": "Vibration",
+  "controlSize": "Control size",
+  "battleSetup": "Battle setup",
+  "humanPlayers": "Human players",
+  "botPlayers": "Bots",
+  "startBattle": "Start battle",
+  "battleHint": "Players 1-4 share one keyboard on desktop; on phones player 1 uses the touch controls.",
+  "playerN": "P{n}",
+  "@playerN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "joystick": "Movement joystick",
+  "bombButton": "Drop bomb",
+  "howMove": "Move with the joystick (arrow keys / WASD).",
+  "howBomb": "Drop a bomb with the bomb button (Space). It explodes after 3 seconds in a plus shape.",
+  "howBlocks": "Blasts destroy crates but stop at steel walls. Bombs set off other bombs.",
+  "howEnemies": "Defeat every enemy to open the exit door, then step on it. Watch out for chasers and speedsters!",
+  "howShield": "Shield: protects you for a few seconds.",
+  "powerBomb": "Extra bomb",
+  "powerRange": "Longer blasts",
+  "powerSpeed": "Speed up",
+  "powerShield": "Shield",
+  "powerKick": "Bomb kick",
+  "howBattle": "Battle: last buddy standing wins. Play with friends or bots.",
+  "howTime": "You have 3 minutes per level and 3 lives.",
+  "back": "Back",
+  "language": "Language follows your device settings.",
+  "onlineMode": "Online",
+  "onlineTitle": "Online battle",
+  "yourName": "Your name",
+  "serverAddress": "Custom server address",
+  "serverHint": "Leave empty for the default server",
+  "advanced": "Advanced",
+  "serverWaking": "Waking up the server, this can take about a minute…",
+  "onlineHint": "Enter your name and connect. Create a room or join one your friends created.",
+  "connect": "Connect",
+  "disconnect": "Disconnect",
+  "connectFailed": "Could not connect to the server.",
+  "connectionLost": "Connection lost.",
+  "rooms": "Rooms",
+  "noRooms": "No rooms yet. Create one!",
+  "createRoom": "Create room",
+  "roomName": "Room name",
+  "playerCount": "Players",
+  "teamsLabel": "Teams (2 vs 2)",
+  "passwordOptional": "Password (optional)",
+  "password": "Password",
+  "create": "Create",
+  "join": "Join",
+  "cancel": "Cancel",
+  "modeDuel": "1 vs 1",
+  "modeTeams": "2 vs 2",
+  "modeFfa": "{n} players, free-for-all",
+  "@modeFfa": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "inGame": "In game",
+  "readyLabel": "Ready",
+  "notReady": "Not ready",
+  "imReady": "Ready!",
+  "cancelReady": "Not ready",
+  "waitingForPlayers": "Waiting for players… ({n}/{cap})",
+  "@waitingForPlayers": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "cap": {
+        "type": "int"
+      }
+    }
+  },
+  "waitingForReady": "Waiting for everyone to be ready…",
+  "startsIn": "Starting in {n}…",
+  "@startsIn": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "leaveRoom": "Leave room",
+  "emptySlot": "Empty slot",
+  "youTag": "{name} (you)",
+  "@youTag": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "teamN": "Team {n}",
+  "@teamN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "teamWins": "Team {n} wins!",
+  "@teamWins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "nameWins": "{name} wins!",
+  "@nameWins": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "backToRoom": "Back to room",
+  "leaveMatch": "Leave match",
+  "leaveMatchQuestion": "Leave the match?",
+  "errWrongPassword": "Wrong password.",
+  "errRoomFull": "The room is full.",
+  "errRoomNotFound": "The room no longer exists.",
+  "errInProgress": "The match has already started.",
+  "errTooManyAttempts": "Too many wrong attempts. Try again in a minute.",
+  "errServerFull": "The server is full.",
+  "errVersion": "App and server versions do not match.",
+  "errGeneric": "Request rejected."
+}

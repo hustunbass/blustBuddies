@@ -1,0 +1,13 @@
+# Render Blueprint for the online battle server (free plan, see README "Online").
+# Rooms live in memory, so keep exactly one instance.
+services:
+  - type: web
+    name: blast-buddies-server
+    runtime: docker
+    plan: free
+    dockerfilePath: ./server.Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: "8080"
