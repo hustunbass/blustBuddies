@@ -32,7 +32,7 @@ class Msg {
 
   // client -> server
 
-  /// `{name, v}` first message.
+  /// `{name, v, skin: [hat, face, colour]}` first message.
   static const hello = 'hello';
 
   /// `{name, capacity, teams, password?}`.
@@ -47,8 +47,14 @@ class Msg {
   /// `{ready}`.
   static const setReady = 'ready';
 
-  /// `{d: Dir index, b: bomb pressed}`.
+  /// `{d: Dir index, b: bomb pressed, x: detonate}`.
   static const input = 'in';
+
+  /// `{capacity}` join a public waiting room or open a new one (auto-ready).
+  static const quick = 'quick';
+
+  /// `{e: 0..5}` show an emote above your buddy (throttled).
+  static const emote = 'emote';
 
   /// `{c: number}` latency probe; answered with [pong] echoing `c`.
   static const ping = 'ping';
@@ -67,7 +73,13 @@ class Msg {
   /// `{room: RoomDetails}` state of the room you are in.
   static const room = 'room';
 
-  /// `{seed, capacity, teams, you, names}` match begins.
+  /// `{from, e}` somebody's emote.
+  static const emoteFrom = 'emoted';
+
+  /// `{slot}` a player left the running match.
+  static const left = 'left';
+
+  /// `{seed, cap, teams, you, names, skins}` match begins.
   static const start = 'start';
 
   /// World snapshot (see `snapshot.dart`).

@@ -96,6 +96,8 @@ class GameHud extends StatelessWidget {
             _Stat(Icons.add, '${state.range}', Colors.deepOrangeAccent),
             _Stat(Icons.bolt, state.speed.toStringAsFixed(1), Colors.yellow),
             if (state.kick) const _Stat(Icons.sports_soccer, '', Colors.purpleAccent),
+            if (state.detonate) const _Stat(Icons.flash_on, '', Colors.redAccent),
+            if (state.ghost > 0) _Stat(Icons.visibility_off, '${state.ghost}', Colors.blueGrey.shade100),
             if (state.shield > 0) _Stat(Icons.shield, '${state.shield}', Colors.lightBlueAccent),
             const SizedBox(width: 10),
           ],

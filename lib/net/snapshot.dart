@@ -54,6 +54,8 @@ Map<String, dynamic> encodeSnapshot(GameWorld w, List<GameEvent> events, {double
           p.stats.range,
           _c(p.stats.speed),
           if (p.stats.canKick) 1 else 0,
+          _c(p.stats.ghost),
+          if (p.stats.canDetonate) 1 else 0,
         ],
     ],
     'e': [
@@ -121,7 +123,9 @@ void applySnapshot(GameWorld w, Map<String, dynamic> m) {
       ..maxBombs = l[8] as int
       ..range = l[9] as int
       ..speed = _d(l[10])
-      ..canKick = l[11] == 1;
+      ..canKick = l[11] == 1
+      ..ghost = l.length > 12 ? _d(l[12]) : 0
+      ..canDetonate = l.length > 13 && l[13] == 1;
   }
 
   for (final e in m['e'] as List) {

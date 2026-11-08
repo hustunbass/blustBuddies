@@ -7,11 +7,45 @@ import 'package:blast_buddies/core/grid/grid_pos.dart';
 import 'package:blast_buddies/features/game/logic/entities.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 
+/// How clever and fast battle bots are.
+enum BotLevel {
+  /// Slow, hesitant, sometimes walks into danger.
+  easy(speed: 3.0, thinkEvery: 0.30, bombChance: 0.35, blunder: 0.25),
+
+  /// The default.
+  normal(speed: 3.6, thinkEvery: 0.12, bombChance: 0.7, blunder: 0),
+
+  /// Quick, relentless, rarely wastes a bomb.
+  hard(speed: 4.0, thinkEvery: 0.07, bombChance: 0.95, blunder: 0);
+
+  const BotLevel({
+    required this.speed,
+    required this.thinkEvery,
+    required this.bombChance,
+    required this.blunder,
+  });
+
+  /// Movement speed (cells/s).
+  final double speed;
+
+  /// Seconds between decisions.
+  final double thinkEvery;
+
+  /// Chance to drop a bomb on a useful spot.
+  final double bombChance;
+
+  /// Chance per decision to ignore a nearby blast.
+  final double blunder;
+}
+
 /// Simple battle-mode bot: flees danger, bombs blocks/opponents when it has
 /// an escape route, otherwise walks towards a useful bombing spot.
 class BotBrain {
   /// Creates a brain using [_rng] for tie breaking.
-  BotBrain(this._rng);
+  BotBrain(this._rng, [this.level = BotLevel.normal]);
+
+  /// Skill.
+  final BotLevel level;
 
   final Random _rng;
   double _cooldown = 0;
@@ -21,7 +55,7 @@ class BotBrain {
   void update(GameWorld w, Player p, double dt) {
     _cooldown -= dt;
     if (_cooldown <= 0) {
-      _cooldown = 0.12;
+      _cooldown = level.thinkEvery;
       _think(w, p);
     }
     p.moveDir = _aligned(p, _dir);
@@ -48,7 +82,7 @@ class BotBrain {
         w.grid.inBounds(c.x, c.y) && danger[c.y * GridModel.cols + c.x];
     final cell = p.cell;
 
-    if (isDanger(cell)) {
+    if (isDanger(cell) && !(level.blunder > 0 && _rng.nextDouble() < level.blunder)) {
       final path = bfsPath(cell, (c) => !isDanger(c), (c) => w.walkable(c.x, c.y),
           maxDepth: 8);
       _dir = path != null && path.isNotEmpty ? dirBetween(cell, path.first) : Dir.none;
@@ -56,7 +90,7 @@ class BotBrain {
     }
 
     final canPlace = p.activeBombs < p.stats.maxBombs && w.bombAt(cell.x, cell.y) == null;
-    if (canPlace && _useful(w, p, cell) && _rng.nextDouble() < 0.7) {
+    if (canPlace && _useful(w, p, cell) && _rng.nextDouble() < level.bombChance) {
       final escape = _escapeFrom(w, p, cell, isDanger);
       if (escape != null) {
         p.bombRequested = true;

@@ -11,11 +11,12 @@ Blast Buddies is a fast, colourful arcade game for one to four players.
 Guide your round little buddy through a maze of crates, drop bombs, grab
 power-ups and clear every enemy robot before time runs out.
 
-* 12 story levels with rising difficulty: wanderers, chasers and speedsters
-* Battle mode: you against 1-3 bots, optional 2 vs 2 teams
+* 100 story levels in 10 worlds with a gentle difficulty curve, 3-star ratings and a boss every 25 levels
+* Wardrobe: unlock hats, faces and colours with your stars; achievements and statistics
+* Battle mode: you against 1-3 bots (easy, normal, hard), optional 2 vs 2 teams, daily arena
 * Online battle with friends on their own devices: create a room (optional
-  password) for 1v1, 2v2, 3 or 4 player free-for-all, ready up and fight
-* Power-ups: extra bombs, longer blasts, speed, shield, bomb kick
+  password) for 1v1, 2v2, 3 or 4 player free-for-all, ready up and fight; or hit Quick match, share room codes and send emotes
+* Power-ups: extra bombs, longer blasts, speed, shield, bomb kick, detonator, ghost
 * Chain reactions, smooth movement, virtual joystick or keyboard controls
 * Available in English and Turkish. No ads, no tracking; story and bot
   battles work offline.
@@ -25,11 +26,12 @@ Blast Buddies bir ile dört oyuncu için hızlı ve renkli bir arcade oyunudur.
 Yuvarlak buddy'ni sandık dolu labirentte yönlendir, bomba bırak, güçlendirmeleri
 topla ve süre dolmadan tüm robot düşmanları temizle.
 
-* Zorluğu artan 12 hikaye bölümü: gezginler, kovalayanlar ve hızlılar
-* Savaş modu: 1-3 bota karşı, istersen 2'ye 2 takım
+* 10 dünyada 100 hikaye bölümü, yumuşak zorluk eğrisi, 3 yıldız puanı ve her 25 bölümde bir patron
+* Gardırop: yıldızlarınla şapka, yüz ve renk aç; başarımlar ve istatistikler
+* Savaş modu: 1-3 bota karşı (kolay, normal, zor), istersen 2'ye 2 takım, günün arenası
 * Çevrimiçi savaş: arkadaşlarınla kendi cihazlarından; oda kur (isteğe bağlı
-  şifre), 1'e 1, 2'ye 2, 3 ya da 4 kişilik herkes tek, hazır ol ve savaş
-* Güçlendirmeler: ekstra bomba, uzun patlama, hız, kalkan, bomba tekmeleme
+  şifre), 1'e 1, 2'ye 2, 3 ya da 4 kişilik herkes tek, hazır ol ve savaş; ya da Hızlı maç, oda kodu ve emoji kullan
+* Güçlendirmeler: ekstra bomba, uzun patlama, hız, kalkan, bomba tekmeleme, patlatıcı, hayalet
 * Zincirleme patlamalar, akıcı hareket, sanal joystick veya klavye
 * İngilizce ve Türkçe. Reklam yok, takip yok; hikaye ve bot savaşları
   çevrimdışı çalışır.

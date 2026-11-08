@@ -38,6 +38,17 @@ class SettingsScreen extends ConsumerWidget {
                 if (v) ref.read(audioProvider).tap();
               },
             ),
+            SwitchListTile(
+              title: Text(l.floatingStick),
+              subtitle: Text(l.floatingStickHint),
+              value: s.floatingStick,
+              onChanged: (v) => notifier.update(s.copyWith(floatingStick: v)),
+            ),
+            SwitchListTile(
+              title: Text(l.leftHanded),
+              value: s.leftHanded,
+              onChanged: (v) => notifier.update(s.copyWith(leftHanded: v)),
+            ),
             ListTile(
               title: Text(l.controlSize),
               subtitle: Slider(

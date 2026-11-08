@@ -313,4 +313,45 @@ void main() {
     expect(errors, [ErrorCode.badRequest, ErrorCode.roomNotFound]);
     expect(a.status, OnlineStatus.connected);
   });
+
+  test('quick match pairs two players, auto-readies them and shares looks', () async {
+    final a = OnlineClient();
+    final b = OnlineClient();
+    clients.addAll([a, b]);
+    expect(await a.connect(address, 'Ann', skin: [4, 2, 1]), isTrue);
+    expect(await b.connect(address, 'Bob', skin: [1, 1, 1]), isTrue);
+    a.quickMatch(2);
+    await waitFor(() => a.room != null);
+    expect(a.room!.filled, 1);
+    b.quickMatch(2);
+    await waitFor(() => a.match != null && b.match != null);
+    expect(server.roomCount, 1, reason: 'both ended up in one room');
+    final skins = [for (final p in a.match!.world.players) p.skin];
+    expect(skins[0].hat, 4);
+    expect(skins[1].hat, 1);
+    expect(skins[0].color, isNotNull);
+    expect(skins[1].color, isNull, reason: 'duplicate body colour falls back to the slot colour');
+  });
+
+  test('emotes reach the room, are throttled, and leaving is announced', () async {
+    final a = OnlineClient();
+    final b = OnlineClient();
+    clients.addAll([a, b]);
+    await a.connect(address, 'Ann');
+    await b.connect(address, 'Bob');
+    a.quickMatch(2);
+    await waitFor(() => a.room != null);
+    b.quickMatch(2);
+    await waitFor(() => a.match != null && b.match != null);
+    final left = <int>[];
+    a.match!.leftSlots.listen(left.add);
+    b.match!.emote(3);
+    b.match!.emote(4); // inside the throttle window: dropped
+    await waitFor(() => a.match!.emotes[1] == 3);
+    await Future<void>.delayed(const Duration(milliseconds: 100));
+    expect(a.match!.emotes[1], 3);
+    b.leaveRoom();
+    await waitFor(() => left.isNotEmpty);
+    expect(left, [1]);
+  });
 }

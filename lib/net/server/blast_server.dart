@@ -3,8 +3,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:blast_buddies/core/cosmetics.dart';
 import 'package:blast_buddies/core/grid/grid_pos.dart';
 import 'package:blast_buddies/core/grid/map_generator.dart';
+import 'package:blast_buddies/features/game/logic/entities.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/net/protocol.dart';
 import 'package:blast_buddies/net/snapshot.dart';
@@ -204,6 +206,10 @@ class BlastServer {
           _ready(c, m['ready'] == true);
         case Msg.input:
           _input(c, m);
+        case Msg.quick:
+          _quick(c, m);
+        case Msg.emote:
+          _emote(c, m);
         case Msg.ping:
           final t = m['c'];
           if (t is num) _send(c, {'t': Msg.pong, 'c': t});
@@ -235,6 +241,10 @@ class BlastServer {
     }
     final name = cleanText(m['name'], Limits.name);
     c.name = name.isEmpty ? 'Player ${c.id}' : name;
+    final sk = m['skin'];
+    if (sk is List && sk.length == 3 && sk.every((e) => e is int)) {
+      c.skin = Cosmetics.skin(sk[0] as int, sk[1] as int, sk[2] as int);
+    }
     final online = _clients.where((x) => x.name != null).length;
     if (online > _peakOnline) _peakOnline = online;
     _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true});
@@ -302,6 +312,52 @@ class BlastServer {
     _broadcastRoomList();
   }
 
+  /// Joins the fullest public waiting room of that size or opens a new one.
+  /// Everybody in a quick room is ready automatically, so it starts as soon
+  /// as it is full.
+  void _quick(_Client c, Map<String, dynamic> m) {
+    final cap = m['capacity'];
+    if (cap is! int || !validRoomShape(cap, false)) {
+      _error(c, ErrorCode.badRequest);
+      return;
+    }
+    _leave(c);
+    _Room? best;
+    for (final r in _rooms.values) {
+      if (r.locked || r.teams || r.capacity != cap || r.phase != RoomPhase.lobby) continue;
+      if (r.filled == 0 || r.filled >= r.capacity) continue;
+      if (best == null || r.filled > best.filled) best = r;
+    }
+    if (best == null) {
+      if (_rooms.length >= maxRooms) {
+        _error(c, ErrorCode.serverFull);
+        return;
+      }
+      best = _Room(id: _newRoomId(), name: c.name!, capacity: cap, teams: false);
+      _rooms[best.id] = best;
+      log?.call('room ${best.id} quick-created by ${c.name} (cap $cap)');
+    }
+    best.slots[best.slots.indexOf(null)] = c;
+    c.room = best;
+    _broadcastRoom(best);
+    _broadcastRoomList();
+    _ready(c, true);
+  }
+
+  void _emote(_Client c, Map<String, dynamic> m) {
+    final r = c.room;
+    final e = m['e'];
+    if (r == null || r.match == null || e is! int || e < 0 || e > 5) return;
+    final now = DateTime.now();
+    final last = c.lastEmote;
+    if (last != null && now.difference(last) < const Duration(milliseconds: 800)) return;
+    c.lastEmote = now;
+    final slot = r.slots.indexOf(c);
+    for (final o in r.members) {
+      _send(o, {'t': Msg.emoteFrom, 'from': slot, 'e': e});
+    }
+  }
+
   static List<int> _hashPassword(List<int> salt, String password) =>
       sha256.convert([...salt, ...utf8.encode(password)]).bytes;
 
@@ -363,6 +419,9 @@ class BlastServer {
     if (r.phase == RoomPhase.countdown) _cancelCountdown(r);
     final match = r.match;
     if (match != null) {
+      for (final o in r.members) {
+        _send(o, {'t': Msg.left, 'slot': slot});
+      }
       final p = match.world.players[slot];
       if (p.alive) {
         p.alive = false;
@@ -432,6 +491,20 @@ class BlastServer {
       ..phase = RoomPhase.playing
       ..match = match;
     final names = [for (final c in r.slots) c?.name ?? ''];
+    // Everybody keeps their look, but two buddies never share a body colour.
+    final usedColors = <int>{};
+    final skins = <Skin>[
+      for (final c in r.slots)
+        () {
+          final sk = c?.skin ?? const Skin();
+          final col = sk.color;
+          if (col != null && !usedColors.add(col)) return Skin(hat: sk.hat, face: sk.face);
+          return sk;
+        }(),
+    ];
+    for (var i = 0; i < world.players.length; i++) {
+      world.players[i].skin = skins[i];
+    }
     for (final c in r.members) {
       _send(c, {
         't': Msg.start,
@@ -440,6 +513,7 @@ class BlastServer {
         'teams': r.teams,
         'you': r.slots.indexOf(c),
         'names': names,
+        'skins': [for (final k in skins) [k.hat, k.face, k.color ?? 0]],
       });
     }
     _broadcastRoom(r);
@@ -507,6 +581,7 @@ class BlastServer {
     final slot = r.slots.indexOf(c);
     match.world.setMove(slot, Dir.values[d]);
     if (m['b'] == true) match.world.requestBomb(slot);
+    if (m['x'] == true) match.world.requestDetonate(slot);
   }
 }
 
@@ -517,6 +592,8 @@ class _Client {
   final WebSocket ws;
   String? name;
   _Room? room;
+  Skin skin = const Skin();
+  DateTime? lastEmote;
   final List<DateTime> failedPasswords = [];
 }
 

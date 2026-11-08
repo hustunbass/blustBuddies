@@ -3,9 +3,11 @@ import 'package:blast_buddies/core/settings/settings.dart';
 import 'package:blast_buddies/core/theme.dart';
 import 'package:blast_buddies/features/game/application/game_state.dart';
 import 'package:blast_buddies/features/game/ui/game_screen.dart';
+import 'package:blast_buddies/features/menu/achievements_screen.dart';
 import 'package:blast_buddies/features/menu/battle_setup_screen.dart';
 import 'package:blast_buddies/features/menu/how_to_play_screen.dart';
 import 'package:blast_buddies/features/menu/menu_screens.dart';
+import 'package:blast_buddies/features/menu/wardrobe_screen.dart';
 import 'package:blast_buddies/features/online/online_screen.dart';
 import 'package:blast_buddies/features/settings/settings_screen.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
@@ -29,6 +31,8 @@ GoRouter buildRouter() => GoRouter(
         ),
         GoRoute(path: '/battle', builder: (_, _) => const BattleSetupScreen()),
         GoRoute(path: '/online', builder: (_, _) => const OnlineScreen()),
+        GoRoute(path: '/wardrobe', builder: (_, _) => const WardrobeScreen()),
+        GoRoute(path: '/achievements', builder: (_, _) => const AchievementsScreen()),
         GoRoute(path: '/howto', builder: (_, _) => const HowToPlayScreen()),
         GoRoute(path: '/settings', builder: (_, _) => const SettingsScreen()),
         GoRoute(

@@ -10,13 +10,15 @@ class HowToPlayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
-    final rules = [l.howMove, l.howBomb, l.howBlocks, l.howEnemies, l.howTime, l.howBattle];
+    final rules = [l.howMove, l.howBomb, l.howBlocks, l.howEnemies, l.howTime, l.howStars, l.howBoss, l.howBattle];
     final powers = <(IconData, Color, String)>[
       (Icons.circle, Colors.blueGrey.shade200, l.powerBomb),
       (Icons.add, Colors.deepOrangeAccent, l.powerRange),
       (Icons.bolt, Colors.yellow, l.powerSpeed),
       (Icons.shield, Colors.lightBlueAccent, l.powerShield),
       (Icons.sports_soccer, Colors.purpleAccent, l.powerKick),
+      (Icons.flash_on, Colors.redAccent, l.howDetonator),
+      (Icons.visibility_off, Colors.blueGrey.shade100, l.howGhost),
     ];
     return Scaffold(
       appBar: AppBar(title: Text(l.howToPlay), backgroundColor: Colors.transparent),

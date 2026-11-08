@@ -101,6 +101,137 @@ class _JoystickPainter extends CustomPainter {
   bool shouldRepaint(_JoystickPainter old) => old.knob != knob || old.size != size;
 }
 
+/// Joystick that appears wherever the thumb lands inside its zone and
+/// follows it; a faint ring marks the resting spot when idle.
+class FloatingJoystick extends StatefulWidget {
+  /// Creates a floating joystick filling its parent.
+  const FloatingJoystick({
+    super.key,
+    required this.onChanged,
+    this.size = 140,
+    this.alignment = Alignment.bottomLeft,
+    this.semanticLabel = 'Joystick',
+  });
+
+  /// Called when the direction changes.
+  final ValueChanged<Dir> onChanged;
+
+  /// Diameter of the stick.
+  final double size;
+
+  /// Resting position inside the zone.
+  final Alignment alignment;
+
+  /// Accessibility label.
+  final String semanticLabel;
+
+  @override
+  State<FloatingJoystick> createState() => _FloatingJoystickState();
+}
+
+class _FloatingJoystickState extends State<FloatingJoystick> {
+  Offset? _origin;
+  Offset _knob = Offset.zero;
+  Dir _dir = Dir.none;
+  int? _pointer;
+
+  void _move(Offset local) {
+    final o = _origin;
+    if (o == null) return;
+    final r = widget.size / 2;
+    var v = local - o;
+    if (v.distance > r) {
+      // Drag the stick along when the thumb leaves the ring.
+      final excess = v - v / v.distance * r;
+      _origin = o + excess;
+      v = v / v.distance * r;
+    }
+    var d = Dir.none;
+    if (v.distance > r * 0.28) {
+      d = v.dx.abs() > v.dy.abs() ? (v.dx > 0 ? Dir.right : Dir.left) : (v.dy > 0 ? Dir.down : Dir.up);
+    }
+    setState(() => _knob = v);
+    if (d != _dir) {
+      _dir = d;
+      widget.onChanged(d);
+    }
+  }
+
+  void _release() {
+    _pointer = null;
+    setState(() {
+      _origin = null;
+      _knob = Offset.zero;
+    });
+    if (_dir != Dir.none) {
+      _dir = Dir.none;
+      widget.onChanged(Dir.none);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: widget.semanticLabel,
+      child: LayoutBuilder(builder: (context, c) {
+        final rest = widget.alignment
+            .inscribe(Size.square(widget.size), Offset.zero & Size(c.maxWidth, c.maxHeight))
+            .center;
+        return Listener(
+          behavior: HitTestBehavior.opaque,
+          onPointerDown: (e) {
+            if (_pointer != null) return;
+            _pointer = e.pointer;
+            _origin = e.localPosition;
+            _move(e.localPosition);
+          },
+          onPointerMove: (e) {
+            if (e.pointer == _pointer) _move(e.localPosition);
+          },
+          onPointerUp: (e) {
+            if (e.pointer == _pointer) _release();
+          },
+          onPointerCancel: (e) {
+            if (e.pointer == _pointer) _release();
+          },
+          child: CustomPaint(
+            size: Size(c.maxWidth, c.maxHeight),
+            painter: _FloatingPainter(_origin ?? rest, _knob, widget.size, active: _origin != null),
+          ),
+        );
+      }),
+    );
+  }
+}
+
+class _FloatingPainter extends CustomPainter {
+  _FloatingPainter(this.center, this.knob, this.size, {required this.active});
+
+  final Offset center;
+  final Offset knob;
+  final double size;
+  final bool active;
+
+  @override
+  void paint(Canvas canvas, Size s) {
+    final a = active ? 1.0 : .45;
+    canvas.drawCircle(center, size / 2, Paint()..color = Color.fromRGBO(255, 255, 255, .2 * a));
+    canvas.drawCircle(
+      center,
+      size / 2 - 2,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 3
+        ..color = Color.fromRGBO(255, 255, 255, .4 * a),
+    );
+    canvas.drawCircle(center + knob * 0.8, size * 0.2, Paint()..color = Color.fromRGBO(255, 255, 255, .8 * a));
+  }
+
+  @override
+  bool shouldRepaint(_FloatingPainter old) =>
+      old.center != center || old.knob != knob || old.active != active || old.size != size;
+}
+
 /// Round bomb button.
 class BombButton extends StatelessWidget {
   /// Creates the button.

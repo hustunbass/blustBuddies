@@ -7,6 +7,7 @@ import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
 import 'package:blast_buddies/net/protocol.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Room lobby: slots, ready toggles and the start countdown.
 class OnlineRoomView extends StatelessWidget {
@@ -61,7 +62,21 @@ class OnlineRoomView extends StatelessWidget {
                     Text(roomModeLabel(l, room.capacity, room.teams),
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.amber)),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 6),
+                    Center(
+                      child: TextButton.icon(
+                        onPressed: () {
+                          Clipboard.setData(ClipboardData(text: room.id));
+                          ScaffoldMessenger.of(context)
+                            ..hideCurrentSnackBar()
+                            ..showSnackBar(SnackBar(content: Text(l.codeCopied)));
+                        },
+                        icon: const Icon(Icons.copy, size: 16),
+                        label: Text(l.roomCode(room.id),
+                            style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700)),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
                     for (var i = 0; i < room.capacity; i++) _SlotTile(slot: i, room: room),
                     const SizedBox(height: 16),
                     DefaultTextStyle.merge(

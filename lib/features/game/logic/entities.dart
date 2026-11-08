@@ -1,6 +1,28 @@
 import 'package:blast_buddies/core/combat/powerups.dart';
 import 'package:blast_buddies/core/grid/grid_pos.dart';
 
+/// Cosmetic look of a buddy (hat, face, optional body colour as ARGB).
+class Skin {
+  /// Creates a skin; the default is the plain buddy in its slot colour.
+  const Skin({this.hat = 0, this.face = 0, this.color});
+
+  /// Hat index (0 = none), see `Cosmetics.hats`.
+  final int hat;
+
+  /// Face index, see `Cosmetics.faces`.
+  final int face;
+
+  /// Body colour override (ARGB), null = slot colour.
+  final int? color;
+
+  @override
+  bool operator ==(Object other) =>
+      other is Skin && other.hat == hat && other.face == face && other.color == color;
+
+  @override
+  int get hashCode => Object.hash(hat, face, color);
+}
+
 /// A player-controlled or bot-controlled buddy.
 class Player {
   /// Creates a player at the centre of [spawn].
@@ -58,6 +80,12 @@ class Player {
 
   /// Set by input; consumed by the world.
   bool bombRequested = false;
+
+  /// Set by input: detonate own bombs (needs the detonator power-up).
+  bool detonateRequested = false;
+
+  /// Cosmetics.
+  Skin skin = const Skin();
 
   /// Cell holding the player's centre.
   GridPos get cell => GridPos(x.floor(), y.floor());
@@ -125,13 +153,17 @@ enum EnemyType {
 
   /// Wanders quickly.
   speedster,
+
+  /// Big chaser that takes several hits (every 25th story level).
+  boss,
 }
 
 /// A hostile roaming robot.
 class Enemy {
   /// Creates an enemy at the centre of [cell].
-  Enemy({required this.type, required GridPos cell, required this.speed})
-      : x = cell.x + 0.5,
+  Enemy({required this.type, required GridPos cell, required this.speed, this.hp = 1})
+      : maxHp = hp,
+        x = cell.x + 0.5,
         y = cell.y + 0.5,
         tx = cell.x,
         ty = cell.y,
@@ -165,6 +197,15 @@ class Enemy {
   /// Heading used to prefer straight walking.
   Dir dir = Dir.none;
 
+  /// Hits left before dying.
+  int hp;
+
+  /// Hits at spawn.
+  final int maxHp;
+
+  /// Seconds during which flames don't hurt it again (bosses).
+  double hitCooldown = 0;
+
   /// Alive flag.
   bool alive = true;
 
@@ -173,5 +214,6 @@ class Enemy {
         EnemyType.wanderer => 100,
         EnemyType.chaser => 200,
         EnemyType.speedster => 150,
+        EnemyType.boss => 1000,
       };
 }

@@ -1,3 +1,4 @@
+import 'package:blast_buddies/features/game/logic/bot_brain.dart';
 import 'package:blast_buddies/features/game/logic/entities.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/features/game/logic/level_config.dart';
@@ -10,10 +11,19 @@ class GameArgs {
       : mode = GameMode.story,
         humans = 1,
         bots = 0,
-        teams = false;
+        teams = false,
+        botLevel = BotLevel.normal,
+        daily = false;
 
   /// Battle game; [teams] plays 2v2 when there are 4 players.
-  const GameArgs.battle({required this.humans, required this.bots, this.seed, this.teams = false})
+  const GameArgs.battle({
+    required this.humans,
+    required this.bots,
+    this.seed,
+    this.teams = false,
+    this.botLevel = BotLevel.normal,
+    this.daily = false,
+  })
       : mode = GameMode.battle,
         level = 0,
         carry = null;
@@ -33,6 +43,20 @@ class GameArgs {
   /// 2v2 battle.
   final bool teams;
 
+  /// Bot skill (battle).
+  final BotLevel botLevel;
+
+  /// Battle on today's shared arena (same layout, colours and crates for
+  /// everybody on the same date).
+  final bool daily;
+
+  /// Seed of the daily arena for [now] (local date).
+  static int dailySeed([DateTime? now]) {
+    final d = now ?? DateTime.now();
+    final days = DateTime.utc(d.year, d.month, d.day).millisecondsSinceEpoch ~/ 86400000;
+    return (days * 2654435761) & 0x7fffffff;
+  }
+
   /// Player carried over from the previous level.
   final Player? carry;
 
@@ -40,11 +64,18 @@ class GameArgs {
   final int? seed;
 
   /// Builds a fresh world.
-  GameWorld buildWorld() {
-    final s = seed ?? DateTime.now().microsecondsSinceEpoch & 0x7fffffff;
+  GameWorld buildWorld({Skin skin = const Skin()}) {
+    final s = seed ?? (daily ? dailySeed() : DateTime.now().microsecondsSinceEpoch & 0x7fffffff);
     return mode == GameMode.story
-        ? GameWorld.story(level: level, seed: s, carry: carry)
-        : GameWorld.battle(humans: humans, bots: bots, seed: s, teams: teams);
+        ? GameWorld.story(level: level, seed: s, carry: carry, skin: skin)
+        : GameWorld.battle(
+            humans: humans,
+            bots: bots,
+            seed: s,
+            teams: teams,
+            botLevel: botLevel,
+            skins: [skin],
+          );
   }
 
   /// Whether another story level exists after this one.
@@ -64,6 +95,8 @@ class HudState {
     this.range = 2,
     this.speed = 3.6,
     this.kick = false,
+    this.detonate = false,
+    this.ghost = 0,
     this.shield = 0,
     this.enemies = 0,
     this.alive = const [],
@@ -93,6 +126,12 @@ class HudState {
   /// Kick unlocked.
   final bool kick;
 
+  /// Detonator unlocked.
+  final bool detonate;
+
+  /// Ghost seconds left (rounded up).
+  final int ghost;
+
   /// Shield seconds left (rounded up).
   final int shield;
 
@@ -102,9 +141,9 @@ class HudState {
   /// Alive flags per player (battle).
   final List<bool> alive;
 
-  /// Reads a snapshot from [w].
-  factory HudState.from(GameWorld w) {
-    final p = w.players.first;
+  /// Reads a snapshot from [w]; [me] is the local player's slot (online).
+  factory HudState.from(GameWorld w, [int me = 0]) {
+    final p = w.players[me < w.players.length ? me : 0];
     return HudState(
       lives: p.lives,
       score: p.score,
@@ -114,6 +153,8 @@ class HudState {
       range: p.stats.range,
       speed: (p.stats.speed * 10).round() / 10,
       kick: p.stats.canKick,
+      detonate: p.stats.canDetonate,
+      ghost: p.stats.ghost.ceil(),
       shield: p.stats.shield.ceil(),
       enemies: w.enemies.where((e) => e.alive).length,
       alive: [for (final q in w.players) q.alive],
@@ -131,11 +172,13 @@ class HudState {
       other.range == range &&
       other.speed == speed &&
       other.kick == kick &&
+      other.detonate == detonate &&
+      other.ghost == ghost &&
       other.shield == shield &&
       other.enemies == enemies &&
       listEquals(other.alive, alive);
 
   @override
   int get hashCode => Object.hash(lives, score, seconds, level, maxBombs, range,
-      speed, kick, shield, enemies, Object.hashAll(alive));
+      speed, kick, detonate, ghost, shield, enemies, Object.hashAll(alive));
 }

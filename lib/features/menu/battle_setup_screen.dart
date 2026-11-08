@@ -1,22 +1,26 @@
+import 'package:blast_buddies/core/settings/settings.dart';
 import 'package:blast_buddies/core/theme.dart';
+import 'package:blast_buddies/features/game/logic/bot_brain.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:blast_buddies/features/game/application/game_state.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 /// Battle mode setup: one human against 1–3 bots.
-class BattleSetupScreen extends StatefulWidget {
+class BattleSetupScreen extends ConsumerStatefulWidget {
   /// Creates the screen.
   const BattleSetupScreen({super.key});
 
   @override
-  State<BattleSetupScreen> createState() => _BattleSetupScreenState();
+  ConsumerState<BattleSetupScreen> createState() => _BattleSetupScreenState();
 }
 
-class _BattleSetupScreenState extends State<BattleSetupScreen> {
+class _BattleSetupScreenState extends ConsumerState<BattleSetupScreen> {
   static const _humans = 1;
   int _bots = 1;
   bool _teams = false;
+  bool _daily = false;
 
   @override
   Widget build(BuildContext context) {
@@ -68,6 +72,31 @@ class _BattleSetupScreenState extends State<BattleSetupScreen> {
                     value: teams,
                     onChanged: total == 4 ? (v) => setState(() => _teams = v) : null,
                   ),
+                  const SizedBox(height: 8),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(l.botDifficulty, style: const TextStyle(fontSize: 18)),
+                  ),
+                  const SizedBox(height: 8),
+                  SegmentedButton<int>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment(value: 0, label: Text(l.difficultyEasy)),
+                      ButtonSegment(value: 1, label: Text(l.difficultyNormal)),
+                      ButtonSegment(value: 2, label: Text(l.difficultyHard)),
+                    ],
+                    selected: {ref.watch(settingsProvider).botLevel},
+                    onSelectionChanged: (v) {
+                      final s = ref.read(settingsProvider);
+                      ref.read(settingsProvider.notifier).update(s.copyWith(botLevel: v.first));
+                    },
+                  ),
+                  SwitchListTile(
+                    title: Text(l.dailyArena),
+                    subtitle: Text(l.dailyArenaHint),
+                    value: _daily,
+                    onChanged: (v) => setState(() => _daily = v),
+                  ),
                   const SizedBox(height: 12),
                   Text(
                     l.battleHint,
@@ -78,7 +107,13 @@ class _BattleSetupScreenState extends State<BattleSetupScreen> {
                   FilledButton(
                     onPressed: () => context.pushReplacement(
                             '/game',
-                            extra: GameArgs.battle(humans: _humans, bots: _bots, teams: teams),
+                            extra: GameArgs.battle(
+                              humans: _humans,
+                              bots: _bots,
+                              teams: teams,
+                              botLevel: BotLevel.values[ref.read(settingsProvider).botLevel],
+                              daily: _daily,
+                            ),
                           ),
                     child: Text(l.startBattle),
                   ),

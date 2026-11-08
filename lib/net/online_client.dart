@@ -52,10 +52,16 @@ class OnlineMatch implements RemoteSession {
     required this.names,
     required void Function(Map<String, dynamic>) send,
     double Function()? latency,
+    List<Skin> skins = const [],
   })  : _send = send,
         _latency = latency ?? (() => 0.15),
         world = GameWorld.battle(humans: capacity, bots: 0, seed: seed, teams: teams) {
     _buf = [for (final _ in world.players) <_Sample>[]];
+    _emotes = List.filled(world.players.length, -1);
+    _emoteLeft = List.filled(world.players.length, 0);
+    for (var i = 0; i < world.players.length && i < skins.length; i++) {
+      world.players[i].skin = skins[i];
+    }
   }
 
   /// Mirror of the server world (never ticked locally).
@@ -70,6 +76,37 @@ class OnlineMatch implements RemoteSession {
   final void Function(Map<String, dynamic>) _send;
   final double Function() _latency;
   late final List<List<_Sample>> _buf;
+  late final List<int> _emotes;
+  late final List<double> _emoteLeft;
+  final StreamController<int> _left = StreamController.broadcast();
+
+  /// Slots of players that left during the match.
+  Stream<int> get leftSlots => _left.stream;
+
+  /// Reports that [slot] left.
+  void playerLeft(int slot) {
+    if (!_left.isClosed) _left.add(slot);
+  }
+
+  /// Shows emote [e] above player [slot] for a couple of seconds.
+  void showEmote(int slot, int e) {
+    if (slot < 0 || slot >= _emotes.length) return;
+    _emotes[slot] = e;
+    _emoteLeft[slot] = 2.2;
+  }
+
+  @override
+  List<int> get emotes => _emotes;
+
+  @override
+  void detonate() {
+    if (!ended) _send({'t': Msg.input, 'd': _sentDir.index, 'x': true});
+  }
+
+  @override
+  void emote(int i) {
+    if (!ended) _send({'t': Msg.emote, 'e': i});
+  }
   Dir _sentDir = Dir.none;
   bool _hasSnapshot = false;
 
@@ -202,6 +239,9 @@ class OnlineMatch implements RemoteSession {
   @override
   void advance(double dt) {
     _clock += dt;
+    for (var i = 0; i < _emoteLeft.length; i++) {
+      if (_emoteLeft[i] > 0 && (_emoteLeft[i] -= dt) <= 0) _emotes[i] = -1;
+    }
     if (!_hasSnapshot) return;
     // Render time runs on the local clock and is steered gently towards
     // "newest snapshot minus delay" (half an interval added to centre the
@@ -333,7 +373,7 @@ class OnlineClient extends ChangeNotifier {
   Stream<ErrorCode> get errors => _errors.stream;
 
   /// Connects to [address] as [name]. Returns false on failure.
-  Future<bool> connect(String address, String name) async {
+  Future<bool> connect(String address, String name, {List<int>? skin}) async {
     final uri = parseServerAddress(address);
     if (uri == null || status != OnlineStatus.disconnected) return false;
     status = OnlineStatus.connecting;
@@ -350,7 +390,12 @@ class OnlineClient extends ChangeNotifier {
       _welcome = Completer();
       _sub = ws.listen(_onData, onDone: _onClosed, onError: (_) => _onClosed());
       _helloSentAt = _now;
-      _send({'t': Msg.hello, 'name': cleanText(name, Limits.name), 'v': protocolVersion});
+      _send({
+        't': Msg.hello,
+        'name': cleanText(name, Limits.name),
+        'v': protocolVersion,
+        if (skin != null) 'skin': skin,
+      });
       final ok = await _welcome!.future.timeout(const Duration(seconds: 6), onTimeout: () => false);
       if (!ok) await disconnect();
       return ok;
@@ -432,6 +477,10 @@ class OnlineClient extends ChangeNotifier {
   void createRoom({required String name, required int capacity, required bool teams, String password = ''}) =>
       _send({'t': Msg.createRoom, 'name': name, 'capacity': capacity, 'teams': teams, 'password': password});
 
+  /// Joins a public waiting room of [capacity] players or opens one; the
+  /// match starts as soon as it is full.
+  void quickMatch(int capacity) => _send({'t': Msg.quick, 'capacity': capacity});
+
   /// Joins room [id].
   void joinRoom(String id, {String password = ''}) =>
       _send({'t': Msg.joinRoom, 'room': id, 'password': password});
@@ -496,7 +545,21 @@ class OnlineClient extends ChangeNotifier {
           names: (m['names'] as List).cast<String>(),
           send: _send,
           latency: () => rtt,
+          skins: [
+            for (final k in (m['skins'] as List? ?? const []))
+              Skin(
+                hat: (k as List)[0] as int,
+                face: k[1] as int,
+                color: (k[2] as int) == 0 ? null : k[2] as int,
+              ),
+          ],
         );
+      case Msg.emoteFrom:
+        match?.showEmote(m['from'] as int, m['e'] as int);
+        return;
+      case Msg.left:
+        match?.playerLeft(m['slot'] as int);
+        return;
       case Msg.end:
         winner = m['winner'] as int?;
         winnerTeam = m['team'] as int?;

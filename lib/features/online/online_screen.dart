@@ -46,12 +46,24 @@ class OnlineScreen extends ConsumerStatefulWidget {
 class _OnlineScreenState extends ConsumerState<OnlineScreen> {
   late final OnlineClient _client = ref.read(onlineClientProvider);
   late final StreamSubscription<ErrorCode> _errors;
+  String? _codeJoin;
 
   @override
   void initState() {
     super.initState();
-    _errors = _client.errors.listen((code) {
+    _errors = _client.errors.listen((code) async {
       if (!mounted) return;
+      final pending = _codeJoin;
+      _codeJoin = null;
+      if (code == ErrorCode.wrongPassword && pending != null) {
+        // The room behind that code is locked: ask for its password.
+        final p = await showDialog<String>(context: context, builder: (_) => _PasswordDialog(room: pending));
+        if (p != null) {
+          _codeJoin = pending;
+          _client.joinRoom(pending, password: p);
+        }
+        return;
+      }
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
         ..showSnackBar(SnackBar(content: Text(errorText(AppLocalizations.of(context), code))));
@@ -74,7 +86,15 @@ class _OnlineScreenState extends ConsumerState<OnlineScreen> {
         if (match != null) return OnlineGameView(key: ObjectKey(match), client: _client, match: match);
         final room = _client.room;
         if (room != null) return OnlineRoomView(client: _client, room: room);
-        if (_client.status == OnlineStatus.connected) return _RoomListView(client: _client);
+        if (_client.status == OnlineStatus.connected) {
+          return _RoomListView(
+            client: _client,
+            onJoinCode: (code) {
+              _codeJoin = code;
+              _client.joinRoom(code);
+            },
+          );
+        }
         return _ConnectView(client: _client);
       },
     );
@@ -117,7 +137,12 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
     _cancelled = false;
     final custom = _server.text.trim();
     await p.setString('onlineCustomServer', custom);
-    final ok = await widget.client.connect(custom.isEmpty ? defaultServerUrl : custom, _name.text);
+    final st = ref.read(settingsProvider);
+    final ok = await widget.client.connect(
+      custom.isEmpty ? defaultServerUrl : custom,
+      _name.text,
+      skin: [st.hat, st.face, st.color],
+    );
     if (mounted) setState(() => _failed = !ok && !_cancelled);
   }
 
@@ -208,9 +233,34 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
 }
 
 class _RoomListView extends StatelessWidget {
-  const _RoomListView({required this.client});
+  const _RoomListView({required this.client, required this.onJoinCode});
 
   final OnlineClient client;
+  final void Function(String code) onJoinCode;
+
+  Future<void> _quick(BuildContext context) async {
+    final l = AppLocalizations.of(context);
+    final cap = await showDialog<int>(
+      context: context,
+      builder: (_) => SimpleDialog(
+        title: Text(l.quickMatch),
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
+            child: Text(l.quickHint, style: const TextStyle(color: Colors.white70)),
+          ),
+          SimpleDialogOption(onPressed: () => Navigator.pop(context, 2), child: Text(l.quick1v1)),
+          SimpleDialogOption(onPressed: () => Navigator.pop(context, 4), child: Text(l.quick4)),
+        ],
+      ),
+    );
+    if (cap != null) client.quickMatch(cap);
+  }
+
+  Future<void> _byCode(BuildContext context) async {
+    final code = await showDialog<String>(context: context, builder: (_) => const _CodeDialog());
+    if (code != null && code.isNotEmpty) onJoinCode(code);
+  }
 
   Future<void> _join(BuildContext context, RoomSummary r) async {
     var password = '';
@@ -237,19 +287,36 @@ class _RoomListView extends StatelessWidget {
         title: Text(l.rooms),
         backgroundColor: Colors.transparent,
         actions: [
+          IconButton(tooltip: l.joinByCode, onPressed: () => _byCode(context), icon: const Icon(Icons.vpn_key)),
           IconButton(tooltip: l.disconnect, onPressed: client.disconnect, icon: const Icon(Icons.wifi_off)),
         ],
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _create(context),
-        icon: const Icon(Icons.add),
-        label: Text(l.createRoom),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: 'quick',
+            onPressed: () => _quick(context),
+            icon: const Icon(Icons.bolt),
+            label: Text(l.quickMatch),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            heroTag: 'create',
+            backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
+            foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+            onPressed: () => _create(context),
+            icon: const Icon(Icons.add),
+            label: Text(l.createRoom),
+          ),
+        ],
       ),
       body: SafeArea(
         child: rooms.isEmpty
             ? Center(child: Text(l.noRooms, style: const TextStyle(fontSize: 18, color: Colors.white70)))
             : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 96),
+                padding: const EdgeInsets.fromLTRB(12, 12, 12, 150),
                 itemCount: rooms.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, i) {
@@ -394,6 +461,47 @@ class _SeatChip extends StatelessWidget {
         const SizedBox(width: 3),
         Text('$players/$capacity', style: TextStyle(fontSize: 12.5, color: c, fontWeight: FontWeight.w700)),
       ]),
+    );
+  }
+}
+
+class _CodeDialog extends StatefulWidget {
+  const _CodeDialog();
+
+  @override
+  State<_CodeDialog> createState() => _CodeDialogState();
+}
+
+class _CodeDialogState extends State<_CodeDialog> {
+  final _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    return AlertDialog(
+      title: Text(l.joinByCode),
+      content: TextField(
+        controller: _ctrl,
+        autofocus: true,
+        maxLength: 5,
+        textCapitalization: TextCapitalization.characters,
+        style: const TextStyle(fontSize: 24, letterSpacing: 6, fontWeight: FontWeight.w800),
+        decoration: InputDecoration(labelText: l.enterCode, prefixIcon: const Icon(Icons.vpn_key)),
+        onSubmitted: (v) => Navigator.pop(context, v.trim().toUpperCase()),
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(context), child: Text(l.cancel)),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _ctrl.text.trim().toUpperCase()),
+          child: Text(l.join),
+        ),
+      ],
     );
   }
 }

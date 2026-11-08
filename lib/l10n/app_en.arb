@@ -84,7 +84,7 @@
   "powerShield": "Shield",
   "powerKick": "Bomb kick",
   "howBattle": "Battle: last buddy standing wins. Play with friends or bots.",
-  "howTime": "You have 3 minutes per level and 3 lives.",
+  "howTime": "Story levels are timed (a little shorter later on) and you have 3 lives.",
   "back": "Back",
   "language": "Language follows your device settings.",
   "onlineMode": "Online",
@@ -189,5 +189,289 @@
   "errTooManyAttempts": "Too many wrong attempts. Try again in a minute.",
   "errServerFull": "The server is full.",
   "errVersion": "App and server versions do not match.",
-  "errGeneric": "Request rejected."
+  "errGeneric": "Request rejected.",
+  "wardrobe": "Wardrobe",
+  "achievements": "Achievements",
+  "worldN": "World {n}",
+  "@worldN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "starsCount": "{n} stars",
+  "@starsCount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "bossLevel": "BOSS",
+  "levelStart": "Level {n}",
+  "@levelStart": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "mapName0": "Neon Arena",
+  "mapName1": "Jungle Ruins",
+  "mapName2": "Desert Dunes",
+  "mapName3": "Frozen Peak",
+  "mapName4": "Lava Forge",
+  "mapName5": "Deep Ocean",
+  "mapName6": "Cosmic Station",
+  "worldStory0": "The buddies wake up in a neon training arena. Time to learn the ropes!",
+  "worldStory1": "Ancient ruins hide crates of treasure — and angry robots.",
+  "worldStory2": "Hot sand, long shadows. The robots never sleep here.",
+  "worldStory3": "A frozen peak. Slippery nerves, sharp blasts.",
+  "worldStory4": "The forge burns day and night. Watch your step!",
+  "worldStory5": "Deep below the waves, the robots built a base.",
+  "worldStory6": "The last station in space. Nothing can stop the buddies now.",
+  "worldStory7": "The jungle again — but the robots came back stronger.",
+  "worldStory8": "The dunes shift, the robots multiply.",
+  "worldStory9": "The final stretch. Become the Blast Buddy legend!",
+  "achievementUnlocked": "Achievement unlocked: {name}",
+  "@achievementUnlocked": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "starsEarnedLabel": "Stars earned",
+  "quickMatch": "Quick match",
+  "quick1v1": "1 vs 1",
+  "quick4": "4-player free-for-all",
+  "quickHint": "Find a match now. You start as soon as the room is full.",
+  "joinByCode": "Join by code",
+  "enterCode": "Room code",
+  "roomCode": "Room code: {code}",
+  "@roomCode": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
+  },
+  "copyCode": "Copy code",
+  "codeCopied": "Code copied",
+  "playerLeftMatch": "{name} left the match",
+  "@playerLeftMatch": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "emote": "Emote",
+  "rematch": "Play again",
+  "roomNotFoundMsg": "No room with that code.",
+  "floatingStick": "Floating joystick",
+  "floatingStickHint": "The stick appears where you touch.",
+  "leftHanded": "Left-handed layout",
+  "botDifficulty": "Bot difficulty",
+  "difficultyEasy": "Easy",
+  "difficultyNormal": "Normal",
+  "difficultyHard": "Hard",
+  "dailyArena": "Daily arena",
+  "dailyArenaHint": "Everyone plays the same arena today.",
+  "wardrobeHat": "Hat",
+  "wardrobeFace": "Face",
+  "wardrobeColor": "Colour",
+  "starsToUnlock": "{n} stars to unlock",
+  "@starsToUnlock": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "yourStars": "Your stars: {n}",
+  "@yourStars": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hatName0": "None",
+  "hatName1": "Cap",
+  "hatName2": "Party hat",
+  "hatName3": "Cowboy hat",
+  "hatName4": "Crown",
+  "hatName5": "Wizard hat",
+  "hatName6": "Halo",
+  "hatName7": "Horns",
+  "faceName0": "Classic",
+  "faceName1": "Happy",
+  "faceName2": "Cool",
+  "faceName3": "Angry",
+  "faceName4": "Wink",
+  "faceName5": "Star eyes",
+  "statsTitle": "Statistics",
+  "stat_kills": "Enemies defeated",
+  "stat_blocks": "Crates destroyed",
+  "stat_bombs": "Bombs placed",
+  "stat_wins": "Battle wins",
+  "stat_onlineWins": "Online wins",
+  "stat_levels": "Levels cleared",
+  "stat_bosses": "Bosses beaten",
+  "stat_stars": "Stars",
+  "stat_powerups": "Power-ups collected",
+  "stat_perfect": "Three-star levels",
+  "ach_firstBlood": "First blood",
+  "achDesc_firstBlood": "Defeat {n} enemy",
+  "@achDesc_firstBlood": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_firstWin": "First victory",
+  "achDesc_firstWin": "Win {n} battle",
+  "@achDesc_firstWin": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_bomber": "Bomber",
+  "achDesc_bomber": "Place {n} bombs",
+  "@achDesc_bomber": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_demolition": "Demolition crew",
+  "achDesc_demolition": "Destroy {n} crates",
+  "@achDesc_demolition": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_collector": "Collector",
+  "achDesc_collector": "Collect {n} power-ups",
+  "@achDesc_collector": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_chapter": "Chapter one",
+  "achDesc_chapter": "Clear {n} levels",
+  "@achDesc_chapter": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_stars30": "Star gazer",
+  "achDesc_stars30": "Collect {n} stars",
+  "@achDesc_stars30": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_exterminator": "Exterminator",
+  "achDesc_exterminator": "Defeat {n} enemies",
+  "@achDesc_exterminator": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_champion": "Champion",
+  "achDesc_champion": "Win {n} battles",
+  "@achDesc_champion": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_online1": "Online debut",
+  "achDesc_online1": "Win {n} online match",
+  "@achDesc_online1": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_boss1": "Boss slayer",
+  "achDesc_boss1": "Beat {n} boss",
+  "@achDesc_boss1": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_perfectionist": "Perfectionist",
+  "achDesc_perfectionist": "Get three stars on {n} levels",
+  "@achDesc_perfectionist": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_explorer": "Explorer",
+  "achDesc_explorer": "Clear {n} levels",
+  "@achDesc_explorer": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_online10": "Online ace",
+  "achDesc_online10": "Win {n} online matches",
+  "@achDesc_online10": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_bosses4": "Boss master",
+  "achDesc_bosses4": "Beat all {n} bosses",
+  "@achDesc_bosses4": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "ach_legend": "Legend",
+  "achDesc_legend": "Clear all {n} levels",
+  "@achDesc_legend": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "powerDetonator": "Detonator",
+  "powerGhost": "Ghost",
+  "howDetonator": "Detonator: use the blast button (key E) to set off all your bombs at once.",
+  "howGhost": "Ghost: walk through crates for a few seconds.",
+  "howBoss": "Every 25th level ends with a boss. Hit it several times!",
+  "howStars": "Earn up to 3 stars per level: no hits taken and plenty of time left. Stars unlock hats, faces and colours.",
+  "detonateButton": "Detonate bombs"
 }

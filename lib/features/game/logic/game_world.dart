@@ -89,12 +89,13 @@ class GameWorld {
     required this.players,
     required this.enemies,
     this.teams = false,
+    BotLevel botLevel = BotLevel.normal,
   })  : grid = map.grid,
         exit = map.exit,
         themeId = map.theme,
         layout = map.layout {
     for (final p in players.where((p) => p.isBot)) {
-      _brains[p.id] = BotBrain(Random(rng.nextInt(1 << 30)));
+      _brains[p.id] = BotBrain(Random(rng.nextInt(1 << 30)), botLevel);
     }
   }
 
@@ -105,7 +106,7 @@ class GameWorld {
   final MapLayout layout;
 
   /// Creates a story-mode world. [carry] transfers lives/score/upgrades.
-  factory GameWorld.story({required int level, int seed = 0, Player? carry}) {
+  factory GameWorld.story({required int level, int seed = 0, Player? carry, Skin skin = const Skin()}) {
     final rng = Random(seed);
     final cfg = LevelConfig.forLevel(level);
     final map = MapGenerator.generate(
@@ -118,7 +119,7 @@ class GameWorld {
           ? MapLayout.values[(cfg.level ~/ 5) % MapLayout.values.length]
           : MapLayout.classic,
     );
-    final player = Player(id: 0, spawn: map.spawns.first);
+    final player = Player(id: 0, spawn: map.spawns.first)..skin = skin;
     if (carry != null) {
       player.lives = carry.lives;
       player.score = carry.score;
@@ -138,6 +139,7 @@ class GameWorld {
           type: types[i],
           cell: map.enemySpawns[i],
           speed: baseEnemySpeed(types[i]) * cfg.enemySpeedScale,
+          hp: types[i] == EnemyType.boss ? cfg.bossHp : 1,
         ),
     ];
     return GameWorld._(
@@ -160,6 +162,8 @@ class GameWorld {
     required int bots,
     int seed = 0,
     bool teams = false,
+    BotLevel botLevel = BotLevel.normal,
+    List<Skin> skins = const [],
   }) {
     final total = (humans + bots).clamp(2, 4);
     final teamed = teams && total == 4;
@@ -180,7 +184,9 @@ class GameWorld {
           isBot: i >= humans,
           lives: 1,
           teamId: teamed ? teamOf(i) : i,
-        ),
+        )
+          ..skin = i < skins.length ? skins[i] : const Skin()
+          ..stats.speed = i >= humans ? botLevel.speed : PlayerStats().speed,
     ];
     return GameWorld._(
       mode: GameMode.battle,
@@ -191,6 +197,7 @@ class GameWorld {
       players: players,
       enemies: [],
       teams: teamed,
+      botLevel: botLevel,
     );
   }
 
@@ -230,6 +237,7 @@ class GameWorld {
         EnemyType.wanderer => 1.6,
         EnemyType.chaser => 2.0,
         EnemyType.speedster => 3.2,
+        EnemyType.boss => 1.7,
       };
 
   /// Half size of an actor's collision box.
@@ -283,6 +291,9 @@ class GameWorld {
   /// Seconds elapsed (for animation).
   double elapsed = 0;
 
+  /// Times a player actually lost a life (story star rating).
+  int hits = 0;
+
   /// Simulation state.
   WorldStatus status = WorldStatus.playing;
 
@@ -332,6 +343,11 @@ class GameWorld {
     if (id < players.length) players[id].bombRequested = true;
   }
 
+  /// Requests remote detonation of player [id]'s bombs.
+  void requestDetonate(int id) {
+    if (id < players.length) players[id].detonateRequested = true;
+  }
+
   /// Advances the simulation by [dtRaw] seconds.
   void tick(double dtRaw) {
     if (status != WorldStatus.playing) return;
@@ -344,6 +360,19 @@ class GameWorld {
       if (p.isBot) _brains[p.id]!.update(this, p, dt);
       if (p.invuln > 0) p.invuln = max(0, p.invuln - dt);
       if (p.stats.shield > 0) p.stats.shield = max(0, p.stats.shield - dt);
+      if (p.stats.ghost > 0) {
+        p.stats.ghost = max(0, p.stats.ghost - dt);
+        // Never end the ghost phase while stuck inside a crate.
+        if (p.stats.ghost == 0 && _insideBlock(p)) p.stats.ghost = 0.05;
+      }
+      if (p.detonateRequested) {
+        p.detonateRequested = false;
+        if (p.stats.canDetonate) {
+          for (final b in bombs) {
+            if (b.ownerId == p.id) b.fuse = 0;
+          }
+        }
+      }
       _movePlayer(p, dt);
       if (p.bombRequested) {
         p.bombRequested = false;
@@ -362,8 +391,25 @@ class GameWorld {
 
   // ---------------------------------------------------------------- movement
 
+  bool _insideBlock(Player p) {
+    final x0 = (p.x - half).floor(), x1 = (p.x + half).floor();
+    final y0 = (p.y - half).floor(), y1 = (p.y + half).floor();
+    for (var cy = y0; cy <= y1; cy++) {
+      for (var cx = x0; cx <= x1; cx++) {
+        if (grid.typeAt(cx, cy) == CellType.block) return true;
+      }
+    }
+    return false;
+  }
+
   bool _solidOrBomb(int x, int y, int? passId) {
-    if (grid.isSolid(x, y)) return true;
+    if (grid.isSolid(x, y)) {
+      final ghost = passId != null &&
+          passId < players.length &&
+          players[passId].stats.ghost > 0 &&
+          grid.typeAt(x, y) == CellType.block;
+      if (!ghost) return true;
+    }
     final b = bombAt(x, y);
     return b != null && !(passId != null && b.passIds.contains(passId));
   }
@@ -535,7 +581,7 @@ class GameWorld {
     for (final c in blast.destroyedBlocks) {
       grid.setType(c.x, c.y, CellType.empty);
       if (mode == GameMode.story) players[b.ownerId].score += 10;
-      _events.add(GameEvent(GameEventType.blockDestroyed, c.x + .5, c.y + .5));
+      _events.add(GameEvent(GameEventType.blockDestroyed, c.x + .5, c.y + .5, b.ownerId));
       if (c == exit) {
         exitRevealed = true;
       } else {
@@ -556,12 +602,18 @@ class GameWorld {
     for (final e in enemies) {
       if (!e.alive) continue;
       final cx = e.x.floor(), cy = e.y.floor();
-      if (isBurning(cx, cy)) {
-        e.alive = false;
-        if (mode == GameMode.story) {
-          players[_flameOwner[cy * GridModel.cols + cx]].score += e.points;
+      if (e.hitCooldown > 0) e.hitCooldown = max(0, e.hitCooldown - dt);
+      if (isBurning(cx, cy) && e.hitCooldown == 0) {
+        e.hp--;
+        e.hitCooldown = 1.0;
+        final owner = _flameOwner[cy * GridModel.cols + cx];
+        if (e.hp <= 0) {
+          e.alive = false;
+          if (mode == GameMode.story) players[owner].score += e.points;
+          _events.add(GameEvent(GameEventType.enemyKilled, e.x, e.y, owner));
+        } else {
+          _events.add(GameEvent(GameEventType.explosion, e.x, e.y));
         }
-        _events.add(GameEvent(GameEventType.enemyKilled, e.x, e.y));
       }
     }
   }
@@ -569,6 +621,7 @@ class GameWorld {
   void _hurt(Player p) {
     if (p.protectedNow) return;
     p.lives--;
+    hits++;
     _events.add(GameEvent(GameEventType.playerHit, p.x, p.y, p.id));
     if (p.lives <= 0) {
       p.alive = false;
@@ -619,7 +672,7 @@ class GameWorld {
   void _enemyChoose(Enemy e) {
     final cur = GridPos(e.tx, e.ty);
     GridPos? next;
-    if (e.type == EnemyType.chaser) {
+    if (e.type == EnemyType.chaser || e.type == EnemyType.boss) {
       final targets = players.where((p) => p.alive).map((p) => p.cell).toSet();
       if (targets.isNotEmpty) {
         final path = bfsPath(
@@ -659,7 +712,8 @@ class GameWorld {
     for (final p in players) {
       if (!p.alive) continue;
       for (final e in enemies) {
-        if (e.alive && (e.x - p.x).abs() < .65 && (e.y - p.y).abs() < .65) {
+        final reach = e.type == EnemyType.boss ? .85 : .65;
+        if (e.alive && (e.x - p.x).abs() < reach && (e.y - p.y).abs() < reach) {
           _hurt(p);
           if (!p.alive) break;
         }

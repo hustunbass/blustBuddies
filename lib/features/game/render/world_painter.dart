@@ -95,6 +95,7 @@ class WorldPainter {
       if (p.id == highlightId) _drawYouMarker(canvas, p);
     }
     if (!reducedMotion) particles.paint(canvas);
+    _drawEmotes(canvas, w);
     _drawTitle(canvas, w);
     canvas.restore();
   }
@@ -167,36 +168,54 @@ class WorldPainter {
     }
   }
 
-  TextPainter? _title;
-  int _titleTheme = -1;
+  /// Headline shown for the first seconds ("LAVA FORGE", "LEVEL 7 · ...").
+  String? title;
 
-  /// Fades the arena name in for the first seconds so a new map is noticed.
-  void _drawTitle(Canvas canvas, GameWorld w) {
-    if (_t > 3 || w.level != 0) return;
-    if (_titleTheme != w.themeId) {
-      _titleTheme = w.themeId;
-      _title = TextPainter(
+  /// Smaller second line under [title] (story intro).
+  String? subtitle;
+
+  TextPainter? _titlePainter;
+  String? _titleKey;
+
+  TextPainter _label(String text, double size, FontWeight weight) => TextPainter(
         text: TextSpan(
-          text: MapTheme.of(w.themeId).name.toUpperCase(),
-          style: const TextStyle(
-            color: Color(0xFFFFFFFF),
-            fontSize: .55,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .08,
-            shadows: [Shadow(color: Color(0xCC000000), blurRadius: .2)],
+          text: text,
+          style: TextStyle(
+            color: const Color(0xFFFFFFFF),
+            fontSize: size,
+            fontWeight: weight,
+            letterSpacing: size * .1,
+            shadows: const [Shadow(color: Color(0xCC000000), blurRadius: .2)],
           ),
         ),
+        textAlign: TextAlign.center,
         textDirection: TextDirection.ltr,
-      )..layout();
+      )..layout(maxWidth: GridModel.cols - 1.5);
+
+  TextPainter? _subPainter;
+
+  /// Fades the headline in for the first seconds so a new map is noticed.
+  void _drawTitle(Canvas canvas, GameWorld w) {
+    final t0 = title;
+    if (_t > 3.2 || t0 == null) return;
+    final key = '$t0|$subtitle';
+    if (_titleKey != key) {
+      _titleKey = key;
+      _titlePainter = _label(t0.toUpperCase(), .55, FontWeight.w800);
+      _subPainter = subtitle == null ? null : _label(subtitle!, .34, FontWeight.w600);
     }
-    final tp = _title!;
-    final alpha = (_t < 2 ? 1.0 : (3 - _t)).clamp(0.0, 1.0);
-    final pos = Offset((GridModel.cols - tp.width) / 2, GridModel.rows / 2 - tp.height / 2);
-    final box = Rect.fromLTWH(pos.dx - .35, pos.dy - .12, tp.width + .7, tp.height + .24);
+    final tp = _titlePainter!;
+    final sp = _subPainter;
+    final alpha = (_t < 2.2 ? 1.0 : (3.2 - _t)).clamp(0.0, 1.0);
+    final h = tp.height + (sp == null ? 0 : sp.height + .1);
+    final wd = max(tp.width, sp?.width ?? 0);
+    final top = GridModel.rows / 2 - h / 2;
+    final box = Rect.fromLTWH((GridModel.cols - wd) / 2 - .35, top - .15, wd + .7, h + .3);
     _fill.color = Color.fromRGBO(0, 0, 0, .55 * alpha);
     canvas.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(.2)), _fill);
     canvas.saveLayer(box.inflate(.5), Paint()..color = Color.fromRGBO(255, 255, 255, alpha));
-    tp.paint(canvas, pos);
+    tp.paint(canvas, Offset((GridModel.cols - tp.width) / 2, top));
+    sp?.paint(canvas, Offset((GridModel.cols - sp.width) / 2, top + tp.height + .1));
     canvas.restore();
   }
 
@@ -222,6 +241,8 @@ class WorldPainter {
       PowerUpType.speed: Color(0xFFFFEE58),
       PowerUpType.shield: Color(0xFF4FC3F7),
       PowerUpType.kick: Color(0xFFBA68C8),
+      PowerUpType.detonator: Color(0xFFEF5350),
+      PowerUpType.ghost: Color(0xFFCFD8DC),
     };
     _fill.color = colors[t]!;
     canvas.drawRRect(
@@ -255,6 +276,18 @@ class WorldPainter {
           ..drawLine(center.translate(-.15, 0), center.translate(.15, 0), _stroke)
           ..drawLine(center.translate(.04, -.11), center.translate(.15, 0), _stroke)
           ..drawLine(center.translate(.04, .11), center.translate(.15, 0), _stroke);
+      case PowerUpType.detonator:
+        canvas
+          ..drawCircle(center, .17, _stroke)
+          ..drawCircle(center, .06, _fill);
+      case PowerUpType.ghost:
+        canvas
+          ..drawCircle(center.translate(0, -.04), .13, _fill)
+          ..drawRect(Rect.fromLTRB(center.dx - .13, center.dy - .04, center.dx + .13, center.dy + .13), _fill);
+        _fill.color = const Color(0xFFCFD8DC);
+        canvas
+          ..drawCircle(center.translate(-.05, -.05), .028, _fill)
+          ..drawCircle(center.translate(.05, -.05), .028, _fill);
     }
   }
 
@@ -314,7 +347,13 @@ class WorldPainter {
 
   void _drawBuddy(Canvas canvas, Player p) {
     if (p.invuln > 0 && (_t * 12).floor().isEven) return;
-    final color = BuddyColors.players[p.id % 4];
+    final ghost = p.stats.ghost > 0;
+    if (ghost) {
+      final fade = p.stats.ghost < 2 && (_t * 10).floor().isEven ? .3 : .55;
+      canvas.saveLayer(null, Paint()..color = Color.fromRGBO(255, 255, 255, fade));
+    }
+    final sk = p.skin;
+    final color = sk.color != null ? Color(sk.color!) : BuddyColors.players[p.id % 4];
     final moving = p.moveDir != Dir.none;
     final bob = moving ? sin(_t * 18).abs() * .05 : 0.0;
     final c = Offset(p.x, p.y - bob);
@@ -326,13 +365,15 @@ class WorldPainter {
     canvas
       ..drawCircle(Offset(p.x - .15, p.y + .32 + foot), .09, _fill)
       ..drawCircle(Offset(p.x + .15, p.y + .32 - foot), .09, _fill);
-    // Antenna
-    _stroke
-      ..color = const Color(0xFFCFD8DC)
-      ..strokeWidth = .05;
-    canvas.drawLine(c.translate(0, -.3), c.translate(0, -.45), _stroke);
-    _fill.color = (_t * 3).floor().isEven ? const Color(0xFFFF5252) : const Color(0xFFFFFFFF);
-    canvas.drawCircle(c.translate(0, -.46), .06, _fill);
+    // Antenna (hats replace it)
+    if (sk.hat == 0 || sk.hat == 6) {
+      _stroke
+        ..color = const Color(0xFFCFD8DC)
+        ..strokeWidth = .05;
+      canvas.drawLine(c.translate(0, -.3), c.translate(0, -.45), _stroke);
+      _fill.color = (_t * 3).floor().isEven ? const Color(0xFFFF5252) : const Color(0xFFFFFFFF);
+      canvas.drawCircle(c.translate(0, -.46), .06, _fill);
+    }
     // Body
     _fill.color = color;
     canvas.drawCircle(c, .36, _fill);
@@ -345,15 +386,228 @@ class WorldPainter {
       ),
       _fill,
     );
-    _fill.color = const Color(0xFF263238);
-    final look = Offset(p.facing.dx * .05, p.facing.dy * .03);
-    canvas
-      ..drawCircle(c.translate(-.1, -.02) + look, .045, _fill)
-      ..drawCircle(c.translate(.1, -.02) + look, .045, _fill);
+    _drawFace(canvas, c, p.facing, sk.face);
+    _drawHat(canvas, c, sk.hat);
     if (p.stats.shield > 0) {
       final fade = p.stats.shield < 2 && (_t * 10).floor().isEven ? .15 : .35;
       _fill.color = const Color(0xFF4FC3F7).withValues(alpha: fade);
       canvas.drawCircle(c, .5 + sin(_t * 6) * .02, _fill);
+    }
+    if (ghost) canvas.restore();
+  }
+
+  void _drawFace(Canvas canvas, Offset c, Dir facing, int face) {
+    final look = Offset(facing.dx * .05, facing.dy * .03);
+    final l = c.translate(-.1, -.02) + look, r = c.translate(.1, -.02) + look;
+    const ink = Color(0xFF263238);
+    _fill.color = ink;
+    _stroke
+      ..color = ink
+      ..strokeWidth = .04;
+    switch (face) {
+      case 1: // happy ^ ^
+        for (final e in [l, r]) {
+          canvas.drawArc(Rect.fromCenter(center: e.translate(0, .02), width: .1, height: .1), pi, pi, false, _stroke);
+        }
+      case 2: // sunglasses
+        _fill.color = const Color(0xFF111418);
+        canvas
+          ..drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: l, width: .17, height: .12), const Radius.circular(.04)), _fill)
+          ..drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: r, width: .17, height: .12), const Radius.circular(.04)), _fill);
+        _fill.color = const Color(0x66FFFFFF);
+        canvas
+          ..drawCircle(l.translate(-.03, -.02), .02, _fill)
+          ..drawCircle(r.translate(-.03, -.02), .02, _fill);
+      case 3: // angry
+        canvas
+          ..drawCircle(l, .045, _fill)
+          ..drawCircle(r, .045, _fill)
+          ..drawLine(l.translate(-.07, -.1), l.translate(.05, -.05), _stroke)
+          ..drawLine(r.translate(.07, -.1), r.translate(-.05, -.05), _stroke);
+      case 4: // wink
+        canvas
+          ..drawCircle(l, .045, _fill)
+          ..drawLine(r.translate(-.05, 0), r.translate(.05, 0), _stroke);
+      case 5: // star eyes
+        _fill.color = const Color(0xFFFFB300);
+        for (final e in [l, r]) {
+          canvas
+            ..drawCircle(e, .05, _fill)
+            ..drawLine(e.translate(-.08, 0), e.translate(.08, 0), _stroke..color = const Color(0xFFFFB300))
+            ..drawLine(e.translate(0, -.08), e.translate(0, .08), _stroke);
+        }
+        _stroke.color = ink;
+      default:
+        canvas
+          ..drawCircle(l, .045, _fill)
+          ..drawCircle(r, .045, _fill);
+    }
+  }
+
+  void _drawHat(Canvas canvas, Offset c, int hat) {
+    final top = c.translate(0, -.32);
+    switch (hat) {
+      case 1: // cap
+        _fill.color = const Color(0xFFE53935);
+        canvas
+          ..drawArc(Rect.fromCenter(center: top.translate(0, .02), width: .62, height: .5), pi, pi, true, _fill)
+          ..drawRRect(
+              RRect.fromRectAndRadius(Rect.fromLTWH(top.dx - .02, top.dy - .03, .4, .07), const Radius.circular(.035)), _fill);
+      case 2: // party
+        _fill.color = const Color(0xFFAB47BC);
+        canvas.drawPath(
+            Path()
+              ..moveTo(top.dx - .2, top.dy + .04)
+              ..lineTo(top.dx, top.dy - .42)
+              ..lineTo(top.dx + .2, top.dy + .04)
+              ..close(),
+            _fill);
+        _fill.color = const Color(0xFFFFEE58);
+        canvas
+          ..drawCircle(top.translate(0, -.43), .06, _fill)
+          ..drawRect(Rect.fromLTWH(top.dx - .13, top.dy - .12, .26, .05), _fill);
+      case 3: // cowboy
+        _fill.color = const Color(0xFF8D6E63);
+        canvas
+          ..drawOval(Rect.fromCenter(center: top.translate(0, .02), width: .8, height: .16), _fill)
+          ..drawRRect(
+              RRect.fromRectAndRadius(Rect.fromCenter(center: top.translate(0, -.1), width: .38, height: .3), const Radius.circular(.1)),
+              _fill);
+        _fill.color = const Color(0xFF5D4037);
+        canvas.drawRect(Rect.fromCenter(center: top.translate(0, -.03), width: .38, height: .05), _fill);
+      case 4: // crown
+        _fill.color = const Color(0xFFFFCA28);
+        canvas.drawPath(
+            Path()
+              ..moveTo(top.dx - .22, top.dy + .04)
+              ..lineTo(top.dx - .25, top.dy - .25)
+              ..lineTo(top.dx - .11, top.dy - .12)
+              ..lineTo(top.dx, top.dy - .3)
+              ..lineTo(top.dx + .11, top.dy - .12)
+              ..lineTo(top.dx + .25, top.dy - .25)
+              ..lineTo(top.dx + .22, top.dy + .04)
+              ..close(),
+            _fill);
+        _fill.color = const Color(0xFFE53935);
+        canvas.drawCircle(top.translate(0, -.08), .035, _fill);
+      case 5: // wizard
+        _fill.color = const Color(0xFF3949AB);
+        canvas
+          ..drawOval(Rect.fromCenter(center: top.translate(0, .02), width: .7, height: .13), _fill)
+          ..drawPath(
+              Path()
+                ..moveTo(top.dx - .2, top.dy)
+                ..lineTo(top.dx + .04, top.dy - .55)
+                ..lineTo(top.dx + .2, top.dy)
+                ..close(),
+              _fill);
+        _fill.color = const Color(0xFFFFEE58);
+        canvas.drawCircle(top.translate(0, -.2), .045, _fill);
+      case 6: // halo
+        _stroke
+          ..color = const Color(0xFFFFEE58)
+          ..strokeWidth = .06;
+        canvas.drawOval(Rect.fromCenter(center: top.translate(0, -.22 + sin(_t * 4) * .02), width: .5, height: .15), _stroke);
+      case 7: // horns
+        _fill.color = const Color(0xFFD32F2F);
+        for (final k in [-1.0, 1.0]) {
+          canvas.drawPath(
+              Path()
+                ..moveTo(top.dx + k * .25, top.dy + .04)
+                ..lineTo(top.dx + k * .3, top.dy - .26)
+                ..lineTo(top.dx + k * .08, top.dy - .02)
+                ..close(),
+              _fill);
+        }
+    }
+  }
+
+  /// Draws a lone buddy filling [size] (wardrobe preview).
+  void paintBuddyPreview(Canvas canvas, Size size, Skin skin, int slot) {
+    final p = Player(id: slot, spawn: const GridPos(0, 0))
+      ..skin = skin
+      ..facing = Dir.down;
+    canvas
+      ..save()
+      ..translate(size.width / 2, size.height / 2)
+      ..scale(min(size.width, size.height) / 1.5)
+      ..translate(-.5, -.5);
+    _drawBuddy(canvas, p);
+    canvas.restore();
+  }
+
+  /// Latest emote per player slot (-1 = none); fed by the online session.
+  List<int> emotes = const [];
+
+  static const emoji = ['👍', '😂', '😡', '😎', '🔥', '💣'];
+  final Map<int, TextPainter> _emoteText = {};
+
+  void _drawEmotes(Canvas canvas, GameWorld w) {
+    for (var i = 0; i < emotes.length && i < w.players.length; i++) {
+      final e = emotes[i];
+      final p = w.players[i];
+      if (e < 0 || e >= emoji.length || !p.alive) continue;
+      final tp = _emoteText[e] ??= TextPainter(
+        text: TextSpan(text: emoji[e], style: const TextStyle(fontSize: .5)),
+        textDirection: TextDirection.ltr,
+      )..layout();
+      final c = Offset(p.x, p.y - .95 + sin(_t * 6) * .03);
+      _fill.color = const Color(0xF2FFFFFF);
+      canvas
+        ..drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: c, width: .72, height: .6), const Radius.circular(.2)), _fill)
+        ..drawPath(
+            Path()
+              ..moveTo(c.dx - .08, c.dy + .29)
+              ..lineTo(c.dx, c.dy + .43)
+              ..lineTo(c.dx + .08, c.dy + .29)
+              ..close(),
+            _fill);
+      tp.paint(canvas, c.translate(-tp.width / 2, -tp.height / 2));
+    }
+  }
+
+  void _drawBoss(Canvas canvas, Enemy e, Offset c) {
+    final hurt = e.hitCooldown > 0 && (_t * 16).floor().isEven;
+    final body = hurt ? const Color(0xFFFFFFFF) : const Color(0xFF6A1B9A);
+    _fill.color = const Color(0x66000000);
+    canvas.drawOval(Rect.fromCenter(center: c.translate(0, .5), width: 1.0, height: .26), _fill);
+    final wob = sin(_t * 8) * .03;
+    _fill.color = body;
+    canvas.drawCircle(c.translate(0, -wob), .52, _fill);
+    for (var i = -2; i <= 2; i++) {
+      canvas.drawCircle(c.translate(i * .21, .42 + wob * i), .12, _fill);
+    }
+    // Spikes
+    _fill.color = hurt ? const Color(0xFFFFCDD2) : const Color(0xFFFFCA28);
+    for (var i = -2; i <= 2; i++) {
+      canvas.drawPath(
+          Path()
+            ..moveTo(c.dx + i * .2 - .08, c.dy - .46)
+            ..lineTo(c.dx + i * .2, c.dy - .72 + (i.abs()) * .08)
+            ..lineTo(c.dx + i * .2 + .08, c.dy - .46)
+            ..close(),
+          _fill);
+    }
+    // Angry eyes
+    _fill.color = const Color(0xFFFFFFFF);
+    canvas
+      ..drawCircle(c.translate(-.17, -.08), .13, _fill)
+      ..drawCircle(c.translate(.17, -.08), .13, _fill);
+    _fill.color = const Color(0xFFD50000);
+    final look = Offset(e.dir.dx * .04, e.dir.dy * .04);
+    canvas
+      ..drawCircle(c.translate(-.17, -.08) + look, .065, _fill)
+      ..drawCircle(c.translate(.17, -.08) + look, .065, _fill);
+    _stroke
+      ..color = const Color(0xFF1A0033)
+      ..strokeWidth = .06;
+    canvas
+      ..drawLine(c.translate(-.33, -.27), c.translate(-.06, -.17), _stroke)
+      ..drawLine(c.translate(.33, -.27), c.translate(.06, -.17), _stroke);
+    // Health pips
+    for (var i = 0; i < e.maxHp; i++) {
+      _fill.color = i < e.hp ? const Color(0xFFFF5252) : const Color(0x55FFFFFF);
+      canvas.drawCircle(Offset(c.dx + (i - (e.maxHp - 1) / 2) * .17, c.dy - .88), .06, _fill);
     }
   }
 
@@ -384,6 +638,9 @@ class WorldPainter {
           ..lineTo(c.dx + .08, c.dy - .28);
         _fill.color = const Color(0xFFFFCDD2);
         canvas.drawPath(horn, _fill);
+      case EnemyType.boss:
+        _drawBoss(canvas, e, c);
+        return;
       case EnemyType.speedster:
         _fill.color = const Color(0xFFFFB300);
         canvas.drawOval(Rect.fromCenter(center: c, width: .72, height: .56), _fill);

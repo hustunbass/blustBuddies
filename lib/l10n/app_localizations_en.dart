@@ -171,7 +171,8 @@ class AppLocalizationsEn extends AppLocalizations {
       'Battle: last buddy standing wins. Play with friends or bots.';
 
   @override
-  String get howTime => 'You have 3 minutes per level and 3 lives.';
+  String get howTime =>
+      'Story levels are timed (a little shorter later on) and you have 3 lives.';
 
   @override
   String get back => 'Back';
@@ -348,4 +349,409 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errGeneric => 'Request rejected.';
+
+  @override
+  String get wardrobe => 'Wardrobe';
+
+  @override
+  String get achievements => 'Achievements';
+
+  @override
+  String worldN(int n) {
+    return 'World $n';
+  }
+
+  @override
+  String starsCount(int n) {
+    return '$n stars';
+  }
+
+  @override
+  String get bossLevel => 'BOSS';
+
+  @override
+  String levelStart(int n) {
+    return 'Level $n';
+  }
+
+  @override
+  String get mapName0 => 'Neon Arena';
+
+  @override
+  String get mapName1 => 'Jungle Ruins';
+
+  @override
+  String get mapName2 => 'Desert Dunes';
+
+  @override
+  String get mapName3 => 'Frozen Peak';
+
+  @override
+  String get mapName4 => 'Lava Forge';
+
+  @override
+  String get mapName5 => 'Deep Ocean';
+
+  @override
+  String get mapName6 => 'Cosmic Station';
+
+  @override
+  String get worldStory0 =>
+      'The buddies wake up in a neon training arena. Time to learn the ropes!';
+
+  @override
+  String get worldStory1 =>
+      'Ancient ruins hide crates of treasure — and angry robots.';
+
+  @override
+  String get worldStory2 =>
+      'Hot sand, long shadows. The robots never sleep here.';
+
+  @override
+  String get worldStory3 => 'A frozen peak. Slippery nerves, sharp blasts.';
+
+  @override
+  String get worldStory4 => 'The forge burns day and night. Watch your step!';
+
+  @override
+  String get worldStory5 => 'Deep below the waves, the robots built a base.';
+
+  @override
+  String get worldStory6 =>
+      'The last station in space. Nothing can stop the buddies now.';
+
+  @override
+  String get worldStory7 =>
+      'The jungle again — but the robots came back stronger.';
+
+  @override
+  String get worldStory8 => 'The dunes shift, the robots multiply.';
+
+  @override
+  String get worldStory9 => 'The final stretch. Become the Blast Buddy legend!';
+
+  @override
+  String achievementUnlocked(String name) {
+    return 'Achievement unlocked: $name';
+  }
+
+  @override
+  String get starsEarnedLabel => 'Stars earned';
+
+  @override
+  String get quickMatch => 'Quick match';
+
+  @override
+  String get quick1v1 => '1 vs 1';
+
+  @override
+  String get quick4 => '4-player free-for-all';
+
+  @override
+  String get quickHint =>
+      'Find a match now. You start as soon as the room is full.';
+
+  @override
+  String get joinByCode => 'Join by code';
+
+  @override
+  String get enterCode => 'Room code';
+
+  @override
+  String roomCode(String code) {
+    return 'Room code: $code';
+  }
+
+  @override
+  String get copyCode => 'Copy code';
+
+  @override
+  String get codeCopied => 'Code copied';
+
+  @override
+  String playerLeftMatch(String name) {
+    return '$name left the match';
+  }
+
+  @override
+  String get emote => 'Emote';
+
+  @override
+  String get rematch => 'Play again';
+
+  @override
+  String get roomNotFoundMsg => 'No room with that code.';
+
+  @override
+  String get floatingStick => 'Floating joystick';
+
+  @override
+  String get floatingStickHint => 'The stick appears where you touch.';
+
+  @override
+  String get leftHanded => 'Left-handed layout';
+
+  @override
+  String get botDifficulty => 'Bot difficulty';
+
+  @override
+  String get difficultyEasy => 'Easy';
+
+  @override
+  String get difficultyNormal => 'Normal';
+
+  @override
+  String get difficultyHard => 'Hard';
+
+  @override
+  String get dailyArena => 'Daily arena';
+
+  @override
+  String get dailyArenaHint => 'Everyone plays the same arena today.';
+
+  @override
+  String get wardrobeHat => 'Hat';
+
+  @override
+  String get wardrobeFace => 'Face';
+
+  @override
+  String get wardrobeColor => 'Colour';
+
+  @override
+  String starsToUnlock(int n) {
+    return '$n stars to unlock';
+  }
+
+  @override
+  String yourStars(int n) {
+    return 'Your stars: $n';
+  }
+
+  @override
+  String get hatName0 => 'None';
+
+  @override
+  String get hatName1 => 'Cap';
+
+  @override
+  String get hatName2 => 'Party hat';
+
+  @override
+  String get hatName3 => 'Cowboy hat';
+
+  @override
+  String get hatName4 => 'Crown';
+
+  @override
+  String get hatName5 => 'Wizard hat';
+
+  @override
+  String get hatName6 => 'Halo';
+
+  @override
+  String get hatName7 => 'Horns';
+
+  @override
+  String get faceName0 => 'Classic';
+
+  @override
+  String get faceName1 => 'Happy';
+
+  @override
+  String get faceName2 => 'Cool';
+
+  @override
+  String get faceName3 => 'Angry';
+
+  @override
+  String get faceName4 => 'Wink';
+
+  @override
+  String get faceName5 => 'Star eyes';
+
+  @override
+  String get statsTitle => 'Statistics';
+
+  @override
+  String get stat_kills => 'Enemies defeated';
+
+  @override
+  String get stat_blocks => 'Crates destroyed';
+
+  @override
+  String get stat_bombs => 'Bombs placed';
+
+  @override
+  String get stat_wins => 'Battle wins';
+
+  @override
+  String get stat_onlineWins => 'Online wins';
+
+  @override
+  String get stat_levels => 'Levels cleared';
+
+  @override
+  String get stat_bosses => 'Bosses beaten';
+
+  @override
+  String get stat_stars => 'Stars';
+
+  @override
+  String get stat_powerups => 'Power-ups collected';
+
+  @override
+  String get stat_perfect => 'Three-star levels';
+
+  @override
+  String get ach_firstBlood => 'First blood';
+
+  @override
+  String achDesc_firstBlood(int n) {
+    return 'Defeat $n enemy';
+  }
+
+  @override
+  String get ach_firstWin => 'First victory';
+
+  @override
+  String achDesc_firstWin(int n) {
+    return 'Win $n battle';
+  }
+
+  @override
+  String get ach_bomber => 'Bomber';
+
+  @override
+  String achDesc_bomber(int n) {
+    return 'Place $n bombs';
+  }
+
+  @override
+  String get ach_demolition => 'Demolition crew';
+
+  @override
+  String achDesc_demolition(int n) {
+    return 'Destroy $n crates';
+  }
+
+  @override
+  String get ach_collector => 'Collector';
+
+  @override
+  String achDesc_collector(int n) {
+    return 'Collect $n power-ups';
+  }
+
+  @override
+  String get ach_chapter => 'Chapter one';
+
+  @override
+  String achDesc_chapter(int n) {
+    return 'Clear $n levels';
+  }
+
+  @override
+  String get ach_stars30 => 'Star gazer';
+
+  @override
+  String achDesc_stars30(int n) {
+    return 'Collect $n stars';
+  }
+
+  @override
+  String get ach_exterminator => 'Exterminator';
+
+  @override
+  String achDesc_exterminator(int n) {
+    return 'Defeat $n enemies';
+  }
+
+  @override
+  String get ach_champion => 'Champion';
+
+  @override
+  String achDesc_champion(int n) {
+    return 'Win $n battles';
+  }
+
+  @override
+  String get ach_online1 => 'Online debut';
+
+  @override
+  String achDesc_online1(int n) {
+    return 'Win $n online match';
+  }
+
+  @override
+  String get ach_boss1 => 'Boss slayer';
+
+  @override
+  String achDesc_boss1(int n) {
+    return 'Beat $n boss';
+  }
+
+  @override
+  String get ach_perfectionist => 'Perfectionist';
+
+  @override
+  String achDesc_perfectionist(int n) {
+    return 'Get three stars on $n levels';
+  }
+
+  @override
+  String get ach_explorer => 'Explorer';
+
+  @override
+  String achDesc_explorer(int n) {
+    return 'Clear $n levels';
+  }
+
+  @override
+  String get ach_online10 => 'Online ace';
+
+  @override
+  String achDesc_online10(int n) {
+    return 'Win $n online matches';
+  }
+
+  @override
+  String get ach_bosses4 => 'Boss master';
+
+  @override
+  String achDesc_bosses4(int n) {
+    return 'Beat all $n bosses';
+  }
+
+  @override
+  String get ach_legend => 'Legend';
+
+  @override
+  String achDesc_legend(int n) {
+    return 'Clear all $n levels';
+  }
+
+  @override
+  String get powerDetonator => 'Detonator';
+
+  @override
+  String get powerGhost => 'Ghost';
+
+  @override
+  String get howDetonator =>
+      'Detonator: use the blast button (key E) to set off all your bombs at once.';
+
+  @override
+  String get howGhost => 'Ghost: walk through crates for a few seconds.';
+
+  @override
+  String get howBoss =>
+      'Every 25th level ends with a boss. Hit it several times!';
+
+  @override
+  String get howStars =>
+      'Earn up to 3 stars per level: no hits taken and plenty of time left. Stars unlock hats, faces and colours.';
+
+  @override
+  String get detonateButton => 'Detonate bombs';
 }

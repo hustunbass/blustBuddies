@@ -11,6 +11,10 @@ Future<ProviderContainer> pumpApp(WidgetTester tester, {Map<String, Object> pref
   final sp = await SharedPreferences.getInstance();
   final container = ProviderContainer(overrides: [prefsProvider.overrideWithValue(sp)]);
   addTearDown(container.dispose);
+  // The menu logo hops forever; let tests settle like a reduced-motion user.
+  tester.platformDispatcher.accessibilityFeaturesTestValue =
+      const FakeAccessibilityFeatures(disableAnimations: true);
+  addTearDown(tester.platformDispatcher.clearAccessibilityFeaturesTestValue);
   await tester.pumpWidget(UncontrolledProviderScope(
     container: container,
     child: const BlastBuddiesApp(),
@@ -46,7 +50,9 @@ void main() {
     await tester.tap(find.text('Story'));
     await tester.pumpAndSettle();
     expect(find.byIcon(Icons.lock), findsWidgets);
-    expect(find.byIcon(Icons.star), findsNWidgets(3));
+    expect(find.text('Level 3'), findsNothing);
+    expect(find.text('3'), findsOneWidget);
+    expect(find.textContaining('World 1'), findsOneWidget);
   });
 
   testWidgets('settings are persisted', (tester) async {
@@ -87,7 +93,8 @@ void main() {
     await pumpApp(tester);
     await tester.tap(find.text('Battle'));
     await tester.pumpAndSettle();
-    SwitchListTile teamSwitch() => tester.widget(find.byType(SwitchListTile));
+    SwitchListTile teamSwitch() =>
+        tester.widget(find.widgetWithText(SwitchListTile, 'Teams (2 vs 2)'));
     expect(teamSwitch().onChanged, isNull);
     await tester.tap(find.byIcon(Icons.add_circle_outline).last);
     await tester.pump();

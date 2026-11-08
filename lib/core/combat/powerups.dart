@@ -16,10 +16,16 @@ enum PowerUpType {
 
   /// Lets the player kick bombs.
   kick,
+
+  /// Remote detonation of own bombs.
+  detonator,
+
+  /// Walk through breakable crates for a while.
+  ghost,
 }
 
 /// Relative drop weights, same order as [PowerUpType.values].
-const List<int> _weights = [25, 25, 20, 15, 15];
+const List<int> _weights = [25, 25, 20, 15, 15, 8, 10];
 
 /// Chance that a destroyed block drops a power-up.
 const double powerUpDropChance = 0.30;
@@ -53,6 +59,12 @@ class PlayerStats {
   /// Whether bombs can be kicked.
   bool canKick = false;
 
+  /// Whether own bombs can be detonated on demand.
+  bool canDetonate = false;
+
+  /// Remaining ghost seconds (walk through crates).
+  double ghost = 0;
+
   /// Remaining shield seconds.
   double shield = 0;
 
@@ -71,6 +83,9 @@ class PlayerStats {
   /// Shield duration in seconds.
   static const double shieldDuration = 8;
 
+  /// Ghost duration in seconds.
+  static const double ghostDuration = 8;
+
   /// Applies a pick-up.
   void apply(PowerUpType t) {
     switch (t) {
@@ -84,6 +99,10 @@ class PlayerStats {
         shield = shieldDuration;
       case PowerUpType.kick:
         canKick = true;
+      case PowerUpType.detonator:
+        canDetonate = true;
+      case PowerUpType.ghost:
+        ghost = ghostDuration;
     }
   }
 }

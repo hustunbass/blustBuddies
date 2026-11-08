@@ -90,6 +90,15 @@ abstract interface class RemoteSession {
   /// Sends a bomb request.
   void bomb();
 
+  /// Detonates own bombs (detonator power-up).
+  void detonate();
+
+  /// Shows emote [i] above the local buddy.
+  void emote(int i);
+
+  /// Current emote per player slot (-1 = none).
+  List<int> get emotes;
+
   /// Advances client-side smoothing by [dt] seconds.
   void advance(double dt);
 }
@@ -106,7 +115,7 @@ class BlastGame extends FlameGame with KeyboardEvents {
     this.remote,
     bool reducedMotion = false,
   }) : painter = WorldPainter(reducedMotion: reducedMotion, highlightId: remote?.localId) {
-    hud = ValueNotifier(HudState.from(sim));
+    hud = ValueNotifier(HudState.from(sim, remote?.localId ?? 0));
   }
 
   /// Simulation.
@@ -142,6 +151,16 @@ class BlastGame extends FlameGame with KeyboardEvents {
   /// Touch bomb button.
   void touchBomb() => _bomb(0);
 
+  /// Touch detonate button.
+  void touchDetonate() {
+    final r = remote;
+    if (r != null) {
+      r.detonate();
+    } else {
+      sim.requestDetonate(0);
+    }
+  }
+
   void _bomb(int i) {
     final r = remote;
     if (r != null) {
@@ -171,11 +190,12 @@ class BlastGame extends FlameGame with KeyboardEvents {
       sim.tick(dt);
     }
     painter.update(dt);
+    if (r != null) painter.emotes = r.emotes;
     for (final e in sim.drainEvents()) {
       painter.onEvent(e);
       onEvent(e);
     }
-    final s = HudState.from(sim);
+    final s = HudState.from(sim, r?.localId ?? 0);
     if (s != hud.value) hud.value = s;
     if (!_finished && sim.status != WorldStatus.playing) {
       _finished = true;
@@ -193,6 +213,10 @@ class BlastGame extends FlameGame with KeyboardEvents {
   KeyEventResult onKeyEvent(KeyEvent event, Set<LogicalKeyboardKey> keysPressed) {
     final schemes = humans == 1 ? [KeyScheme.solo] : KeyScheme.multi;
     var handled = false;
+    if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.keyE) {
+      touchDetonate();
+      handled = true;
+    }
     for (var i = 0; i < humans && i < schemes.length; i++) {
       final s = schemes[i];
       final d = s.dirFor(event.logicalKey);

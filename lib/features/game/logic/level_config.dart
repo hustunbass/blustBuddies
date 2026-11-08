@@ -20,6 +20,7 @@ class LevelConfig {
     required this.blockDensity,
     required this.enemySpeedScale,
     this.timeLimit = 180,
+    this.bossHp = 0,
   });
 
   /// Total number of story levels.
@@ -40,6 +41,12 @@ class LevelConfig {
   /// Time limit in seconds.
   final double timeLimit;
 
+  /// Hits the boss takes (0 = no boss on this level).
+  final int bossHp;
+
+  /// Every 25th level ends with a boss fight.
+  static bool isBossLevel(int level) => level % 25 == 0;
+
   /// Total enemy count.
   int get enemyCount => enemies.values.fold(0, (a, b) => a + b);
 
@@ -53,17 +60,20 @@ class LevelConfig {
     final total = 2 + (n * 0.08).floor();
     final chasers = n < 6 ? 0 : 1 + ((n - 6) * 3 ~/ 94);
     final fast = n < 16 ? 0 : 1 + ((n - 16) * 2 ~/ 84);
-    final wander = max(1, total - chasers - fast);
+    final boss = isBossLevel(n);
+    final wander = max(1, total - chasers - fast - (boss ? 1 : 0));
     return LevelConfig(
       level: n,
       enemies: {
         EnemyType.wanderer: wander,
         EnemyType.chaser: chasers,
         EnemyType.speedster: fast,
+        if (boss) EnemyType.boss: 1,
       },
       blockDensity: 0.45 + 0.003 * n,
       enemySpeedScale: 0.9 + 0.0075 * n,
-      timeLimit: 180.0 - (n ~/ 10) * 3,
+      timeLimit: 180.0 - (n ~/ 10) * 3 + (boss ? 60 : 0),
+      bossHp: boss ? 2 + n ~/ 25 : 0,
     );
   }
 }

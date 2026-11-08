@@ -1,4 +1,9 @@
+import 'dart:async';
+
 import 'package:blast_buddies/core/audio/audio_service.dart';
+import 'package:blast_buddies/core/settings/stats.dart';
+import 'package:blast_buddies/features/game/logic/game_world.dart';
+import 'package:blast_buddies/l10n/names.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/features/game/ui/game_stage.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
@@ -28,12 +33,49 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
   BlastGame? _game;
   late final AudioService _audio;
   final ValueNotifier<_Overlay> _overlay = ValueNotifier(_Overlay.none);
+  final Map<String, int> _delta = {};
+  StreamSubscription<int>? _left;
 
   @override
   void initState() {
     super.initState();
     _audio = ref.read(audioProvider);
     _audio.startMusic();
+    _left = widget.match.leftSlots.listen((slot) {
+      if (!mounted || slot == widget.match.localId || slot >= widget.match.names.length) return;
+      final l = AppLocalizations.of(context);
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(l.playerLeftMatch(widget.match.names[slot]))));
+    });
+  }
+
+  void _bump(String k) => _delta[k] = (_delta[k] ?? 0) + 1;
+
+  void _onEvent(GameEvent e) {
+    _audio.onGameEvent(e);
+    final me = widget.match.localId;
+    switch (e.type) {
+      case GameEventType.bombPlaced when e.id == me:
+        _bump('bombs');
+      case GameEventType.blockDestroyed when e.id == me:
+        _bump('blocks');
+      default:
+        break;
+    }
+  }
+
+  Future<void> _flushStats() async {
+    if (_delta.isEmpty) return;
+    final delta = Map<String, int>.of(_delta);
+    _delta.clear();
+    final fresh = await ref.read(statsProvider.notifier).add(delta);
+    if (!mounted) return;
+    final l = AppLocalizations.of(context);
+    final m = ScaffoldMessenger.of(context);
+    for (final a in fresh) {
+      m.showSnackBar(SnackBar(content: Text(l.achievementUnlocked(Names.achievement(l, a.id)))));
+    }
   }
 
   @override
@@ -43,12 +85,22 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
       sim: widget.match.world,
       humans: 1,
       remote: widget.match,
-      onEvent: _audio.onGameEvent,
-      onFinished: (_) => Future<void>.delayed(const Duration(milliseconds: 900), () {
+      onEvent: _onEvent,
+      onFinished: (_) {
+        final w = widget.match.world;
+        final me = widget.match.localId;
+        _bump('games');
+        _bump('onlineGames');
+        if (w.winnerTeam != null && me < w.players.length && w.winnerTeam == w.players[me].teamId) {
+          _bump('onlineWins');
+        }
+        _flushStats();
+        Future<void>.delayed(const Duration(milliseconds: 900), () {
         if (!mounted) return;
         _audio.stopMusic();
         _overlay.value = _Overlay.finished;
-      }),
+      });
+      },
       reducedMotion: MediaQuery.of(context).disableAnimations,
     );
   }
@@ -56,6 +108,7 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
   @override
   void dispose() {
     _audio.stopMusic();
+    unawaited(_left?.cancel());
     _overlay.dispose();
     super.dispose();
   }
@@ -113,7 +166,15 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
                     _Overlay.finished => ResultPanel(
                         title: _resultTitle(l),
                         actions: [
-                          FilledButton(onPressed: widget.client.closeMatch, child: Text(l.backToRoom)),
+                          FilledButton(
+                            onPressed: () {
+                              widget.client
+                                ..closeMatch()
+                                ..setReady(true);
+                            },
+                            child: Text(l.rematch),
+                          ),
+                          FilledButton.tonal(onPressed: widget.client.closeMatch, child: Text(l.backToRoom)),
                           FilledButton.tonal(onPressed: widget.client.leaveRoom, child: Text(l.leaveRoom)),
                         ],
                       ),

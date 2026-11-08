@@ -395,7 +395,7 @@ abstract class AppLocalizations {
   /// No description provided for @howTime.
   ///
   /// In en, this message translates to:
-  /// **'You have 3 minutes per level and 3 lives.'**
+  /// **'Story levels are timed (a little shorter later on) and you have 3 lives.'**
   String get howTime;
 
   /// No description provided for @back.
@@ -715,6 +715,702 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Request rejected.'**
   String get errGeneric;
+
+  /// No description provided for @wardrobe.
+  ///
+  /// In en, this message translates to:
+  /// **'Wardrobe'**
+  String get wardrobe;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievements;
+
+  /// No description provided for @worldN.
+  ///
+  /// In en, this message translates to:
+  /// **'World {n}'**
+  String worldN(int n);
+
+  /// No description provided for @starsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} stars'**
+  String starsCount(int n);
+
+  /// No description provided for @bossLevel.
+  ///
+  /// In en, this message translates to:
+  /// **'BOSS'**
+  String get bossLevel;
+
+  /// No description provided for @levelStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Level {n}'**
+  String levelStart(int n);
+
+  /// No description provided for @mapName0.
+  ///
+  /// In en, this message translates to:
+  /// **'Neon Arena'**
+  String get mapName0;
+
+  /// No description provided for @mapName1.
+  ///
+  /// In en, this message translates to:
+  /// **'Jungle Ruins'**
+  String get mapName1;
+
+  /// No description provided for @mapName2.
+  ///
+  /// In en, this message translates to:
+  /// **'Desert Dunes'**
+  String get mapName2;
+
+  /// No description provided for @mapName3.
+  ///
+  /// In en, this message translates to:
+  /// **'Frozen Peak'**
+  String get mapName3;
+
+  /// No description provided for @mapName4.
+  ///
+  /// In en, this message translates to:
+  /// **'Lava Forge'**
+  String get mapName4;
+
+  /// No description provided for @mapName5.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep Ocean'**
+  String get mapName5;
+
+  /// No description provided for @mapName6.
+  ///
+  /// In en, this message translates to:
+  /// **'Cosmic Station'**
+  String get mapName6;
+
+  /// No description provided for @worldStory0.
+  ///
+  /// In en, this message translates to:
+  /// **'The buddies wake up in a neon training arena. Time to learn the ropes!'**
+  String get worldStory0;
+
+  /// No description provided for @worldStory1.
+  ///
+  /// In en, this message translates to:
+  /// **'Ancient ruins hide crates of treasure — and angry robots.'**
+  String get worldStory1;
+
+  /// No description provided for @worldStory2.
+  ///
+  /// In en, this message translates to:
+  /// **'Hot sand, long shadows. The robots never sleep here.'**
+  String get worldStory2;
+
+  /// No description provided for @worldStory3.
+  ///
+  /// In en, this message translates to:
+  /// **'A frozen peak. Slippery nerves, sharp blasts.'**
+  String get worldStory3;
+
+  /// No description provided for @worldStory4.
+  ///
+  /// In en, this message translates to:
+  /// **'The forge burns day and night. Watch your step!'**
+  String get worldStory4;
+
+  /// No description provided for @worldStory5.
+  ///
+  /// In en, this message translates to:
+  /// **'Deep below the waves, the robots built a base.'**
+  String get worldStory5;
+
+  /// No description provided for @worldStory6.
+  ///
+  /// In en, this message translates to:
+  /// **'The last station in space. Nothing can stop the buddies now.'**
+  String get worldStory6;
+
+  /// No description provided for @worldStory7.
+  ///
+  /// In en, this message translates to:
+  /// **'The jungle again — but the robots came back stronger.'**
+  String get worldStory7;
+
+  /// No description provided for @worldStory8.
+  ///
+  /// In en, this message translates to:
+  /// **'The dunes shift, the robots multiply.'**
+  String get worldStory8;
+
+  /// No description provided for @worldStory9.
+  ///
+  /// In en, this message translates to:
+  /// **'The final stretch. Become the Blast Buddy legend!'**
+  String get worldStory9;
+
+  /// No description provided for @achievementUnlocked.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked: {name}'**
+  String achievementUnlocked(String name);
+
+  /// No description provided for @starsEarnedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars earned'**
+  String get starsEarnedLabel;
+
+  /// No description provided for @quickMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick match'**
+  String get quickMatch;
+
+  /// No description provided for @quick1v1.
+  ///
+  /// In en, this message translates to:
+  /// **'1 vs 1'**
+  String get quick1v1;
+
+  /// No description provided for @quick4.
+  ///
+  /// In en, this message translates to:
+  /// **'4-player free-for-all'**
+  String get quick4;
+
+  /// No description provided for @quickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find a match now. You start as soon as the room is full.'**
+  String get quickHint;
+
+  /// No description provided for @joinByCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Join by code'**
+  String get joinByCode;
+
+  /// No description provided for @enterCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Room code'**
+  String get enterCode;
+
+  /// No description provided for @roomCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Room code: {code}'**
+  String roomCode(String code);
+
+  /// No description provided for @copyCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyCode;
+
+  /// No description provided for @codeCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Code copied'**
+  String get codeCopied;
+
+  /// No description provided for @playerLeftMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} left the match'**
+  String playerLeftMatch(String name);
+
+  /// No description provided for @emote.
+  ///
+  /// In en, this message translates to:
+  /// **'Emote'**
+  String get emote;
+
+  /// No description provided for @rematch.
+  ///
+  /// In en, this message translates to:
+  /// **'Play again'**
+  String get rematch;
+
+  /// No description provided for @roomNotFoundMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'No room with that code.'**
+  String get roomNotFoundMsg;
+
+  /// No description provided for @floatingStick.
+  ///
+  /// In en, this message translates to:
+  /// **'Floating joystick'**
+  String get floatingStick;
+
+  /// No description provided for @floatingStickHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The stick appears where you touch.'**
+  String get floatingStickHint;
+
+  /// No description provided for @leftHanded.
+  ///
+  /// In en, this message translates to:
+  /// **'Left-handed layout'**
+  String get leftHanded;
+
+  /// No description provided for @botDifficulty.
+  ///
+  /// In en, this message translates to:
+  /// **'Bot difficulty'**
+  String get botDifficulty;
+
+  /// No description provided for @difficultyEasy.
+  ///
+  /// In en, this message translates to:
+  /// **'Easy'**
+  String get difficultyEasy;
+
+  /// No description provided for @difficultyNormal.
+  ///
+  /// In en, this message translates to:
+  /// **'Normal'**
+  String get difficultyNormal;
+
+  /// No description provided for @difficultyHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard'**
+  String get difficultyHard;
+
+  /// No description provided for @dailyArena.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily arena'**
+  String get dailyArena;
+
+  /// No description provided for @dailyArenaHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Everyone plays the same arena today.'**
+  String get dailyArenaHint;
+
+  /// No description provided for @wardrobeHat.
+  ///
+  /// In en, this message translates to:
+  /// **'Hat'**
+  String get wardrobeHat;
+
+  /// No description provided for @wardrobeFace.
+  ///
+  /// In en, this message translates to:
+  /// **'Face'**
+  String get wardrobeFace;
+
+  /// No description provided for @wardrobeColor.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour'**
+  String get wardrobeColor;
+
+  /// No description provided for @starsToUnlock.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} stars to unlock'**
+  String starsToUnlock(int n);
+
+  /// No description provided for @yourStars.
+  ///
+  /// In en, this message translates to:
+  /// **'Your stars: {n}'**
+  String yourStars(int n);
+
+  /// No description provided for @hatName0.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get hatName0;
+
+  /// No description provided for @hatName1.
+  ///
+  /// In en, this message translates to:
+  /// **'Cap'**
+  String get hatName1;
+
+  /// No description provided for @hatName2.
+  ///
+  /// In en, this message translates to:
+  /// **'Party hat'**
+  String get hatName2;
+
+  /// No description provided for @hatName3.
+  ///
+  /// In en, this message translates to:
+  /// **'Cowboy hat'**
+  String get hatName3;
+
+  /// No description provided for @hatName4.
+  ///
+  /// In en, this message translates to:
+  /// **'Crown'**
+  String get hatName4;
+
+  /// No description provided for @hatName5.
+  ///
+  /// In en, this message translates to:
+  /// **'Wizard hat'**
+  String get hatName5;
+
+  /// No description provided for @hatName6.
+  ///
+  /// In en, this message translates to:
+  /// **'Halo'**
+  String get hatName6;
+
+  /// No description provided for @hatName7.
+  ///
+  /// In en, this message translates to:
+  /// **'Horns'**
+  String get hatName7;
+
+  /// No description provided for @faceName0.
+  ///
+  /// In en, this message translates to:
+  /// **'Classic'**
+  String get faceName0;
+
+  /// No description provided for @faceName1.
+  ///
+  /// In en, this message translates to:
+  /// **'Happy'**
+  String get faceName1;
+
+  /// No description provided for @faceName2.
+  ///
+  /// In en, this message translates to:
+  /// **'Cool'**
+  String get faceName2;
+
+  /// No description provided for @faceName3.
+  ///
+  /// In en, this message translates to:
+  /// **'Angry'**
+  String get faceName3;
+
+  /// No description provided for @faceName4.
+  ///
+  /// In en, this message translates to:
+  /// **'Wink'**
+  String get faceName4;
+
+  /// No description provided for @faceName5.
+  ///
+  /// In en, this message translates to:
+  /// **'Star eyes'**
+  String get faceName5;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statsTitle;
+
+  /// No description provided for @stat_kills.
+  ///
+  /// In en, this message translates to:
+  /// **'Enemies defeated'**
+  String get stat_kills;
+
+  /// No description provided for @stat_blocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Crates destroyed'**
+  String get stat_blocks;
+
+  /// No description provided for @stat_bombs.
+  ///
+  /// In en, this message translates to:
+  /// **'Bombs placed'**
+  String get stat_bombs;
+
+  /// No description provided for @stat_wins.
+  ///
+  /// In en, this message translates to:
+  /// **'Battle wins'**
+  String get stat_wins;
+
+  /// No description provided for @stat_onlineWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Online wins'**
+  String get stat_onlineWins;
+
+  /// No description provided for @stat_levels.
+  ///
+  /// In en, this message translates to:
+  /// **'Levels cleared'**
+  String get stat_levels;
+
+  /// No description provided for @stat_bosses.
+  ///
+  /// In en, this message translates to:
+  /// **'Bosses beaten'**
+  String get stat_bosses;
+
+  /// No description provided for @stat_stars.
+  ///
+  /// In en, this message translates to:
+  /// **'Stars'**
+  String get stat_stars;
+
+  /// No description provided for @stat_powerups.
+  ///
+  /// In en, this message translates to:
+  /// **'Power-ups collected'**
+  String get stat_powerups;
+
+  /// No description provided for @stat_perfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Three-star levels'**
+  String get stat_perfect;
+
+  /// No description provided for @ach_firstBlood.
+  ///
+  /// In en, this message translates to:
+  /// **'First blood'**
+  String get ach_firstBlood;
+
+  /// No description provided for @achDesc_firstBlood.
+  ///
+  /// In en, this message translates to:
+  /// **'Defeat {n} enemy'**
+  String achDesc_firstBlood(int n);
+
+  /// No description provided for @ach_firstWin.
+  ///
+  /// In en, this message translates to:
+  /// **'First victory'**
+  String get ach_firstWin;
+
+  /// No description provided for @achDesc_firstWin.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} battle'**
+  String achDesc_firstWin(int n);
+
+  /// No description provided for @ach_bomber.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomber'**
+  String get ach_bomber;
+
+  /// No description provided for @achDesc_bomber.
+  ///
+  /// In en, this message translates to:
+  /// **'Place {n} bombs'**
+  String achDesc_bomber(int n);
+
+  /// No description provided for @ach_demolition.
+  ///
+  /// In en, this message translates to:
+  /// **'Demolition crew'**
+  String get ach_demolition;
+
+  /// No description provided for @achDesc_demolition.
+  ///
+  /// In en, this message translates to:
+  /// **'Destroy {n} crates'**
+  String achDesc_demolition(int n);
+
+  /// No description provided for @ach_collector.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector'**
+  String get ach_collector;
+
+  /// No description provided for @achDesc_collector.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {n} power-ups'**
+  String achDesc_collector(int n);
+
+  /// No description provided for @ach_chapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Chapter one'**
+  String get ach_chapter;
+
+  /// No description provided for @achDesc_chapter.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear {n} levels'**
+  String achDesc_chapter(int n);
+
+  /// No description provided for @ach_stars30.
+  ///
+  /// In en, this message translates to:
+  /// **'Star gazer'**
+  String get ach_stars30;
+
+  /// No description provided for @achDesc_stars30.
+  ///
+  /// In en, this message translates to:
+  /// **'Collect {n} stars'**
+  String achDesc_stars30(int n);
+
+  /// No description provided for @ach_exterminator.
+  ///
+  /// In en, this message translates to:
+  /// **'Exterminator'**
+  String get ach_exterminator;
+
+  /// No description provided for @achDesc_exterminator.
+  ///
+  /// In en, this message translates to:
+  /// **'Defeat {n} enemies'**
+  String achDesc_exterminator(int n);
+
+  /// No description provided for @ach_champion.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion'**
+  String get ach_champion;
+
+  /// No description provided for @achDesc_champion.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} battles'**
+  String achDesc_champion(int n);
+
+  /// No description provided for @ach_online1.
+  ///
+  /// In en, this message translates to:
+  /// **'Online debut'**
+  String get ach_online1;
+
+  /// No description provided for @achDesc_online1.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} online match'**
+  String achDesc_online1(int n);
+
+  /// No description provided for @ach_boss1.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss slayer'**
+  String get ach_boss1;
+
+  /// No description provided for @achDesc_boss1.
+  ///
+  /// In en, this message translates to:
+  /// **'Beat {n} boss'**
+  String achDesc_boss1(int n);
+
+  /// No description provided for @ach_perfectionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfectionist'**
+  String get ach_perfectionist;
+
+  /// No description provided for @achDesc_perfectionist.
+  ///
+  /// In en, this message translates to:
+  /// **'Get three stars on {n} levels'**
+  String achDesc_perfectionist(int n);
+
+  /// No description provided for @ach_explorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Explorer'**
+  String get ach_explorer;
+
+  /// No description provided for @achDesc_explorer.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear {n} levels'**
+  String achDesc_explorer(int n);
+
+  /// No description provided for @ach_online10.
+  ///
+  /// In en, this message translates to:
+  /// **'Online ace'**
+  String get ach_online10;
+
+  /// No description provided for @achDesc_online10.
+  ///
+  /// In en, this message translates to:
+  /// **'Win {n} online matches'**
+  String achDesc_online10(int n);
+
+  /// No description provided for @ach_bosses4.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss master'**
+  String get ach_bosses4;
+
+  /// No description provided for @achDesc_bosses4.
+  ///
+  /// In en, this message translates to:
+  /// **'Beat all {n} bosses'**
+  String achDesc_bosses4(int n);
+
+  /// No description provided for @ach_legend.
+  ///
+  /// In en, this message translates to:
+  /// **'Legend'**
+  String get ach_legend;
+
+  /// No description provided for @achDesc_legend.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear all {n} levels'**
+  String achDesc_legend(int n);
+
+  /// No description provided for @powerDetonator.
+  ///
+  /// In en, this message translates to:
+  /// **'Detonator'**
+  String get powerDetonator;
+
+  /// No description provided for @powerGhost.
+  ///
+  /// In en, this message translates to:
+  /// **'Ghost'**
+  String get powerGhost;
+
+  /// No description provided for @howDetonator.
+  ///
+  /// In en, this message translates to:
+  /// **'Detonator: use the blast button (key E) to set off all your bombs at once.'**
+  String get howDetonator;
+
+  /// No description provided for @howGhost.
+  ///
+  /// In en, this message translates to:
+  /// **'Ghost: walk through crates for a few seconds.'**
+  String get howGhost;
+
+  /// No description provided for @howBoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Every 25th level ends with a boss. Hit it several times!'**
+  String get howBoss;
+
+  /// No description provided for @howStars.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn up to 3 stars per level: no hits taken and plenty of time left. Stars unlock hats, faces and colours.'**
+  String get howStars;
+
+  /// No description provided for @detonateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Detonate bombs'**
+  String get detonateButton;
 }
 
 class _AppLocalizationsDelegate
