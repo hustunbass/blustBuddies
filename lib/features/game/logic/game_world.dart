@@ -90,11 +90,19 @@ class GameWorld {
     required this.enemies,
     this.teams = false,
   })  : grid = map.grid,
-        exit = map.exit {
+        exit = map.exit,
+        themeId = map.theme,
+        layout = map.layout {
     for (final p in players.where((p) => p.isBot)) {
       _brains[p.id] = BotBrain(Random(rng.nextInt(1 << 30)));
     }
   }
+
+  /// Index into `MapTheme.all` used to colour this arena.
+  final int themeId;
+
+  /// Floor plan of this arena.
+  final MapLayout layout;
 
   /// Creates a story-mode world. [carry] transfers lives/score/upgrades.
   factory GameWorld.story({required int level, int seed = 0, Player? carry}) {
@@ -104,6 +112,11 @@ class GameWorld {
       rng: rng,
       density: cfg.blockDensity,
       enemyCount: cfg.enemyCount,
+      // A new colour world every 10 levels; every 5th level a new floor plan.
+      theme: ((cfg.level - 1) ~/ 10) % MapGenerator.themeCount,
+      layout: cfg.level % 5 == 0
+          ? MapLayout.values[(cfg.level ~/ 5) % MapLayout.values.length]
+          : MapLayout.classic,
     );
     final player = Player(id: 0, spawn: map.spawns.first);
     if (carry != null) {
@@ -151,7 +164,14 @@ class GameWorld {
     final total = (humans + bots).clamp(2, 4);
     final teamed = teams && total == 4;
     final rng = Random(seed);
-    final map = MapGenerator.generate(rng: rng, density: 0.6, withExit: false);
+    final style = MapGenerator.styleFor(seed);
+    final map = MapGenerator.generate(
+      rng: rng,
+      density: 0.6,
+      withExit: false,
+      layout: style.$1,
+      theme: style.$2,
+    );
     final players = [
       for (var i = 0; i < total; i++)
         Player(

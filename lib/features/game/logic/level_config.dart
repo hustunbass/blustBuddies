@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:blast_buddies/features/game/logic/entities.dart';
 
 /// Game mode.
@@ -21,7 +23,7 @@ class LevelConfig {
   });
 
   /// Total number of story levels.
-  static const int totalLevels = 12;
+  static const int totalLevels = 100;
 
   /// Level number (1-based).
   final int level;
@@ -41,13 +43,17 @@ class LevelConfig {
   /// Total enemy count.
   int get enemyCount => enemies.values.fold(0, (a, b) => a + b);
 
-  /// Builds the config for [level] (clamped to 1..[totalLevels]); difficulty
-  /// rises monotonically.
+  /// Builds the config for [level] (clamped to 1..[totalLevels]).
+  ///
+  /// Difficulty rises slowly and monotonically: a gentle start (two slow
+  /// wanderers, open board), chasers from level 6, speedsters from level 16,
+  /// and only by level 100 a crowd of 10 fast enemies on a dense board.
   factory LevelConfig.forLevel(int level) {
     final n = level.clamp(1, totalLevels);
-    final wander = (5 - n ~/ 3).clamp(2, 5);
-    final chasers = n < 3 ? 0 : ((n - 1) ~/ 2).clamp(1, 4);
-    final fast = n < 4 ? 0 : ((n - 1) ~/ 3).clamp(1, 3);
+    final total = 2 + (n * 0.08).floor();
+    final chasers = n < 6 ? 0 : 1 + ((n - 6) * 3 ~/ 94);
+    final fast = n < 16 ? 0 : 1 + ((n - 16) * 2 ~/ 84);
+    final wander = max(1, total - chasers - fast);
     return LevelConfig(
       level: n,
       enemies: {
@@ -55,8 +61,9 @@ class LevelConfig {
         EnemyType.chaser: chasers,
         EnemyType.speedster: fast,
       },
-      blockDensity: 0.5 + 0.02 * n,
-      enemySpeedScale: 1 + 0.04 * n,
+      blockDensity: 0.45 + 0.003 * n,
+      enemySpeedScale: 0.9 + 0.0075 * n,
+      timeLimit: 180.0 - (n ~/ 10) * 3,
     );
   }
 }

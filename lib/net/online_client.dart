@@ -55,8 +55,7 @@ class OnlineMatch implements RemoteSession {
   })  : _send = send,
         _latency = latency ?? (() => 0.15),
         world = GameWorld.battle(humans: capacity, bots: 0, seed: seed, teams: teams) {
-    _tx = [for (final p in world.players) p.x];
-    _ty = [for (final p in world.players) p.y];
+    _buf = [for (final _ in world.players) <_Sample>[]];
   }
 
   /// Mirror of the server world (never ticked locally).
@@ -70,15 +69,26 @@ class OnlineMatch implements RemoteSession {
 
   final void Function(Map<String, dynamic>) _send;
   final double Function() _latency;
-  late final List<double> _tx;
-  late final List<double> _ty;
+  late final List<List<_Sample>> _buf;
   Dir _sentDir = Dir.none;
   bool _hasSnapshot = false;
 
   /// Whether the local player is predicted (on by default).
   bool predict = true;
 
+  /// How far behind the newest snapshot other players are drawn. Two
+  /// snapshot intervals absorb network jitter, so they glide instead of
+  /// speeding up and stalling when packets arrive unevenly.
+  static const double interpDelay = 0.1;
+
+  /// Position error below which prediction is trusted while running; smaller
+  /// differences are timing noise and correcting them is what felt like
+  /// sudden speed-ups.
+  static const double _deadband = 0.12;
+
   double _clock = 0;
+  double _renderT = 0;
+  double _latest = 0;
   final List<(double, double, double)> _history = [];
   double _pendX = 0, _pendY = 0;
 
@@ -106,10 +116,19 @@ class OnlineMatch implements RemoteSession {
   void apply(Map<String, dynamic> m) {
     final shown = [for (final p in world.players) (p.x, p.y)];
     applySnapshot(world, m);
+    // Server match time when sent; arrival time for servers that don't say.
+    final n = m['n'];
+    final stamp = n is num ? n / 1000 : _clock;
+    if (!_hasSnapshot) {
+      _latest = stamp;
+      _renderT = stamp - interpDelay;
+    } else if (stamp > _latest) {
+      _latest = stamp;
+    }
     for (var i = 0; i < world.players.length; i++) {
       final p = world.players[i];
-      _tx[i] = p.x;
-      _ty[i] = p.y;
+      final b = _buf[i];
+      if (b.isEmpty || stamp > b.last.t) b.add(_Sample(stamp, p.x, p.y));
       if (!_hasSnapshot) continue;
       if (i == localId && _predicting) {
         _reconcile(p, shown[i].$1, shown[i].$2);
@@ -133,10 +152,14 @@ class OnlineMatch implements RemoteSession {
       _snapLocal(p, sx, sy);
       return;
     }
-    final ex = sx - past.$1, ey = sy - past.$2;
+    var ex = sx - past.$1, ey = sy - past.$2;
     if (ex.abs() + ey.abs() > 1.2) {
       _snapLocal(p, sx, sy);
       return;
+    }
+    if (_sentDir != Dir.none) {
+      ex = _beyondDeadband(ex);
+      ey = _beyondDeadband(ey);
     }
     _pendX += ex;
     _pendY += ey;
@@ -145,6 +168,9 @@ class OnlineMatch implements RemoteSession {
       _history[i] = (h.$1, h.$2 + ex, h.$3 + ey);
     }
   }
+
+  static double _beyondDeadband(double v) =>
+      v.abs() < _deadband ? 0 : v - _deadband * v.sign;
 
   void _snapLocal(Player p, double x, double y) {
     p
@@ -176,24 +202,50 @@ class OnlineMatch implements RemoteSession {
   @override
   void advance(double dt) {
     _clock += dt;
-    final k = 1 - exp(-dt * 20);
+    if (!_hasSnapshot) return;
+    // Render time runs on the local clock and is steered gently towards
+    // "newest snapshot minus delay" (half an interval added to centre the
+    // sawtooth of arrivals), so bursts of packets never change the speed.
+    final target = _latest - interpDelay + 0.0165;
+    if ((target - _renderT).abs() > 0.5) {
+      _renderT = target;
+    } else {
+      _renderT += dt + (target - _renderT) * min(1.0, dt * 1.0);
+    }
     for (var i = 0; i < world.players.length; i++) {
       final p = world.players[i];
-      if (i == localId && _predicting && _hasSnapshot) {
+      if (i == localId && _predicting) {
         _advanceLocal(p, dt);
         continue;
       }
-      final dx = _tx[i] - p.x, dy = _ty[i] - p.y;
-      if (dx.abs() + dy.abs() > 1.5) {
+      final b = _buf[i];
+      while (b.length > 2 && b[1].t < _renderT - 0.25) {
+        b.removeAt(0);
+      }
+      final pos = _sampleAt(b, _renderT);
+      if (pos != null) {
         p
-          ..x = _tx[i]
-          ..y = _ty[i];
-      } else {
-        p
-          ..x += dx * k
-          ..y += dy * k;
+          ..x = pos.$1
+          ..y = pos.$2;
       }
     }
+  }
+
+  /// Position at [t] between buffered snapshots; holds the newest one if [t]
+  /// is past it and jumps (no gliding) across teleports such as respawns.
+  static (double, double)? _sampleAt(List<_Sample> b, double t) {
+    if (b.isEmpty) return null;
+    if (t <= b.first.t) return (b.first.x, b.first.y);
+    for (var i = b.length - 1; i > 0; i--) {
+      final a = b[i - 1], c = b[i];
+      if (a.t <= t) {
+        if (t >= c.t) return (c.x, c.y);
+        if ((c.x - a.x).abs() + (c.y - a.y).abs() > 1.5) return (a.x, a.y);
+        final k = (t - a.t) / (c.t - a.t);
+        return (a.x + (c.x - a.x) * k, a.y + (c.y - a.y) * k);
+      }
+    }
+    return (b.first.x, b.first.y);
   }
 
   void _advanceLocal(Player p, double dt) {
@@ -214,6 +266,12 @@ class OnlineMatch implements RemoteSession {
       _history.removeAt(0);
     }
   }
+}
+
+class _Sample {
+  const _Sample(this.t, this.x, this.y);
+
+  final double t, x, y;
 }
 
 /// WebSocket client for the online lobby and matches.

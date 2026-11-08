@@ -112,4 +112,32 @@ void main() {
     expect(other.x, closeTo(l.server.players[1].x, 0.02));
     expect(other.y, closeTo(l.server.players[1].y, 0.02));
   });
+
+  test('other players glide at constant speed even when packets arrive in bursts', () {
+    final l = _Link();
+    // Player 1 runs along the top lane.
+    l.server.setMove(1, Dir.left);
+    final xs = <double>[];
+    var jitter = 0;
+    for (var i = 0; i < 180; i++) {
+      l.t += 1 / 60;
+      l.server.tick(1 / 60);
+      if (i % 2 == 1) {
+        // Every third snapshot is held back and delivered together with the next.
+        final snap = jsonDecode(jsonEncode(encodeSnapshot(l.server, l.server.drainEvents(),
+            serverTime: l.t))) as Map<String, dynamic>;
+        l._down.add((l.t + l.oneWay + ((++jitter % 3 == 0) ? 0.05 : 0), snap));
+        l._down.sort((a, b) => a.$1.compareTo(b.$1));
+      }
+      while (l._down.isNotEmpty && l._down.first.$1 <= l.t) {
+        l.client.apply(l._down.removeAt(0).$2);
+      }
+      l.client.advance(1 / 60);
+      if (i > 60) xs.add(l.client.world.players[1].x);
+    }
+    final steps = [for (var i = 1; i < xs.length; i++) (xs[i - 1] - xs[i]).abs()];
+    final speed = 3.6 / 60;
+    // Without a jitter buffer a burst makes a frame move > 2x the speed.
+    expect(steps.reduce((a, b) => a > b ? a : b), lessThan(speed * 1.6));
+  });
 }

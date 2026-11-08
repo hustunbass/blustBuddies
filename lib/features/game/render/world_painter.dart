@@ -1,5 +1,5 @@
 import 'dart:math';
-import 'dart:ui';
+import 'dart:ui' hide TextStyle;
 
 import 'package:blast_buddies/core/combat/powerups.dart';
 import 'package:blast_buddies/core/grid/grid_model.dart';
@@ -8,6 +8,7 @@ import 'package:blast_buddies/core/theme.dart';
 import 'package:blast_buddies/features/game/logic/entities.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/features/game/render/particles.dart';
+import 'package:flutter/painting.dart' show TextPainter, TextSpan, TextStyle;
 
 /// Draws a [GameWorld] with vector shapes (no image assets needed).
 ///
@@ -94,39 +95,109 @@ class WorldPainter {
       if (p.id == highlightId) _drawYouMarker(canvas, p);
     }
     if (!reducedMotion) particles.paint(canvas);
+    _drawTitle(canvas, w);
     canvas.restore();
   }
 
   void _drawTerrain(Canvas canvas, GameWorld w) {
+    final th = MapTheme.of(w.themeId);
+    final g = w.grid;
     for (var y = 0; y < GridModel.rows; y++) {
       for (var x = 0; x < GridModel.cols; x++) {
-        final r = Rect.fromLTWH(x.toDouble(), y.toDouble(), 1, 1);
-        switch (w.grid.typeAt(x, y)) {
-          case CellType.wall:
-            _fill.color = BuddyColors.wall;
-            canvas.drawRect(r, _fill);
-            _fill.color = const Color(0x33FFFFFF);
-            canvas.drawRect(Rect.fromLTWH(x + .06, y + .06, .88, .2), _fill);
-            _fill.color = const Color(0x33000000);
-            canvas.drawRect(Rect.fromLTWH(x + .06, y + .76, .88, .18), _fill);
-          case CellType.block:
-            _fill.color = BuddyColors.floorA;
-            canvas.drawRect(r, _fill);
-            _fill.color = BuddyColors.block;
-            canvas.drawRRect(
-                RRect.fromRectAndRadius(r.deflate(.05), const Radius.circular(.12)), _fill);
-            _stroke
-              ..color = const Color(0xFF7A4A22)
-              ..strokeWidth = .07;
-            canvas
-              ..drawLine(Offset(x + .2, y + .2), Offset(x + .8, y + .8), _stroke)
-              ..drawLine(Offset(x + .8, y + .2), Offset(x + .2, y + .8), _stroke);
-          case CellType.empty:
-            _fill.color = (x + y).isEven ? BuddyColors.floorA : BuddyColors.floorB;
-            canvas.drawRect(r, _fill);
+        final fx = x.toDouble(), fy = y.toDouble();
+        final r = Rect.fromLTWH(fx, fy, 1, 1);
+        // Floor under everything (blocks stand on it).
+        _fill.color = (x + y).isEven ? th.floorA : th.floorB;
+        canvas.drawRect(r, _fill);
+        final type = g.typeAt(x, y);
+        if (type == CellType.empty) {
+          _fill.color = th.floorLine.withValues(alpha: .35);
+          canvas
+            ..drawRect(Rect.fromLTWH(fx, fy, 1, .025), _fill)
+            ..drawRect(Rect.fromLTWH(fx, fy, .025, 1), _fill);
+          // Soft shadow cast by a solid neighbour above / to the left.
+          if (g.typeAt(x, y - 1) != CellType.empty) {
+            _fill.color = const Color(0x30000000);
+            canvas.drawRect(Rect.fromLTWH(fx, fy, 1, .22), _fill);
+          }
+          if (g.typeAt(x - 1, y) != CellType.empty) {
+            _fill.color = const Color(0x1C000000);
+            canvas.drawRect(Rect.fromLTWH(fx, fy, .14, 1), _fill);
+          }
+        } else if (type == CellType.wall) {
+          // Stone pillar: shaded base, lit top face, bevel and a seam.
+          _fill.color = th.wallShade;
+          canvas.drawRRect(RRect.fromRectAndRadius(r.deflate(.02), const Radius.circular(.1)), _fill);
+          _fill.color = th.wall;
+          canvas.drawRRect(
+              RRect.fromRectAndRadius(Rect.fromLTWH(fx + .04, fy + .03, .92, .8), const Radius.circular(.1)), _fill);
+          _fill.color = th.wallTop.withValues(alpha: .55);
+          canvas.drawRRect(
+              RRect.fromRectAndRadius(Rect.fromLTWH(fx + .1, fy + .08, .8, .16), const Radius.circular(.08)), _fill);
+          _stroke
+            ..color = th.wallShade.withValues(alpha: .55)
+            ..strokeWidth = .03;
+          canvas
+            ..drawLine(Offset(fx + .08, fy + .5), Offset(fx + .92, fy + .5), _stroke)
+            ..drawLine(Offset(fx + (x.isEven ? .38 : .62), fy + .5), Offset(fx + (x.isEven ? .38 : .62), fy + .8), _stroke);
+        } else {
+          // Wooden crate: outline, body, planks and corner studs.
+          _fill.color = const Color(0x40000000);
+          canvas.drawRRect(
+              RRect.fromRectAndRadius(Rect.fromLTWH(fx + .07, fy + .12, .88, .86), const Radius.circular(.12)), _fill);
+          _fill.color = th.blockDark;
+          canvas.drawRRect(RRect.fromRectAndRadius(r.deflate(.05), const Radius.circular(.12)), _fill);
+          _fill.color = th.block;
+          canvas.drawRRect(RRect.fromRectAndRadius(r.deflate(.13), const Radius.circular(.07)), _fill);
+          _fill.color = th.blockLight.withValues(alpha: .6);
+          canvas.drawRRect(
+              RRect.fromRectAndRadius(Rect.fromLTWH(fx + .16, fy + .16, .68, .1), const Radius.circular(.05)), _fill);
+          _stroke
+            ..color = th.blockDark
+            ..strokeWidth = .06;
+          canvas
+            ..drawLine(Offset(fx + .2, fy + .2), Offset(fx + .8, fy + .8), _stroke)
+            ..drawLine(Offset(fx + .8, fy + .2), Offset(fx + .2, fy + .8), _stroke);
+          _fill.color = th.blockLight;
+          for (final c in const [Offset(.18, .18), Offset(.82, .18), Offset(.18, .82), Offset(.82, .82)]) {
+            canvas.drawCircle(Offset(fx + c.dx, fy + c.dy), .035, _fill);
+          }
         }
       }
     }
+  }
+
+  TextPainter? _title;
+  int _titleTheme = -1;
+
+  /// Fades the arena name in for the first seconds so a new map is noticed.
+  void _drawTitle(Canvas canvas, GameWorld w) {
+    if (_t > 3 || w.level != 0) return;
+    if (_titleTheme != w.themeId) {
+      _titleTheme = w.themeId;
+      _title = TextPainter(
+        text: TextSpan(
+          text: MapTheme.of(w.themeId).name.toUpperCase(),
+          style: const TextStyle(
+            color: Color(0xFFFFFFFF),
+            fontSize: .55,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .08,
+            shadows: [Shadow(color: Color(0xCC000000), blurRadius: .2)],
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+    }
+    final tp = _title!;
+    final alpha = (_t < 2 ? 1.0 : (3 - _t)).clamp(0.0, 1.0);
+    final pos = Offset((GridModel.cols - tp.width) / 2, GridModel.rows / 2 - tp.height / 2);
+    final box = Rect.fromLTWH(pos.dx - .35, pos.dy - .12, tp.width + .7, tp.height + .24);
+    _fill.color = Color.fromRGBO(0, 0, 0, .55 * alpha);
+    canvas.drawRRect(RRect.fromRectAndRadius(box, const Radius.circular(.2)), _fill);
+    canvas.saveLayer(box.inflate(.5), Paint()..color = Color.fromRGBO(255, 255, 255, alpha));
+    tp.paint(canvas, pos);
+    canvas.restore();
   }
 
   void _drawExit(Canvas canvas, GameWorld w) {

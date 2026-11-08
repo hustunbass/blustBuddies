@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:blast_buddies/core/grid/grid_pos.dart';
+import 'package:blast_buddies/core/grid/map_generator.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/net/protocol.dart';
 import 'package:blast_buddies/net/snapshot.dart';
@@ -419,7 +420,12 @@ class BlastServer {
       _broadcastRoom(r);
       return;
     }
-    final seed = _rng.nextInt(1 << 31);
+    // Never repeat the previous arena (layout + colours) in the same room.
+    var seed = _rng.nextInt(1 << 31);
+    for (var i = 0; i < 50 && MapGenerator.styleFor(seed) == r.lastStyle; i++) {
+      seed = _rng.nextInt(1 << 31);
+    }
+    r.lastStyle = MapGenerator.styleFor(seed);
     final world = GameWorld.battle(humans: r.capacity, bots: 0, seed: seed, teams: r.teams);
     final match = _Match(world);
     r
@@ -468,7 +474,7 @@ class BlastServer {
 
   void _sendSnapshot(_Room r, _Match match) {
     match.lastSnapshotTick = match.ticks;
-    final msg = jsonEncode(encodeSnapshot(match.world, match.pending));
+    final msg = jsonEncode(encodeSnapshot(match.world, match.pending, serverTime: match.ticks / tickRate));
     match.pending.clear();
     for (final c in r.members) {
       if (_clients.contains(c)) c.ws.add(msg);
@@ -530,6 +536,7 @@ class _Room {
   Timer? countdownTimer;
   DateTime? countdownEnds;
   _Match? match;
+  (MapLayout, int)? lastStyle;
 
   bool get locked => hash != null;
 

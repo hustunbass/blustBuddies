@@ -286,21 +286,22 @@ void main() {
     });
 
     test('level configs get harder and there are at least 10', () {
-      expect(LevelConfig.totalLevels, greaterThanOrEqualTo(10));
+      expect(LevelConfig.totalLevels, greaterThanOrEqualTo(100));
       var prev = 0.0;
       for (var l = 1; l <= LevelConfig.totalLevels; l++) {
         final c = LevelConfig.forLevel(l);
         expect(c.enemySpeedScale, greaterThan(prev));
+        expect(c.enemyCount, lessThanOrEqualTo(10));
         prev = c.enemySpeedScale;
       }
       expect(LevelConfig.forLevel(1).enemies[EnemyType.chaser], 0);
-      expect(LevelConfig.forLevel(12).enemies[EnemyType.chaser], greaterThan(0));
-      expect(LevelConfig.forLevel(12).enemies[EnemyType.speedster], greaterThan(0));
+      expect(LevelConfig.forLevel(100).enemies[EnemyType.chaser], greaterThan(0));
+      expect(LevelConfig.forLevel(100).enemies[EnemyType.speedster], greaterThan(0));
     });
 
     test('story factory builds a playable level with all enemy types', () {
-      final w = GameWorld.story(level: 8, seed: 4);
-      expect(w.enemies.length, LevelConfig.forLevel(8).enemyCount);
+      final w = GameWorld.story(level: 40, seed: 4);
+      expect(w.enemies.length, LevelConfig.forLevel(40).enemyCount);
       expect(w.enemies.map((e) => e.type).toSet().length, 3);
       expect(w.status, WorldStatus.playing);
     });

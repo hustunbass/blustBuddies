@@ -8,9 +8,12 @@ import 'package:blast_buddies/net/protocol.dart';
 int _c(double v) => (v * 100).round();
 double _d(Object? v) => (v as num) / 100;
 
+/// [serverTime] (seconds of simulated match time) lets clients interpolate
+/// smoothly even when packets arrive unevenly.
+///
 /// Encodes everything a client needs to draw [w] plus the [events] produced
 /// since the previous snapshot. Fixed-point (x100) ints keep frames small.
-Map<String, dynamic> encodeSnapshot(GameWorld w, List<GameEvent> events) {
+Map<String, dynamic> encodeSnapshot(GameWorld w, List<GameEvent> events, {double? serverTime}) {
   final grid = StringBuffer();
   for (var y = 0; y < GridModel.rows; y++) {
     for (var x = 0; x < GridModel.cols; x++) {
@@ -19,6 +22,7 @@ Map<String, dynamic> encodeSnapshot(GameWorld w, List<GameEvent> events) {
   }
   return {
     't': Msg.snapshot,
+    if (serverTime != null) 'n': (serverTime * 1000).round(),
     'tl': _c(w.timeLeft),
     'st': w.status.index,
     if (w.winnerId != null) 'w': w.winnerId,

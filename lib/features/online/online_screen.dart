@@ -254,26 +254,146 @@ class _RoomListView extends StatelessWidget {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, i) {
                   final r = rooms[i];
-                  final status = r.phase == RoomPhase.playing ? ' · ${l.inGame}' : '';
-                  return Card(
-                    child: ListTile(
-                      leading: Icon(r.locked ? Icons.lock : Icons.lock_open,
-                          color: r.locked ? Colors.amber : Colors.white54),
-                      title: Text(r.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text('${roomModeLabel(l, r.capacity, r.teams)}$status'),
-                      trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                        Text('${r.players}/${r.capacity}', style: const TextStyle(fontSize: 18)),
-                        const SizedBox(width: 12),
-                        FilledButton(
-                          onPressed: r.joinable ? () => _join(context, r) : null,
-                          child: Text(l.join),
-                        ),
-                      ]),
-                    ),
-                  );
+                  return _RoomCard(room: r, onJoin: r.joinable ? () => _join(context, r) : null);
                 },
               ),
       ),
+    );
+  }
+}
+
+/// One row of the room list. The name gets the full width (two lines max),
+/// details live in chips below it and the join button sits on the right.
+class _RoomCard extends StatelessWidget {
+  const _RoomCard({required this.room, required this.onJoin});
+
+  final RoomSummary room;
+  final VoidCallback? onJoin;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final scheme = Theme.of(context).colorScheme;
+    final playing = room.phase == RoomPhase.playing;
+    return Card(
+      margin: EdgeInsets.zero,
+      clipBehavior: Clip.antiAlias,
+      color: scheme.surfaceContainerHigh,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (room.locked) ...[
+                        const Padding(
+                          padding: EdgeInsets.only(top: 2, right: 6),
+                          child: Icon(Icons.lock, size: 16, color: Colors.amber),
+                        ),
+                      ],
+                      Expanded(
+                        child: Text(
+                          room.name,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700, height: 1.2),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      _Chip(
+                        icon: room.teams ? Icons.groups : Icons.person,
+                        label: roomModeLabel(l, room.capacity, room.teams),
+                      ),
+                      _SeatChip(players: room.players, capacity: room.capacity),
+                      if (playing)
+                        _Chip(icon: Icons.sports_esports, label: l.inGame, color: Colors.orangeAccent),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 10),
+            FilledButton(
+              onPressed: onJoin,
+              style: FilledButton.styleFrom(minimumSize: const Size(84, 44), padding: const EdgeInsets.symmetric(horizontal: 18)),
+              child: Text(l.join),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Chip extends StatelessWidget {
+  const _Chip({required this.icon, required this.label, this.color});
+
+  final IconData icon;
+  final String label;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final c = color ?? Colors.white70;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: c.withValues(alpha: .12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        Icon(icon, size: 14, color: c),
+        const SizedBox(width: 4),
+        Flexible(
+          child: Text(label, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 12.5, color: c, fontWeight: FontWeight.w600)),
+        ),
+      ]),
+    );
+  }
+}
+
+/// "2/4" with one dot per seat, filled when taken.
+class _SeatChip extends StatelessWidget {
+  const _SeatChip({required this.players, required this.capacity});
+
+  final int players;
+  final int capacity;
+
+  @override
+  Widget build(BuildContext context) {
+    final full = players >= capacity;
+    final c = full ? Colors.redAccent : Colors.greenAccent;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      decoration: BoxDecoration(color: c.withValues(alpha: .12), borderRadius: BorderRadius.circular(20)),
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        for (var i = 0; i < capacity; i++)
+          Container(
+            width: 8,
+            height: 8,
+            margin: const EdgeInsets.only(right: 3),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: i < players ? c : Colors.transparent,
+              border: Border.all(color: c, width: 1.2),
+            ),
+          ),
+        const SizedBox(width: 3),
+        Text('$players/$capacity', style: TextStyle(fontSize: 12.5, color: c, fontWeight: FontWeight.w700)),
+      ]),
     );
   }
 }
