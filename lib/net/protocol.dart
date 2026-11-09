@@ -3,8 +3,13 @@
 /// Every message is a JSON object with a string field `t` (type).
 library;
 
+import 'package:blast_buddies/core/grid/map_generator.dart';
+
 /// Bumped on incompatible protocol changes.
 const int protocolVersion = 1;
+
+/// Bombs a player starts with after watching the "advantage" ad.
+const int boostedStartBombs = 2;
 
 /// Default TCP port of the server.
 const int defaultServerPort = 8080;
@@ -53,11 +58,15 @@ class Msg {
   /// `{capacity}` join a public waiting room or open a new one (auto-ready).
   static const quick = 'quick';
 
-  /// `{e: 0..5}` show an emote above your buddy (throttled).
+  /// `{e: 0..11}` show an emote above your buddy (throttled; see `Emotes`).
   static const emote = 'emote';
 
   /// `{c: number}` latency probe; answered with [pong] echoing `c`.
   static const ping = 'ping';
+
+  /// `{on: bool}` the player watched a rewarded ad: their next match starts
+  /// with [boostedStartBombs] bombs. Used up when that match begins.
+  static const boost = 'boost';
 
   // server -> client
 
@@ -79,7 +88,8 @@ class Msg {
   /// `{slot}` a player left the running match.
   static const left = 'left';
 
-  /// `{seed, cap, teams, you, names, skins}` match begins.
+  /// `{seed, cap, teams, you, names, skins, boost: [bool]}` match begins
+  /// (`boost[i]`: slot i starts with extra bombs).
   static const start = 'start';
 
   /// World snapshot (see `snapshot.dart`).
@@ -139,9 +149,10 @@ enum RoomPhase {
       values.firstWhere((e) => e.name == s, orElse: () => lobby);
 }
 
-/// Validates a room shape: 2..4 players, teams only with 4 (2v2).
+/// Validates a room shape: 2..[MapGenerator.maxPlayers] players, teams only
+/// with exactly 4 (2v2).
 bool validRoomShape(int capacity, bool teams) =>
-    capacity >= 2 && capacity <= 4 && (!teams || capacity == 4);
+    capacity >= 2 && capacity <= MapGenerator.maxPlayers && (!teams || capacity == 4);
 
 /// One room as shown in the room list.
 class RoomSummary {
@@ -206,13 +217,14 @@ class RoomSummary {
 /// A player sitting in a room slot.
 class RoomMember {
   /// Creates a member.
-  const RoomMember({required this.name, required this.ready, this.you = false});
+  const RoomMember({required this.name, required this.ready, this.you = false, this.boost = false});
 
   /// Parses JSON.
   factory RoomMember.fromJson(Map<String, dynamic> j) => RoomMember(
         name: j['name'] as String,
         ready: j['ready'] as bool,
         you: j['you'] as bool? ?? false,
+        boost: j['boost'] as bool? ?? false,
       );
 
   /// Display name.
@@ -224,8 +236,12 @@ class RoomMember {
   /// This member is the receiving client.
   final bool you;
 
+  /// Starts the next match with extra bombs (watched the advantage ad).
+  final bool boost;
+
   /// JSON.
-  Map<String, dynamic> toJson() => {'name': name, 'ready': ready, if (you) 'you': true};
+  Map<String, dynamic> toJson() =>
+      {'name': name, 'ready': ready, if (you) 'you': true, if (boost) 'boost': true};
 }
 
 /// Full state of the room the client is in.

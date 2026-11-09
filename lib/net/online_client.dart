@@ -363,6 +363,11 @@ class OnlineClient extends ChangeNotifier {
   /// Current match, kept after the end until [closeMatch].
   OnlineMatch? match;
 
+  /// The player watched the advantage ad: the next match starts with extra
+  /// bombs. Cleared when that match begins (or the connection drops, since the
+  /// server forgets the flag).
+  bool boosted = false;
+
   /// Winner slot of the last match (null = draw).
   int? winner;
 
@@ -452,6 +457,7 @@ class OnlineClient extends ChangeNotifier {
     _pinger = null;
     status = OnlineStatus.disconnected;
     waking = false;
+    boosted = false;
     rooms = const [];
     room = null;
     match?.disconnected = !(match?.ended ?? true);
@@ -495,6 +501,13 @@ class OnlineClient extends ChangeNotifier {
   /// Toggles ready.
   void setReady(bool ready) => _send({'t': Msg.setReady, 'ready': ready});
 
+  /// Tells the server that the advantage ad was watched ([on]) or revokes it.
+  void setBoost(bool on) {
+    boosted = on;
+    _send({'t': Msg.boost, 'on': on});
+    notifyListeners();
+  }
+
   /// Forgets the finished match (back to the room screen).
   void closeMatch() {
     if (match == null) return;
@@ -537,6 +550,8 @@ class OnlineClient extends ChangeNotifier {
       case Msg.start:
         winner = null;
         winnerTeam = null;
+        // The server used the advantage up for this match.
+        boosted = false;
         match = OnlineMatch(
           seed: m['seed'] as int,
           capacity: m['cap'] as int,

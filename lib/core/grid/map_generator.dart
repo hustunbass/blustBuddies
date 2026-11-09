@@ -43,7 +43,8 @@ class GeneratedMap {
   /// Terrain.
   final GridModel grid;
 
-  /// Player start cells (corner order: TL, BR, TR, BL).
+  /// Player start cells (corner order: TL, BR, TR, BL, then top-middle,
+  /// bottom-middle, centre).
   final List<GridPos> spawns;
 
   /// Hidden exit cell (always under a breakable block), or null.
@@ -64,6 +65,25 @@ class MapGenerator {
     GridPos(GridModel.cols - 2, 1),
     GridPos(1, GridModel.rows - 2),
   ];
+
+  /// Largest match: 4 corners plus top-middle, bottom-middle and centre.
+  static const int maxPlayers = 7;
+
+  /// Start cells of players 5..7 (see [spawnPoints]).
+  static const List<GridPos> extraSpawns = [
+    GridPos(GridModel.cols ~/ 2, 1),
+    GridPos(GridModel.cols ~/ 2, GridModel.rows - 2),
+    GridPos(GridModel.cols ~/ 2, GridModel.rows ~/ 2),
+  ];
+
+  /// Every start cell in player order: the four corners first (so 2..4 player
+  /// matches look exactly as before), then [extraSpawns].
+  static const List<GridPos> spawnPoints = [...corners, ...extraSpawns];
+
+  /// Cells that must stay empty around start cell [p]: the L-shaped corner
+  /// area, or the cell and its two horizontal neighbours for the others.
+  static List<GridPos> safeZoneOf(GridPos p) =>
+      corners.contains(p) ? safeZone(p) : [p, GridPos(p.x - 1, p.y), GridPos(p.x + 1, p.y)];
 
   /// Cells that must stay empty near [corner] (the corner and 2 neighbours).
   static List<GridPos> safeZone(GridPos corner) {
@@ -128,8 +148,11 @@ class MapGenerator {
     int enemyCount = 0,
     MapLayout layout = MapLayout.classic,
     int theme = 0,
+    int players = 4,
   }) {
-    final safe = <GridPos>{for (final c in corners) ...safeZone(c)};
+    // Start cells in use: always the four corners, more for 5..7 players.
+    final starts = spawnPoints.take(players.clamp(4, maxPlayers)).toList();
+    final safe = <GridPos>{for (final c in starts) ...safeZoneOf(c)};
     var extra = {
       for (final c in _extraWalls[layout] ?? const <GridPos>[])
         if (!safe.contains(c)) c,
@@ -180,7 +203,7 @@ class MapGenerator {
 
     return GeneratedMap(
       grid: grid,
-      spawns: corners,
+      spawns: starts,
       exit: exit,
       enemySpawns: enemySpawns,
       layout: layout,

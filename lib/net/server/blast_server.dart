@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:blast_buddies/core/cosmetics.dart';
+import 'package:blast_buddies/core/emotes.dart';
 import 'package:blast_buddies/core/grid/grid_pos.dart';
 import 'package:blast_buddies/core/grid/map_generator.dart';
 import 'package:blast_buddies/features/game/logic/entities.dart';
@@ -208,6 +209,8 @@ class BlastServer {
           _input(c, m);
         case Msg.quick:
           _quick(c, m);
+        case Msg.boost:
+          _boost(c, m);
         case Msg.emote:
           _emote(c, m);
         case Msg.ping:
@@ -344,10 +347,22 @@ class BlastServer {
     _ready(c, true);
   }
 
+  /// The ad itself cannot be verified here (that needs AdMob server-side
+  /// verification), so the advantage is deliberately small, applies to one
+  /// match only and is visible to everybody in the room.
+  void _boost(_Client c, Map<String, dynamic> m) {
+    final r = c.room;
+    if (r != null && r.phase == RoomPhase.playing) return;
+    final on = m['on'] == true;
+    if (c.boost == on) return;
+    c.boost = on;
+    if (r != null) _broadcastRoom(r);
+  }
+
   void _emote(_Client c, Map<String, dynamic> m) {
     final r = c.room;
     final e = m['e'];
-    if (r == null || r.match == null || e is! int || e < 0 || e > 5) return;
+    if (r == null || r.match == null || e is! int || !Emotes.valid(e)) return;
     final now = DateTime.now();
     final last = c.lastEmote;
     if (last != null && now.difference(last) < const Duration(milliseconds: 800)) return;
@@ -502,8 +517,14 @@ class BlastServer {
           return sk;
         }(),
     ];
+    // Players who watched the advantage ad start with extra bombs, once.
+    final boosted = [for (final c in r.slots) c?.boost ?? false];
     for (var i = 0; i < world.players.length; i++) {
       world.players[i].skin = skins[i];
+      if (boosted[i]) world.players[i].stats.maxBombs = boostedStartBombs;
+    }
+    for (final c in r.slots) {
+      c?.boost = false;
     }
     for (final c in r.members) {
       _send(c, {
@@ -514,6 +535,7 @@ class BlastServer {
         'you': r.slots.indexOf(c),
         'names': names,
         'skins': [for (final k in skins) [k.hat, k.face, k.color ?? 0]],
+        'boost': boosted,
       });
     }
     _broadcastRoom(r);
@@ -594,6 +616,9 @@ class _Client {
   _Room? room;
   Skin skin = const Skin();
   DateTime? lastEmote;
+
+  /// Next match starts with extra bombs (rewarded ad watched).
+  bool boost = false;
   final List<DateTime> failedPasswords = [];
 }
 
@@ -641,7 +666,9 @@ class _Room {
       locked: locked,
       slots: [
         for (final c in slots)
-          c == null ? null : RoomMember(name: c.name!, ready: ready.contains(c), you: c == viewer),
+          c == null
+              ? null
+              : RoomMember(name: c.name!, ready: ready.contains(c), you: c == viewer, boost: c.boost),
       ],
       phase: phase,
       countdown: ends == null

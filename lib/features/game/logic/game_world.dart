@@ -153,7 +153,7 @@ class GameWorld {
     );
   }
 
-  /// Creates a battle world with [humans] + [bots] players (2..4 total).
+  /// Creates a battle world with [humans] + [bots] players (2..7 total).
   ///
   /// With [teams] and 4 players, ids 0+2 (top corners) face 1+3 (bottom
   /// corners); see [teamOf].
@@ -165,7 +165,7 @@ class GameWorld {
     BotLevel botLevel = BotLevel.normal,
     List<Skin> skins = const [],
   }) {
-    final total = (humans + bots).clamp(2, 4);
+    final total = (humans + bots).clamp(2, MapGenerator.maxPlayers);
     final teamed = teams && total == 4;
     final rng = Random(seed);
     final style = MapGenerator.styleFor(seed);
@@ -175,6 +175,7 @@ class GameWorld {
       withExit: false,
       layout: style.$1,
       theme: style.$2,
+      players: total,
     );
     final players = [
       for (var i = 0; i < total; i++)

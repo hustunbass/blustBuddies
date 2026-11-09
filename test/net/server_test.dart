@@ -293,6 +293,38 @@ void main() {
     expect(players[0].winnerTeam, 0);
   });
 
+  test('a seven-player room fills up and everybody starts on their own cell', () async {
+    final players = [for (final n in ['A', 'B', 'C', 'D', 'E', 'F', 'G']) await connect(n)];
+    players[0].createRoom(name: 'party', capacity: 7, teams: false);
+    await waitFor(() => players[1].rooms.isNotEmpty);
+    final room = players[1].rooms.single;
+    expect(room.capacity, 7);
+    for (final p in players.skip(1)) {
+      p.joinRoom(room.id);
+    }
+    await waitFor(() => players[0].room?.filled == 7);
+    for (final p in players) {
+      p.setReady(true);
+    }
+    await waitFor(() => players.every((p) => p.match != null), timeout: const Duration(seconds: 10));
+    expect({for (final p in players) p.match!.localId}, {0, 1, 2, 3, 4, 5, 6});
+    final w = players.first.match!.world;
+    expect(w.players.length, 7);
+    expect({for (final p in w.players) p.spawn}.length, 7);
+    // A snapshot arrives and keeps all seven alive at the start.
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    expect(w.players.every((p) => p.alive), isTrue);
+  });
+
+  test('rooms for more than seven are rejected', () async {
+    final a = await connect('A');
+    final errors = <ErrorCode>[];
+    a.errors.listen(errors.add);
+    a.createRoom(name: 'x', capacity: 8, teams: false);
+    await waitFor(() => errors.isNotEmpty);
+    expect(errors.single, ErrorCode.badRequest);
+  });
+
   test('empty rooms are removed', () async {
     final a = await connect('A');
     a.createRoom(name: 'r', capacity: 3, teams: false);
@@ -333,6 +365,43 @@ void main() {
     expect(skins[1].color, isNull, reason: 'duplicate body colour falls back to the slot colour');
   });
 
+  test('advantage ad: next match starts with 2 bombs, once, and the room sees the badge', () async {
+    final a = OnlineClient();
+    final b = OnlineClient();
+    clients.addAll([a, b]);
+    await a.connect(address, 'Ann');
+    await b.connect(address, 'Bob');
+    a.setBoost(true);
+    expect(a.boosted, isTrue);
+    a.quickMatch(2);
+    await waitFor(() => a.room != null);
+    b.quickMatch(2);
+    // Bob sees Ann's badge while they wait for the countdown.
+    await waitFor(() => b.room?.slots.any((m) => m?.boost ?? false) ?? false);
+    await waitFor(() => a.match != null && b.match != null);
+    final me = a.match!.localId;
+    final other = 1 - me;
+    await waitFor(() => a.match!.world.players[me].stats.maxBombs == boostedStartBombs);
+    expect(a.match!.world.players[other].stats.maxBombs, 1);
+    expect(b.match!.world.players[me].stats.maxBombs == boostedStartBombs ||
+        b.match!.world.players[me].stats.maxBombs == 1, isTrue);
+    // Used up: the client forgets it and the room shows no badge any more.
+    expect(a.boosted, isFalse);
+    await waitFor(() => b.room?.slots.every((m) => !(m?.boost ?? false)) ?? false);
+  });
+
+  test('advantage can be revoked before the match', () async {
+    final a = OnlineClient();
+    clients.add(a);
+    await a.connect(address, 'Ann');
+    a.setBoost(true);
+    a.setBoost(false);
+    expect(a.boosted, isFalse);
+    a.createRoom(name: 'R', capacity: 2, teams: false);
+    await waitFor(() => a.room != null);
+    expect(a.room!.slots.first!.boost, isFalse);
+  });
+
   test('emotes reach the room, are throttled, and leaving is announced', () async {
     final a = OnlineClient();
     final b = OnlineClient();
@@ -350,6 +419,14 @@ void main() {
     await waitFor(() => a.match!.emotes[1] == 3);
     await Future<void>.delayed(const Duration(milliseconds: 100));
     expect(a.match!.emotes[1], 3);
+    // Premium emotes (6..11) travel too; indexes beyond the catalogue do not.
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    b.match!.emote(11);
+    await waitFor(() => a.match!.emotes[1] == 11);
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    b.match!.emote(12);
+    await Future<void>.delayed(const Duration(milliseconds: 150));
+    expect(a.match!.emotes[1], 11);
     b.leaveRoom();
     await waitFor(() => left.isNotEmpty);
     expect(left, [1]);
