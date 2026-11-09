@@ -134,11 +134,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get bombButton => 'Drop bomb';
 
   @override
-  String get howMove => 'Move with the joystick (arrow keys / WASD).';
+  String get howMove => 'Move with the joystick.';
 
   @override
   String get howBomb =>
-      'Drop a bomb with the bomb button (Space). It explodes after 3 seconds in a plus shape.';
+      'Drop a bomb with the bomb button. It explodes after 3 seconds in a plus shape.';
 
   @override
   String get howBlocks =>
@@ -604,134 +604,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stat_perfect => 'Three-star levels';
 
   @override
-  String get ach_firstBlood => 'First blood';
-
-  @override
-  String achDesc_firstBlood(int n) {
-    return 'Defeat $n enemy';
-  }
-
-  @override
-  String get ach_firstWin => 'First victory';
-
-  @override
-  String achDesc_firstWin(int n) {
-    return 'Win $n battle';
-  }
-
-  @override
-  String get ach_bomber => 'Bomber';
-
-  @override
-  String achDesc_bomber(int n) {
-    return 'Place $n bombs';
-  }
-
-  @override
-  String get ach_demolition => 'Demolition crew';
-
-  @override
-  String achDesc_demolition(int n) {
-    return 'Destroy $n crates';
-  }
-
-  @override
-  String get ach_collector => 'Collector';
-
-  @override
-  String achDesc_collector(int n) {
-    return 'Collect $n power-ups';
-  }
-
-  @override
-  String get ach_chapter => 'Chapter one';
-
-  @override
-  String achDesc_chapter(int n) {
-    return 'Clear $n levels';
-  }
-
-  @override
-  String get ach_stars30 => 'Star gazer';
-
-  @override
-  String achDesc_stars30(int n) {
-    return 'Collect $n stars';
-  }
-
-  @override
-  String get ach_exterminator => 'Exterminator';
-
-  @override
-  String achDesc_exterminator(int n) {
-    return 'Defeat $n enemies';
-  }
-
-  @override
-  String get ach_champion => 'Champion';
-
-  @override
-  String achDesc_champion(int n) {
-    return 'Win $n battles';
-  }
-
-  @override
-  String get ach_online1 => 'Online debut';
-
-  @override
-  String achDesc_online1(int n) {
-    return 'Win $n online match';
-  }
-
-  @override
-  String get ach_boss1 => 'Boss slayer';
-
-  @override
-  String achDesc_boss1(int n) {
-    return 'Beat $n boss';
-  }
-
-  @override
-  String get ach_perfectionist => 'Perfectionist';
-
-  @override
-  String achDesc_perfectionist(int n) {
-    return 'Get three stars on $n levels';
-  }
-
-  @override
-  String get ach_explorer => 'Explorer';
-
-  @override
-  String achDesc_explorer(int n) {
-    return 'Clear $n levels';
-  }
-
-  @override
-  String get ach_online10 => 'Online ace';
-
-  @override
-  String achDesc_online10(int n) {
-    return 'Win $n online matches';
-  }
-
-  @override
-  String get ach_bosses4 => 'Boss master';
-
-  @override
-  String achDesc_bosses4(int n) {
-    return 'Beat all $n bosses';
-  }
-
-  @override
-  String get ach_legend => 'Legend';
-
-  @override
-  String achDesc_legend(int n) {
-    return 'Clear all $n levels';
-  }
-
-  @override
   String get powerDetonator => 'Detonator';
 
   @override
@@ -739,7 +611,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howDetonator =>
-      'Detonator: use the blast button (key E) to set off all your bombs at once.';
+      'Detonator: use the blast button to set off all your bombs at once.';
 
   @override
   String get howGhost => 'Ghost: walk through crates for a few seconds.';
@@ -750,8 +622,663 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howStars =>
-      'Earn up to 3 stars per level: no hits taken and plenty of time left. Stars unlock hats, faces and colours.';
+      'Earn up to 3 stars per level: finish fast and take as few hits as possible. 2 stars allow one hit, 3 stars need a flawless run and lots of time left. Every new star pays coins.';
 
   @override
   String get detonateButton => 'Detonate bombs';
+
+  @override
+  String get coin => 'Coin';
+
+  @override
+  String get earnCoin => 'Free Coin';
+
+  @override
+  String get shopTitle => 'Coin shop';
+
+  @override
+  String get shopHint =>
+      'Coins buy hats, faces, colours, emotes and extra lives. No pay-to-win: power-ups are never for sale.';
+
+  @override
+  String get adNotReady => 'No ad available right now. Try again in a moment.';
+
+  @override
+  String rewardGot(int n) {
+    return '+$n Coin!';
+  }
+
+  @override
+  String get notEnoughCoin => 'Not enough Coin';
+
+  @override
+  String get storeSoon => 'Store is not connected yet.';
+
+  @override
+  String coinAmount(int n) {
+    return '$n Coin';
+  }
+
+  @override
+  String get pkgSpark => 'Spark';
+
+  @override
+  String get pkgFuse => 'Fuse';
+
+  @override
+  String get pkgDynamite => 'Dynamite';
+
+  @override
+  String get pkgDepot => 'Bomb depot';
+
+  @override
+  String get mostPopular => 'MOST POPULAR';
+
+  @override
+  String get bestValue => 'BEST VALUE';
+
+  @override
+  String bonusPercent(int n) {
+    return '+$n% bonus';
+  }
+
+  @override
+  String get removeAds => 'Remove ads';
+
+  @override
+  String get removeAdsDesc => 'No more banners or pop-up ads.';
+
+  @override
+  String unlockFor(int n) {
+    return 'Unlock for $n Coin?';
+  }
+
+  @override
+  String get buy => 'Buy';
+
+  @override
+  String get watchAd => 'Watch ad';
+
+  @override
+  String get close => 'Close';
+
+  @override
+  String get livesOutTitle => 'Out of lives';
+
+  @override
+  String livesOutBody(String time) {
+    return 'Every story attempt costs a life; you get it back when you win. A new life arrives in $time.';
+  }
+
+  @override
+  String get livesRefillAd => 'Watch ad: +1 life';
+
+  @override
+  String livesRefillCoins(int n) {
+    return 'Buy 1 life · $n coins';
+  }
+
+  @override
+  String get livesWait => 'I\'ll wait';
+
+  @override
+  String livesChipLabel(int n, int max) {
+    return '$n of $max lives';
+  }
+
+  @override
+  String get achSeries_kills => 'Exterminator';
+
+  @override
+  String achStat_kills(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Defeat $n enemies',
+      one: 'Defeat 1 enemy',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_blocks => 'Demolition crew';
+
+  @override
+  String achStat_blocks(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Destroy $n crates',
+      one: 'Destroy 1 crate',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_bombs => 'Bomber';
+
+  @override
+  String achStat_bombs(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Place $n bombs',
+      one: 'Place 1 bomb',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_powerups => 'Collector';
+
+  @override
+  String achStat_powerups(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Collect $n power-ups',
+      one: 'Collect 1 power-up',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_levels => 'Explorer';
+
+  @override
+  String achStat_levels(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Clear $n levels',
+      one: 'Clear 1 level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_stars => 'Star gazer';
+
+  @override
+  String achStat_stars(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Collect $n stars',
+      one: 'Collect 1 star',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_perfect => 'Perfectionist';
+
+  @override
+  String achStat_perfect(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Get three stars on $n levels',
+      one: 'Get three stars on 1 level',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_bosses => 'Boss slayer';
+
+  @override
+  String achStat_bosses(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Beat $n bosses',
+      one: 'Beat 1 boss',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_wins => 'Champion';
+
+  @override
+  String achStat_wins(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Win $n battles',
+      one: 'Win 1 battle',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_onlineWins => 'Online ace';
+
+  @override
+  String achStat_onlineWins(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Win $n online matches',
+      one: 'Win 1 online match',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_onlineGames => 'Online regular';
+
+  @override
+  String achStat_onlineGames(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Play $n online matches',
+      one: 'Play 1 online match',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_games => 'Veteran';
+
+  @override
+  String achStat_games(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Play $n games',
+      one: 'Play 1 game',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_emotes => 'Chatterbox';
+
+  @override
+  String achStat_emotes(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Send $n emotes',
+      one: 'Send 1 emote',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_ads => 'Supporter';
+
+  @override
+  String achStat_ads(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Watch $n reward ads',
+      one: 'Watch 1 reward ad',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_owned => 'Fashionista';
+
+  @override
+  String achStat_owned(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Own $n wardrobe items',
+      one: 'Own 1 wardrobe item',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_invites => 'Recruiter';
+
+  @override
+  String achStat_invites(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Invite $n friends',
+      one: 'Invite 1 friend',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achSeries_streak => 'Streak keeper';
+
+  @override
+  String achStat_streak(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Play $n days in a row',
+      one: 'Play 1 day in a row',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get achClaim => 'Claim';
+
+  @override
+  String get achClaimAll => 'Claim all';
+
+  @override
+  String get achReady => 'Ready to claim';
+
+  @override
+  String get achInProgress => 'In progress';
+
+  @override
+  String get achDone => 'Completed';
+
+  @override
+  String achReward(int n) {
+    return '$n coins';
+  }
+
+  @override
+  String get wardrobeEmotes => 'Emotes';
+
+  @override
+  String boostWatchAd(int n) {
+    return 'Watch ad: start with $n bombs';
+  }
+
+  @override
+  String boostReady(int n) {
+    return 'Your next match starts with $n bombs';
+  }
+
+  @override
+  String boostBadge(int n) {
+    return 'starts with $n bombs';
+  }
+
+  @override
+  String get editName => 'Edit name';
+
+  @override
+  String get randomName => 'Random name';
+
+  @override
+  String get save => 'Save';
+
+  @override
+  String nameRule(int min, int max) {
+    return '$min–$max letters, numbers, spaces, _ . -';
+  }
+
+  @override
+  String get nameInvalid => 'This name is not allowed.';
+
+  @override
+  String get accountGuest => 'Guest account';
+
+  @override
+  String get accountApple => 'Signed in with Apple';
+
+  @override
+  String get accountGoogle => 'Signed in with Google';
+
+  @override
+  String get starterTitle => 'Starter pack';
+
+  @override
+  String starterBody(int coins) {
+    return '$coins coins + all lives refilled';
+  }
+
+  @override
+  String starterEnds(String time) {
+    return 'Ends in $time';
+  }
+
+  @override
+  String firstBuyBonus(int n) {
+    return 'First purchase: +$n bonus coins';
+  }
+
+  @override
+  String get storeUnavailable => 'The store is not available right now.';
+
+  @override
+  String get productMissing => 'This product is not available yet.';
+
+  @override
+  String get purchaseFailed => 'Purchase failed. You were not charged.';
+
+  @override
+  String get restorePurchases => 'Restore purchases';
+
+  @override
+  String get purchasesRestored => 'Restoring purchases…';
+
+  @override
+  String get adsRemovedThanks => 'Ads removed. Thank you!';
+
+  @override
+  String get purchased => 'Purchased';
+
+  @override
+  String get daily => 'Daily';
+
+  @override
+  String get dailyLoginTitle => 'Daily reward';
+
+  @override
+  String dayN(int n) {
+    return 'Day $n';
+  }
+
+  @override
+  String streakDays(int n) {
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$n-day streak',
+      one: '1-day streak',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get dailyQuests => 'Today\'s quests';
+
+  @override
+  String dailyAllDone(int n) {
+    return 'All quests done: +$n coins';
+  }
+
+  @override
+  String get dailyComeBack => 'Collected – come back tomorrow';
+
+  @override
+  String get dailyReset => 'New quests every day at midnight.';
+
+  @override
+  String quickParty(int n) {
+    return '$n-player party';
+  }
+
+  @override
+  String get controlsTitle => 'Customize controls';
+
+  @override
+  String get controlsHint =>
+      'Drag the joystick and the bomb button to where your thumbs feel best.';
+
+  @override
+  String get controlsReset => 'Reset';
+
+  @override
+  String get controlsDone => 'Done';
+
+  @override
+  String get achievementToastTitle => 'Achievement unlocked';
+
+  @override
+  String get howRules => 'Rules';
+
+  @override
+  String get howPowerUps => 'Power-ups';
+
+  @override
+  String get quickDuelDesc => 'A fast, tense duel';
+
+  @override
+  String get quickBrawlDesc => 'The classic four-way brawl';
+
+  @override
+  String get quickPartyDesc => 'Chaos with up to seven buddies';
+
+  @override
+  String get shopPacks => 'Coin packs';
+
+  @override
+  String get firstBuyNote => 'Your first pack pays a bonus.';
+
+  @override
+  String firstBuyChip(int n) {
+    return '+$n bonus coins';
+  }
+
+  @override
+  String get hatName8 => 'Beanie';
+
+  @override
+  String get hatName9 => 'Chef hat';
+
+  @override
+  String get hatName10 => 'Pirate hat';
+
+  @override
+  String get hatName11 => 'Viking helmet';
+
+  @override
+  String get hatName12 => 'Cat ears';
+
+  @override
+  String get hatName13 => 'Bunny ears';
+
+  @override
+  String get hatName14 => 'Top hat';
+
+  @override
+  String get hatName15 => 'Daisy';
+
+  @override
+  String get hatName16 => 'Headphones';
+
+  @override
+  String get hatName17 => 'Propeller cap';
+
+  @override
+  String get hatName18 => 'Santa hat';
+
+  @override
+  String get hatName19 => 'Ninja band';
+
+  @override
+  String get hatName20 => 'Flame hair';
+
+  @override
+  String get hatName21 => 'Jester hat';
+
+  @override
+  String get hatName22 => 'Laurel wreath';
+
+  @override
+  String get hatName23 => 'Rainbow afro';
+
+  @override
+  String get faceName6 => 'Sleepy';
+
+  @override
+  String get faceName7 => 'Surprised';
+
+  @override
+  String get faceName8 => 'Heart eyes';
+
+  @override
+  String get faceName9 => 'Silly';
+
+  @override
+  String get faceName10 => 'Robot visor';
+
+  @override
+  String get faceName11 => 'Cyclops';
+
+  @override
+  String get tutTitle0 => 'Move';
+
+  @override
+  String get tutBody0 => 'Drag the joystick to the glowing spot.';
+
+  @override
+  String get tutTitle1 => 'Drop a bomb';
+
+  @override
+  String get tutBody1 => 'Stand next to the crate and tap the bomb button.';
+
+  @override
+  String get tutTitle2 => 'Run!';
+
+  @override
+  String get tutBody2 =>
+      'The bomb explodes after 3 seconds in a plus shape. Get out of its line!';
+
+  @override
+  String get tutTitle3 => 'Power-up!';
+
+  @override
+  String get tutBody3 => 'Crates hide power-ups. Walk over it to collect it.';
+
+  @override
+  String get tutTitle4 => 'Beat the enemy';
+
+  @override
+  String get tutBody4 =>
+      'Wait for it to come close, drop a bomb and run. Don\'t get caught in your own blast!';
+
+  @override
+  String get tutTitle5 => 'You\'re ready!';
+
+  @override
+  String get tutBody5 =>
+      'Defeat every enemy, then step on the exit door. Earn up to 3 stars on each level.';
+
+  @override
+  String get tutTooFar =>
+      'That was too far away. Try again right next to the crate.';
+
+  @override
+  String get tutSkip => 'Skip';
+
+  @override
+  String get tutDoneStart => 'Start the story';
+
+  @override
+  String get welcomeTitle => 'Welcome, buddy!';
+
+  @override
+  String welcomeBody(int n) {
+    return 'Learn the basics in under a minute and get $n coins.';
+  }
+
+  @override
+  String get welcomeStart => 'Let\'s go';
+
+  @override
+  String get welcomeSkip => 'Maybe later';
+
+  @override
+  String get howToTutorial => 'Play the tutorial';
 }

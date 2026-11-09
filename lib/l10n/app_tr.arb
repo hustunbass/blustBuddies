@@ -38,8 +38,8 @@
   "playerN": "O{n}",
   "joystick": "Hareket joystick'i",
   "bombButton": "Bomba bırak",
-  "howMove": "Joystick (ok tuşları / WASD) ile hareket et.",
-  "howBomb": "Bomba butonuyla (Boşluk) bomba bırak. 3 saniye sonra artı şeklinde patlar.",
+  "howMove": "Joystick ile hareket et.",
+  "howBomb": "Bomba butonuyla bomba bırak. 3 saniye sonra artı şeklinde patlar.",
   "howBlocks": "Patlama sandıkları yıkar ama çelik duvarlarda durur. Bombalar birbirini tetikler.",
   "howEnemies": "Çıkış kapısını açmak için tüm düşmanları yen, sonra kapıya gir. Kovalayanlara ve hızlılara dikkat!",
   "howShield": "Kalkan: birkaç saniye seni korur.",
@@ -74,7 +74,7 @@
   "password": "Şifre",
   "create": "Kur",
   "join": "Katıl",
-  "cancel": "İptal",
+  "cancel": "Vazgeç",
   "modeDuel": "1’e 1",
   "modeTeams": "2’ye 2",
   "modeFfa": "{n} kişi, herkes tek",
@@ -236,155 +236,438 @@
   "stat_stars": "Yıldız",
   "stat_powerups": "Toplanan güçlendirme",
   "stat_perfect": "Üç yıldızlı bölüm",
-  "ach_firstBlood": "İlk kan",
-  "achDesc_firstBlood": "{n} düşman yen",
-  "@achDesc_firstBlood": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_firstWin": "İlk zafer",
-  "achDesc_firstWin": "{n} savaş kazan",
-  "@achDesc_firstWin": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_bomber": "Bombacı",
-  "achDesc_bomber": "{n} bomba koy",
-  "@achDesc_bomber": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_demolition": "Yıkım ekibi",
-  "achDesc_demolition": "{n} sandık patlat",
-  "@achDesc_demolition": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_collector": "Koleksiyoncu",
-  "achDesc_collector": "{n} güçlendirme topla",
-  "@achDesc_collector": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_chapter": "Birinci bölüm",
-  "achDesc_chapter": "{n} bölüm geç",
-  "@achDesc_chapter": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_stars30": "Yıldız avcısı",
-  "achDesc_stars30": "{n} yıldız topla",
-  "@achDesc_stars30": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_exterminator": "Yok edici",
-  "achDesc_exterminator": "{n} düşman yen",
-  "@achDesc_exterminator": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_champion": "Şampiyon",
-  "achDesc_champion": "{n} savaş kazan",
-  "@achDesc_champion": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_online1": "Çevrimiçi ilk",
-  "achDesc_online1": "{n} çevrimiçi maç kazan",
-  "@achDesc_online1": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_boss1": "Patron avcısı",
-  "achDesc_boss1": "{n} patron yen",
-  "@achDesc_boss1": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_perfectionist": "Mükemmeliyetçi",
-  "achDesc_perfectionist": "{n} bölümde üç yıldız al",
-  "@achDesc_perfectionist": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_explorer": "Kaşif",
-  "achDesc_explorer": "{n} bölüm geç",
-  "@achDesc_explorer": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_online10": "Çevrimiçi usta",
-  "achDesc_online10": "{n} çevrimiçi maç kazan",
-  "@achDesc_online10": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_bosses4": "Patron ustası",
-  "achDesc_bosses4": "{n} patronun hepsini yen",
-  "@achDesc_bosses4": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_legend": "Efsane",
-  "achDesc_legend": "{n} bölümün hepsini geç",
-  "@achDesc_legend": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "powerDetonator": "Patlatıcı",
   "powerGhost": "Hayalet",
-  "howDetonator": "Patlatıcı: tüm bombalarını aynı anda patlatmak için patlat düğmesine (E tuşu) bas.",
+  "howDetonator": "Patlatıcı: tüm bombalarını aynı anda patlatmak için patlat düğmesine bas.",
   "howGhost": "Hayalet: birkaç saniye sandıkların içinden geç.",
   "howBoss": "Her 25. bölümde bir patron var. Ona birkaç kez isabet ettir!",
-  "howStars": "Bölüm başına en fazla 3 yıldız kazan: hasar almadan ve bol süreyle bitir. Yıldızlar şapka, yüz ve renk açar.",
-  "detonateButton": "Bombaları patlat"
+  "howStars": "Bölüm başına en fazla 3 yıldız kazan: hızlı bitir ve olabildiğince az hasar al. 2 yıldız bir isabete izin verir, 3 yıldız hatasız ve bol süreyle bitirmeyi ister. Her yeni yıldız coin kazandırır.",
+  "detonateButton": "Bombaları patlat",
+  "coin": "Coin",
+  "earnCoin": "Bedava Coin",
+  "shopTitle": "Coin mağazası",
+  "shopHint": "Coin ile şapka, yüz, renk, emoji ve ekstra can alabilirsin. Güç satışı yok: güçlendirmeler asla satılmaz.",
+  "adNotReady": "Şu an gösterilecek reklam yok. Birazdan tekrar dene.",
+  "rewardGot": "+{n} Coin!",
+  "@rewardGot": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "notEnoughCoin": "Yeterli Coin yok",
+  "storeSoon": "Mağaza henüz bağlı değil.",
+  "coinAmount": "{n} Coin",
+  "@coinAmount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkgSpark": "Kıvılcım",
+  "pkgFuse": "Fitil",
+  "pkgDynamite": "Dinamit",
+  "pkgDepot": "Bomba deposu",
+  "mostPopular": "EN POPÜLER",
+  "bestValue": "EN İYİ DEĞER",
+  "bonusPercent": "%{n} bonus",
+  "@bonusPercent": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "removeAds": "Reklamları kaldır",
+  "removeAdsDesc": "Banner ve geçiş reklamları kalkar.",
+  "unlockFor": "{n} Coin karşılığında açılsın mı?",
+  "@unlockFor": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "buy": "Satın al",
+  "watchAd": "Reklam izle",
+  "close": "Kapat",
+  "livesOutTitle": "Canların bitti",
+  "livesOutBody": "Her hikaye denemesi 1 can harcar; kazanırsan geri alırsın. Yeni can {time} sonra geliyor.",
+  "@livesOutBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "livesRefillAd": "Reklam izle: +1 can",
+  "livesRefillCoins": "1 can al · {n} coin",
+  "@livesRefillCoins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "livesWait": "Bekleyeceğim",
+  "livesChipLabel": "{max} candan {n} tanesi",
+  "@livesChipLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_kills": "Yok Edici",
+  "achStat_kills": "{n} düşman yen",
+  "@achStat_kills": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_blocks": "Yıkım Ekibi",
+  "achStat_blocks": "{n} sandık yık",
+  "@achStat_blocks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_bombs": "Bombacı",
+  "achStat_bombs": "{n} bomba koy",
+  "@achStat_bombs": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_powerups": "Koleksiyoncu",
+  "achStat_powerups": "{n} güçlendirme topla",
+  "@achStat_powerups": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_levels": "Kaşif",
+  "achStat_levels": "{n} bölüm bitir",
+  "@achStat_levels": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_stars": "Yıldız Avcısı",
+  "achStat_stars": "{n} yıldız topla",
+  "@achStat_stars": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_perfect": "Mükemmeliyetçi",
+  "achStat_perfect": "{n} bölümde üç yıldız al",
+  "@achStat_perfect": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_bosses": "Patron Avcısı",
+  "achStat_bosses": "{n} patronu yen",
+  "@achStat_bosses": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_wins": "Şampiyon",
+  "achStat_wins": "{n} savaş kazan",
+  "@achStat_wins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_onlineWins": "Online Usta",
+  "achStat_onlineWins": "{n} online maç kazan",
+  "@achStat_onlineWins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_onlineGames": "Online Müdavim",
+  "achStat_onlineGames": "{n} online maç oyna",
+  "@achStat_onlineGames": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_games": "Kıdemli",
+  "achStat_games": "{n} oyun oyna",
+  "@achStat_games": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_emotes": "Geveze",
+  "achStat_emotes": "{n} emoji gönder",
+  "@achStat_emotes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_ads": "Destekçi",
+  "achStat_ads": "{n} ödüllü reklam izle",
+  "@achStat_ads": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_owned": "Şık Buddy",
+  "achStat_owned": "{n} gardırop eşyasına sahip ol",
+  "@achStat_owned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_invites": "Davetçi",
+  "achStat_invites": "{n} arkadaşını davet et",
+  "@achStat_invites": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_streak": "Seri Ustası",
+  "achStat_streak": "Üst üste {n} gün oyna",
+  "@achStat_streak": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achClaim": "Topla",
+  "achClaimAll": "Hepsini topla",
+  "achReady": "Toplanmaya hazır",
+  "achInProgress": "Devam eden",
+  "achDone": "Tamamlanan",
+  "achReward": "{n} coin",
+  "@achReward": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wardrobeEmotes": "Emojiler",
+  "boostWatchAd": "Reklam izle: {n} bombayla başla",
+  "@boostWatchAd": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "boostReady": "Sıradaki maçın {n} bombayla başlayacak",
+  "@boostReady": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "boostBadge": "{n} bombayla başlıyor",
+  "@boostBadge": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editName": "Adı düzenle",
+  "randomName": "Rastgele ad",
+  "save": "Kaydet",
+  "nameRule": "{min}–{max} harf, rakam, boşluk, _ . -",
+  "@nameRule": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "nameInvalid": "Bu ad kullanılamaz.",
+  "accountGuest": "Misafir hesabı",
+  "accountApple": "Apple ile giriş yapıldı",
+  "accountGoogle": "Google ile giriş yapıldı",
+  "starterTitle": "Başlangıç paketi",
+  "starterBody": "{coins} coin + tüm canlar dolu",
+  "@starterBody": {
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "starterEnds": "{time} sonra bitiyor",
+  "@starterEnds": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "firstBuyBonus": "İlk alım: +{n} bonus coin",
+  "@firstBuyBonus": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "storeUnavailable": "Mağaza şu an kullanılamıyor.",
+  "productMissing": "Bu ürün henüz satışta değil.",
+  "purchaseFailed": "Satın alma başarısız. Ücret alınmadı.",
+  "restorePurchases": "Satın alımları geri yükle",
+  "purchasesRestored": "Satın alımlar geri yükleniyor…",
+  "adsRemovedThanks": "Reklamlar kaldırıldı. Teşekkürler!",
+  "purchased": "Satın alındı",
+  "daily": "Günlük",
+  "dailyLoginTitle": "Günlük ödül",
+  "dayN": "{n}. gün",
+  "@dayN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "streakDays": "{n} günlük seri",
+  "@streakDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dailyQuests": "Bugünün görevleri",
+  "dailyAllDone": "Tüm görevler tamam: +{n} coin",
+  "@dailyAllDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dailyComeBack": "Alındı – yarın tekrar gel",
+  "dailyReset": "Her gün gece yarısı yeni görevler gelir.",
+  "quickParty": "{n} kişilik parti",
+  "@quickParty": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "controlsTitle": "Kontrolleri düzenle",
+  "controlsHint": "Joystick'i ve bomba butonunu başparmaklarının rahat ettiği yere sürükle.",
+  "controlsReset": "Sıfırla",
+  "controlsDone": "Bitti",
+  "achievementToastTitle": "Başarım kazanıldı",
+  "howRules": "Kurallar",
+  "howPowerUps": "Güçlendirmeler",
+  "quickDuelDesc": "Hızlı ve gergin bir düello",
+  "quickBrawlDesc": "Klasik dörtlü kapışma",
+  "quickPartyDesc": "Yedi kişiye kadar kaos",
+  "shopPacks": "Coin paketleri",
+  "firstBuyNote": "İlk paketin bonus kazandırır.",
+  "firstBuyChip": "+{n} bonus coin",
+  "@firstBuyChip": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hatName8": "Bere",
+  "hatName9": "Aşçı şapkası",
+  "hatName10": "Korsan şapkası",
+  "hatName11": "Viking miğferi",
+  "hatName12": "Kedi kulağı",
+  "hatName13": "Tavşan kulağı",
+  "hatName14": "Silindir şapka",
+  "hatName15": "Papatya",
+  "hatName16": "Kulaklık",
+  "hatName17": "Pervaneli şapka",
+  "hatName18": "Noel şapkası",
+  "hatName19": "Ninja bandı",
+  "hatName20": "Alev saç",
+  "hatName21": "Soytarı şapkası",
+  "hatName22": "Defne çelengi",
+  "hatName23": "Gökkuşağı afro",
+  "faceName6": "Uykulu",
+  "faceName7": "Şaşkın",
+  "faceName8": "Kalpli gözler",
+  "faceName9": "Komik",
+  "faceName10": "Robot vizörü",
+  "faceName11": "Tek gözlü",
+  "tutTitle0": "Hareket",
+  "tutBody0": "Joystick'i sürükleyip parlayan noktaya git.",
+  "tutTitle1": "Bomba bırak",
+  "tutBody1": "Sandığın hemen yanında dur ve bomba butonuna bas.",
+  "tutTitle2": "Kaç!",
+  "tutBody2": "Bomba 3 saniye sonra artı şeklinde patlar. Çizgisinden çık!",
+  "tutTitle3": "Güçlendirme!",
+  "tutBody3": "Sandıklar güçlendirme saklar. Almak için üstünden geç.",
+  "tutTitle4": "Düşmanı yen",
+  "tutBody4": "Yaklaşmasını bekle, bomba bırak ve kaç. Kendi patlamana yakalanma!",
+  "tutTitle5": "Hazırsın!",
+  "tutBody5": "Tüm düşmanları yen, sonra çıkış kapısına gir. Her bölümde 3 yıldıza kadar kazan.",
+  "tutTooFar": "Biraz uzak kaldı. Sandığın hemen yanında tekrar dene.",
+  "tutSkip": "Atla",
+  "tutDoneStart": "Hikayeye başla",
+  "welcomeTitle": "Hoş geldin, buddy!",
+  "welcomeBody": "Temel bilgileri bir dakikadan kısa sürede öğren ve {n} coin kazan.",
+  "@welcomeBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "welcomeStart": "Hadi başlayalım",
+  "welcomeSkip": "Sonra",
+  "howToTutorial": "Öğreticiyi oyna"
 }

@@ -134,11 +134,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get bombButton => 'Bomba bırak';
 
   @override
-  String get howMove => 'Joystick (ok tuşları / WASD) ile hareket et.';
+  String get howMove => 'Joystick ile hareket et.';
 
   @override
   String get howBomb =>
-      'Bomba butonuyla (Boşluk) bomba bırak. 3 saniye sonra artı şeklinde patlar.';
+      'Bomba butonuyla bomba bırak. 3 saniye sonra artı şeklinde patlar.';
 
   @override
   String get howBlocks =>
@@ -248,7 +248,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get join => 'Katıl';
 
   @override
-  String get cancel => 'İptal';
+  String get cancel => 'Vazgeç';
 
   @override
   String get modeDuel => '1’e 1';
@@ -602,134 +602,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get stat_perfect => 'Üç yıldızlı bölüm';
 
   @override
-  String get ach_firstBlood => 'İlk kan';
-
-  @override
-  String achDesc_firstBlood(int n) {
-    return '$n düşman yen';
-  }
-
-  @override
-  String get ach_firstWin => 'İlk zafer';
-
-  @override
-  String achDesc_firstWin(int n) {
-    return '$n savaş kazan';
-  }
-
-  @override
-  String get ach_bomber => 'Bombacı';
-
-  @override
-  String achDesc_bomber(int n) {
-    return '$n bomba koy';
-  }
-
-  @override
-  String get ach_demolition => 'Yıkım ekibi';
-
-  @override
-  String achDesc_demolition(int n) {
-    return '$n sandık patlat';
-  }
-
-  @override
-  String get ach_collector => 'Koleksiyoncu';
-
-  @override
-  String achDesc_collector(int n) {
-    return '$n güçlendirme topla';
-  }
-
-  @override
-  String get ach_chapter => 'Birinci bölüm';
-
-  @override
-  String achDesc_chapter(int n) {
-    return '$n bölüm geç';
-  }
-
-  @override
-  String get ach_stars30 => 'Yıldız avcısı';
-
-  @override
-  String achDesc_stars30(int n) {
-    return '$n yıldız topla';
-  }
-
-  @override
-  String get ach_exterminator => 'Yok edici';
-
-  @override
-  String achDesc_exterminator(int n) {
-    return '$n düşman yen';
-  }
-
-  @override
-  String get ach_champion => 'Şampiyon';
-
-  @override
-  String achDesc_champion(int n) {
-    return '$n savaş kazan';
-  }
-
-  @override
-  String get ach_online1 => 'Çevrimiçi ilk';
-
-  @override
-  String achDesc_online1(int n) {
-    return '$n çevrimiçi maç kazan';
-  }
-
-  @override
-  String get ach_boss1 => 'Patron avcısı';
-
-  @override
-  String achDesc_boss1(int n) {
-    return '$n patron yen';
-  }
-
-  @override
-  String get ach_perfectionist => 'Mükemmeliyetçi';
-
-  @override
-  String achDesc_perfectionist(int n) {
-    return '$n bölümde üç yıldız al';
-  }
-
-  @override
-  String get ach_explorer => 'Kaşif';
-
-  @override
-  String achDesc_explorer(int n) {
-    return '$n bölüm geç';
-  }
-
-  @override
-  String get ach_online10 => 'Çevrimiçi usta';
-
-  @override
-  String achDesc_online10(int n) {
-    return '$n çevrimiçi maç kazan';
-  }
-
-  @override
-  String get ach_bosses4 => 'Patron ustası';
-
-  @override
-  String achDesc_bosses4(int n) {
-    return '$n patronun hepsini yen';
-  }
-
-  @override
-  String get ach_legend => 'Efsane';
-
-  @override
-  String achDesc_legend(int n) {
-    return '$n bölümün hepsini geç';
-  }
-
-  @override
   String get powerDetonator => 'Patlatıcı';
 
   @override
@@ -737,7 +609,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howDetonator =>
-      'Patlatıcı: tüm bombalarını aynı anda patlatmak için patlat düğmesine (E tuşu) bas.';
+      'Patlatıcı: tüm bombalarını aynı anda patlatmak için patlat düğmesine bas.';
 
   @override
   String get howGhost => 'Hayalet: birkaç saniye sandıkların içinden geç.';
@@ -748,8 +620,557 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howStars =>
-      'Bölüm başına en fazla 3 yıldız kazan: hasar almadan ve bol süreyle bitir. Yıldızlar şapka, yüz ve renk açar.';
+      'Bölüm başına en fazla 3 yıldız kazan: hızlı bitir ve olabildiğince az hasar al. 2 yıldız bir isabete izin verir, 3 yıldız hatasız ve bol süreyle bitirmeyi ister. Her yeni yıldız coin kazandırır.';
 
   @override
   String get detonateButton => 'Bombaları patlat';
+
+  @override
+  String get coin => 'Coin';
+
+  @override
+  String get earnCoin => 'Bedava Coin';
+
+  @override
+  String get shopTitle => 'Coin mağazası';
+
+  @override
+  String get shopHint =>
+      'Coin ile şapka, yüz, renk, emoji ve ekstra can alabilirsin. Güç satışı yok: güçlendirmeler asla satılmaz.';
+
+  @override
+  String get adNotReady =>
+      'Şu an gösterilecek reklam yok. Birazdan tekrar dene.';
+
+  @override
+  String rewardGot(int n) {
+    return '+$n Coin!';
+  }
+
+  @override
+  String get notEnoughCoin => 'Yeterli Coin yok';
+
+  @override
+  String get storeSoon => 'Mağaza henüz bağlı değil.';
+
+  @override
+  String coinAmount(int n) {
+    return '$n Coin';
+  }
+
+  @override
+  String get pkgSpark => 'Kıvılcım';
+
+  @override
+  String get pkgFuse => 'Fitil';
+
+  @override
+  String get pkgDynamite => 'Dinamit';
+
+  @override
+  String get pkgDepot => 'Bomba deposu';
+
+  @override
+  String get mostPopular => 'EN POPÜLER';
+
+  @override
+  String get bestValue => 'EN İYİ DEĞER';
+
+  @override
+  String bonusPercent(int n) {
+    return '%$n bonus';
+  }
+
+  @override
+  String get removeAds => 'Reklamları kaldır';
+
+  @override
+  String get removeAdsDesc => 'Banner ve geçiş reklamları kalkar.';
+
+  @override
+  String unlockFor(int n) {
+    return '$n Coin karşılığında açılsın mı?';
+  }
+
+  @override
+  String get buy => 'Satın al';
+
+  @override
+  String get watchAd => 'Reklam izle';
+
+  @override
+  String get close => 'Kapat';
+
+  @override
+  String get livesOutTitle => 'Canların bitti';
+
+  @override
+  String livesOutBody(String time) {
+    return 'Her hikaye denemesi 1 can harcar; kazanırsan geri alırsın. Yeni can $time sonra geliyor.';
+  }
+
+  @override
+  String get livesRefillAd => 'Reklam izle: +1 can';
+
+  @override
+  String livesRefillCoins(int n) {
+    return '1 can al · $n coin';
+  }
+
+  @override
+  String get livesWait => 'Bekleyeceğim';
+
+  @override
+  String livesChipLabel(int n, int max) {
+    return '$max candan $n tanesi';
+  }
+
+  @override
+  String get achSeries_kills => 'Yok Edici';
+
+  @override
+  String achStat_kills(int n) {
+    return '$n düşman yen';
+  }
+
+  @override
+  String get achSeries_blocks => 'Yıkım Ekibi';
+
+  @override
+  String achStat_blocks(int n) {
+    return '$n sandık yık';
+  }
+
+  @override
+  String get achSeries_bombs => 'Bombacı';
+
+  @override
+  String achStat_bombs(int n) {
+    return '$n bomba koy';
+  }
+
+  @override
+  String get achSeries_powerups => 'Koleksiyoncu';
+
+  @override
+  String achStat_powerups(int n) {
+    return '$n güçlendirme topla';
+  }
+
+  @override
+  String get achSeries_levels => 'Kaşif';
+
+  @override
+  String achStat_levels(int n) {
+    return '$n bölüm bitir';
+  }
+
+  @override
+  String get achSeries_stars => 'Yıldız Avcısı';
+
+  @override
+  String achStat_stars(int n) {
+    return '$n yıldız topla';
+  }
+
+  @override
+  String get achSeries_perfect => 'Mükemmeliyetçi';
+
+  @override
+  String achStat_perfect(int n) {
+    return '$n bölümde üç yıldız al';
+  }
+
+  @override
+  String get achSeries_bosses => 'Patron Avcısı';
+
+  @override
+  String achStat_bosses(int n) {
+    return '$n patronu yen';
+  }
+
+  @override
+  String get achSeries_wins => 'Şampiyon';
+
+  @override
+  String achStat_wins(int n) {
+    return '$n savaş kazan';
+  }
+
+  @override
+  String get achSeries_onlineWins => 'Online Usta';
+
+  @override
+  String achStat_onlineWins(int n) {
+    return '$n online maç kazan';
+  }
+
+  @override
+  String get achSeries_onlineGames => 'Online Müdavim';
+
+  @override
+  String achStat_onlineGames(int n) {
+    return '$n online maç oyna';
+  }
+
+  @override
+  String get achSeries_games => 'Kıdemli';
+
+  @override
+  String achStat_games(int n) {
+    return '$n oyun oyna';
+  }
+
+  @override
+  String get achSeries_emotes => 'Geveze';
+
+  @override
+  String achStat_emotes(int n) {
+    return '$n emoji gönder';
+  }
+
+  @override
+  String get achSeries_ads => 'Destekçi';
+
+  @override
+  String achStat_ads(int n) {
+    return '$n ödüllü reklam izle';
+  }
+
+  @override
+  String get achSeries_owned => 'Şık Buddy';
+
+  @override
+  String achStat_owned(int n) {
+    return '$n gardırop eşyasına sahip ol';
+  }
+
+  @override
+  String get achSeries_invites => 'Davetçi';
+
+  @override
+  String achStat_invites(int n) {
+    return '$n arkadaşını davet et';
+  }
+
+  @override
+  String get achSeries_streak => 'Seri Ustası';
+
+  @override
+  String achStat_streak(int n) {
+    return 'Üst üste $n gün oyna';
+  }
+
+  @override
+  String get achClaim => 'Topla';
+
+  @override
+  String get achClaimAll => 'Hepsini topla';
+
+  @override
+  String get achReady => 'Toplanmaya hazır';
+
+  @override
+  String get achInProgress => 'Devam eden';
+
+  @override
+  String get achDone => 'Tamamlanan';
+
+  @override
+  String achReward(int n) {
+    return '$n coin';
+  }
+
+  @override
+  String get wardrobeEmotes => 'Emojiler';
+
+  @override
+  String boostWatchAd(int n) {
+    return 'Reklam izle: $n bombayla başla';
+  }
+
+  @override
+  String boostReady(int n) {
+    return 'Sıradaki maçın $n bombayla başlayacak';
+  }
+
+  @override
+  String boostBadge(int n) {
+    return '$n bombayla başlıyor';
+  }
+
+  @override
+  String get editName => 'Adı düzenle';
+
+  @override
+  String get randomName => 'Rastgele ad';
+
+  @override
+  String get save => 'Kaydet';
+
+  @override
+  String nameRule(int min, int max) {
+    return '$min–$max harf, rakam, boşluk, _ . -';
+  }
+
+  @override
+  String get nameInvalid => 'Bu ad kullanılamaz.';
+
+  @override
+  String get accountGuest => 'Misafir hesabı';
+
+  @override
+  String get accountApple => 'Apple ile giriş yapıldı';
+
+  @override
+  String get accountGoogle => 'Google ile giriş yapıldı';
+
+  @override
+  String get starterTitle => 'Başlangıç paketi';
+
+  @override
+  String starterBody(int coins) {
+    return '$coins coin + tüm canlar dolu';
+  }
+
+  @override
+  String starterEnds(String time) {
+    return '$time sonra bitiyor';
+  }
+
+  @override
+  String firstBuyBonus(int n) {
+    return 'İlk alım: +$n bonus coin';
+  }
+
+  @override
+  String get storeUnavailable => 'Mağaza şu an kullanılamıyor.';
+
+  @override
+  String get productMissing => 'Bu ürün henüz satışta değil.';
+
+  @override
+  String get purchaseFailed => 'Satın alma başarısız. Ücret alınmadı.';
+
+  @override
+  String get restorePurchases => 'Satın alımları geri yükle';
+
+  @override
+  String get purchasesRestored => 'Satın alımlar geri yükleniyor…';
+
+  @override
+  String get adsRemovedThanks => 'Reklamlar kaldırıldı. Teşekkürler!';
+
+  @override
+  String get purchased => 'Satın alındı';
+
+  @override
+  String get daily => 'Günlük';
+
+  @override
+  String get dailyLoginTitle => 'Günlük ödül';
+
+  @override
+  String dayN(int n) {
+    return '$n. gün';
+  }
+
+  @override
+  String streakDays(int n) {
+    return '$n günlük seri';
+  }
+
+  @override
+  String get dailyQuests => 'Bugünün görevleri';
+
+  @override
+  String dailyAllDone(int n) {
+    return 'Tüm görevler tamam: +$n coin';
+  }
+
+  @override
+  String get dailyComeBack => 'Alındı – yarın tekrar gel';
+
+  @override
+  String get dailyReset => 'Her gün gece yarısı yeni görevler gelir.';
+
+  @override
+  String quickParty(int n) {
+    return '$n kişilik parti';
+  }
+
+  @override
+  String get controlsTitle => 'Kontrolleri düzenle';
+
+  @override
+  String get controlsHint =>
+      'Joystick\'i ve bomba butonunu başparmaklarının rahat ettiği yere sürükle.';
+
+  @override
+  String get controlsReset => 'Sıfırla';
+
+  @override
+  String get controlsDone => 'Bitti';
+
+  @override
+  String get achievementToastTitle => 'Başarım kazanıldı';
+
+  @override
+  String get howRules => 'Kurallar';
+
+  @override
+  String get howPowerUps => 'Güçlendirmeler';
+
+  @override
+  String get quickDuelDesc => 'Hızlı ve gergin bir düello';
+
+  @override
+  String get quickBrawlDesc => 'Klasik dörtlü kapışma';
+
+  @override
+  String get quickPartyDesc => 'Yedi kişiye kadar kaos';
+
+  @override
+  String get shopPacks => 'Coin paketleri';
+
+  @override
+  String get firstBuyNote => 'İlk paketin bonus kazandırır.';
+
+  @override
+  String firstBuyChip(int n) {
+    return '+$n bonus coin';
+  }
+
+  @override
+  String get hatName8 => 'Bere';
+
+  @override
+  String get hatName9 => 'Aşçı şapkası';
+
+  @override
+  String get hatName10 => 'Korsan şapkası';
+
+  @override
+  String get hatName11 => 'Viking miğferi';
+
+  @override
+  String get hatName12 => 'Kedi kulağı';
+
+  @override
+  String get hatName13 => 'Tavşan kulağı';
+
+  @override
+  String get hatName14 => 'Silindir şapka';
+
+  @override
+  String get hatName15 => 'Papatya';
+
+  @override
+  String get hatName16 => 'Kulaklık';
+
+  @override
+  String get hatName17 => 'Pervaneli şapka';
+
+  @override
+  String get hatName18 => 'Noel şapkası';
+
+  @override
+  String get hatName19 => 'Ninja bandı';
+
+  @override
+  String get hatName20 => 'Alev saç';
+
+  @override
+  String get hatName21 => 'Soytarı şapkası';
+
+  @override
+  String get hatName22 => 'Defne çelengi';
+
+  @override
+  String get hatName23 => 'Gökkuşağı afro';
+
+  @override
+  String get faceName6 => 'Uykulu';
+
+  @override
+  String get faceName7 => 'Şaşkın';
+
+  @override
+  String get faceName8 => 'Kalpli gözler';
+
+  @override
+  String get faceName9 => 'Komik';
+
+  @override
+  String get faceName10 => 'Robot vizörü';
+
+  @override
+  String get faceName11 => 'Tek gözlü';
+
+  @override
+  String get tutTitle0 => 'Hareket';
+
+  @override
+  String get tutBody0 => 'Joystick\'i sürükleyip parlayan noktaya git.';
+
+  @override
+  String get tutTitle1 => 'Bomba bırak';
+
+  @override
+  String get tutBody1 => 'Sandığın hemen yanında dur ve bomba butonuna bas.';
+
+  @override
+  String get tutTitle2 => 'Kaç!';
+
+  @override
+  String get tutBody2 =>
+      'Bomba 3 saniye sonra artı şeklinde patlar. Çizgisinden çık!';
+
+  @override
+  String get tutTitle3 => 'Güçlendirme!';
+
+  @override
+  String get tutBody3 =>
+      'Sandıklar güçlendirme saklar. Almak için üstünden geç.';
+
+  @override
+  String get tutTitle4 => 'Düşmanı yen';
+
+  @override
+  String get tutBody4 =>
+      'Yaklaşmasını bekle, bomba bırak ve kaç. Kendi patlamana yakalanma!';
+
+  @override
+  String get tutTitle5 => 'Hazırsın!';
+
+  @override
+  String get tutBody5 =>
+      'Tüm düşmanları yen, sonra çıkış kapısına gir. Her bölümde 3 yıldıza kadar kazan.';
+
+  @override
+  String get tutTooFar =>
+      'Biraz uzak kaldı. Sandığın hemen yanında tekrar dene.';
+
+  @override
+  String get tutSkip => 'Atla';
+
+  @override
+  String get tutDoneStart => 'Hikayeye başla';
+
+  @override
+  String get welcomeTitle => 'Hoş geldin, buddy!';
+
+  @override
+  String welcomeBody(int n) {
+    return 'Temel bilgileri bir dakikadan kısa sürede öğren ve $n coin kazan.';
+  }
+
+  @override
+  String get welcomeStart => 'Hadi başlayalım';
+
+  @override
+  String get welcomeSkip => 'Sonra';
+
+  @override
+  String get howToTutorial => 'Öğreticiyi oyna';
 }

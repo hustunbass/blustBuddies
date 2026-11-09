@@ -4,12 +4,15 @@ import 'package:flutter/material.dart';
 class BuddyColors {
   BuddyColors._();
 
-  /// Player colours (P1..P4).
+  /// Player colours (P1..P7).
   static const List<Color> players = [
     Color(0xFF29B6F6),
     Color(0xFFF06292),
     Color(0xFF66BB6A),
     Color(0xFFFFCA28),
+    Color(0xFF9575CD),
+    Color(0xFFEF5350),
+    Color(0xFFFF8A65),
   ];
 
   /// Team colours (2v2): team 1, team 2.
@@ -32,6 +35,15 @@ class BuddyColors {
 
   /// Accent used in UI.
   static const Color accent = Color(0xFFFF7043);
+
+  /// Raised panels: dialogs, sheets, toasts (same navy as the menu gradient).
+  static const Color panel = Color(0xFF232C4D);
+
+  /// Fields and chips sitting on a [panel].
+  static const Color panelLight = Color(0xFF2E3A63);
+
+  /// Coins and rewards.
+  static const Color gold = Color(0xFFFFC53D);
 }
 
 /// Colour scheme of one arena. Which one a match uses is derived from the
@@ -80,6 +92,7 @@ ThemeData buildTheme() {
     seedColor: BuddyColors.accent,
     brightness: Brightness.dark,
   );
+  const radius = Radius.circular(24);
   return ThemeData(
     colorScheme: scheme,
     scaffoldBackgroundColor: BuddyColors.background,
@@ -89,6 +102,63 @@ ThemeData buildTheme() {
         minimumSize: const Size(220, 52),
         textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
       ),
+    ),
+    // One look for every screen title ("How to Play", "Online battle", ...).
+    appBarTheme: const AppBarTheme(
+      backgroundColor: Colors.transparent,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+      titleTextStyle: TextStyle(fontSize: 22, fontWeight: FontWeight.w900, letterSpacing: .4, color: Colors.white),
+    ),
+    // Dialogs, sheets and fields share the app's navy instead of the default
+    // pinkish Material surface.
+    dialogTheme: const DialogThemeData(
+      backgroundColor: BuddyColors.panel,
+      surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(radius)),
+      titleTextStyle: TextStyle(fontSize: 21, fontWeight: FontWeight.w900, color: Colors.white),
+      contentTextStyle: TextStyle(fontSize: 15, height: 1.35, color: Colors.white70),
+    ),
+    bottomSheetTheme: const BottomSheetThemeData(
+      backgroundColor: BuddyColors.panel,
+      surfaceTintColor: Colors.transparent,
+      dragHandleColor: Colors.white24,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: radius)),
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: BuddyColors.panelLight,
+      labelStyle: const TextStyle(color: Colors.white70),
+      helperStyle: const TextStyle(color: Colors.white54),
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide(color: scheme.primary, width: 2),
+      ),
+    ),
+    chipTheme: ChipThemeData(
+      backgroundColor: BuddyColors.panelLight,
+      selectedColor: scheme.primary,
+      side: BorderSide.none,
+      shape: const StadiumBorder(),
+      labelStyle: const TextStyle(fontWeight: FontWeight.w700, color: Colors.white),
+      secondaryLabelStyle: TextStyle(fontWeight: FontWeight.w800, color: scheme.onPrimary),
+      checkmarkColor: scheme.onPrimary,
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? scheme.onPrimary : Colors.white70,
+      ),
+      trackColor: WidgetStateProperty.resolveWith(
+        (s) => s.contains(WidgetState.selected) ? scheme.primary : BuddyColors.panelLight,
+      ),
+      trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+    ),
+    dividerTheme: const DividerThemeData(color: Colors.white12),
+    textButtonTheme: TextButtonThemeData(
+      style: TextButton.styleFrom(foregroundColor: scheme.primary, textStyle: const TextStyle(fontWeight: FontWeight.w800)),
     ),
   );
 }

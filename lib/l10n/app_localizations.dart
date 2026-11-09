@@ -329,13 +329,13 @@ abstract class AppLocalizations {
   /// No description provided for @howMove.
   ///
   /// In en, this message translates to:
-  /// **'Move with the joystick (arrow keys / WASD).'**
+  /// **'Move with the joystick.'**
   String get howMove;
 
   /// No description provided for @howBomb.
   ///
   /// In en, this message translates to:
-  /// **'Drop a bomb with the bomb button (Space). It explodes after 3 seconds in a plus shape.'**
+  /// **'Drop a bomb with the bomb button. It explodes after 3 seconds in a plus shape.'**
   String get howBomb;
 
   /// No description provided for @howBlocks.
@@ -1178,198 +1178,6 @@ abstract class AppLocalizations {
   /// **'Three-star levels'**
   String get stat_perfect;
 
-  /// No description provided for @ach_firstBlood.
-  ///
-  /// In en, this message translates to:
-  /// **'First blood'**
-  String get ach_firstBlood;
-
-  /// No description provided for @achDesc_firstBlood.
-  ///
-  /// In en, this message translates to:
-  /// **'Defeat {n} enemy'**
-  String achDesc_firstBlood(int n);
-
-  /// No description provided for @ach_firstWin.
-  ///
-  /// In en, this message translates to:
-  /// **'First victory'**
-  String get ach_firstWin;
-
-  /// No description provided for @achDesc_firstWin.
-  ///
-  /// In en, this message translates to:
-  /// **'Win {n} battle'**
-  String achDesc_firstWin(int n);
-
-  /// No description provided for @ach_bomber.
-  ///
-  /// In en, this message translates to:
-  /// **'Bomber'**
-  String get ach_bomber;
-
-  /// No description provided for @achDesc_bomber.
-  ///
-  /// In en, this message translates to:
-  /// **'Place {n} bombs'**
-  String achDesc_bomber(int n);
-
-  /// No description provided for @ach_demolition.
-  ///
-  /// In en, this message translates to:
-  /// **'Demolition crew'**
-  String get ach_demolition;
-
-  /// No description provided for @achDesc_demolition.
-  ///
-  /// In en, this message translates to:
-  /// **'Destroy {n} crates'**
-  String achDesc_demolition(int n);
-
-  /// No description provided for @ach_collector.
-  ///
-  /// In en, this message translates to:
-  /// **'Collector'**
-  String get ach_collector;
-
-  /// No description provided for @achDesc_collector.
-  ///
-  /// In en, this message translates to:
-  /// **'Collect {n} power-ups'**
-  String achDesc_collector(int n);
-
-  /// No description provided for @ach_chapter.
-  ///
-  /// In en, this message translates to:
-  /// **'Chapter one'**
-  String get ach_chapter;
-
-  /// No description provided for @achDesc_chapter.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear {n} levels'**
-  String achDesc_chapter(int n);
-
-  /// No description provided for @ach_stars30.
-  ///
-  /// In en, this message translates to:
-  /// **'Star gazer'**
-  String get ach_stars30;
-
-  /// No description provided for @achDesc_stars30.
-  ///
-  /// In en, this message translates to:
-  /// **'Collect {n} stars'**
-  String achDesc_stars30(int n);
-
-  /// No description provided for @ach_exterminator.
-  ///
-  /// In en, this message translates to:
-  /// **'Exterminator'**
-  String get ach_exterminator;
-
-  /// No description provided for @achDesc_exterminator.
-  ///
-  /// In en, this message translates to:
-  /// **'Defeat {n} enemies'**
-  String achDesc_exterminator(int n);
-
-  /// No description provided for @ach_champion.
-  ///
-  /// In en, this message translates to:
-  /// **'Champion'**
-  String get ach_champion;
-
-  /// No description provided for @achDesc_champion.
-  ///
-  /// In en, this message translates to:
-  /// **'Win {n} battles'**
-  String achDesc_champion(int n);
-
-  /// No description provided for @ach_online1.
-  ///
-  /// In en, this message translates to:
-  /// **'Online debut'**
-  String get ach_online1;
-
-  /// No description provided for @achDesc_online1.
-  ///
-  /// In en, this message translates to:
-  /// **'Win {n} online match'**
-  String achDesc_online1(int n);
-
-  /// No description provided for @ach_boss1.
-  ///
-  /// In en, this message translates to:
-  /// **'Boss slayer'**
-  String get ach_boss1;
-
-  /// No description provided for @achDesc_boss1.
-  ///
-  /// In en, this message translates to:
-  /// **'Beat {n} boss'**
-  String achDesc_boss1(int n);
-
-  /// No description provided for @ach_perfectionist.
-  ///
-  /// In en, this message translates to:
-  /// **'Perfectionist'**
-  String get ach_perfectionist;
-
-  /// No description provided for @achDesc_perfectionist.
-  ///
-  /// In en, this message translates to:
-  /// **'Get three stars on {n} levels'**
-  String achDesc_perfectionist(int n);
-
-  /// No description provided for @ach_explorer.
-  ///
-  /// In en, this message translates to:
-  /// **'Explorer'**
-  String get ach_explorer;
-
-  /// No description provided for @achDesc_explorer.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear {n} levels'**
-  String achDesc_explorer(int n);
-
-  /// No description provided for @ach_online10.
-  ///
-  /// In en, this message translates to:
-  /// **'Online ace'**
-  String get ach_online10;
-
-  /// No description provided for @achDesc_online10.
-  ///
-  /// In en, this message translates to:
-  /// **'Win {n} online matches'**
-  String achDesc_online10(int n);
-
-  /// No description provided for @ach_bosses4.
-  ///
-  /// In en, this message translates to:
-  /// **'Boss master'**
-  String get ach_bosses4;
-
-  /// No description provided for @achDesc_bosses4.
-  ///
-  /// In en, this message translates to:
-  /// **'Beat all {n} bosses'**
-  String achDesc_bosses4(int n);
-
-  /// No description provided for @ach_legend.
-  ///
-  /// In en, this message translates to:
-  /// **'Legend'**
-  String get ach_legend;
-
-  /// No description provided for @achDesc_legend.
-  ///
-  /// In en, this message translates to:
-  /// **'Clear all {n} levels'**
-  String achDesc_legend(int n);
-
   /// No description provided for @powerDetonator.
   ///
   /// In en, this message translates to:
@@ -1385,7 +1193,7 @@ abstract class AppLocalizations {
   /// No description provided for @howDetonator.
   ///
   /// In en, this message translates to:
-  /// **'Detonator: use the blast button (key E) to set off all your bombs at once.'**
+  /// **'Detonator: use the blast button to set off all your bombs at once.'**
   String get howDetonator;
 
   /// No description provided for @howGhost.
@@ -1403,7 +1211,7 @@ abstract class AppLocalizations {
   /// No description provided for @howStars.
   ///
   /// In en, this message translates to:
-  /// **'Earn up to 3 stars per level: no hits taken and plenty of time left. Stars unlock hats, faces and colours.'**
+  /// **'Earn up to 3 stars per level: finish fast and take as few hits as possible. 2 stars allow one hit, 3 stars need a flawless run and lots of time left. Every new star pays coins.'**
   String get howStars;
 
   /// No description provided for @detonateButton.
@@ -1411,6 +1219,936 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Detonate bombs'**
   String get detonateButton;
+
+  /// No description provided for @coin.
+  ///
+  /// In en, this message translates to:
+  /// **'Coin'**
+  String get coin;
+
+  /// No description provided for @earnCoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Coin'**
+  String get earnCoin;
+
+  /// No description provided for @shopTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Coin shop'**
+  String get shopTitle;
+
+  /// No description provided for @shopHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Coins buy hats, faces, colours, emotes and extra lives. No pay-to-win: power-ups are never for sale.'**
+  String get shopHint;
+
+  /// No description provided for @adNotReady.
+  ///
+  /// In en, this message translates to:
+  /// **'No ad available right now. Try again in a moment.'**
+  String get adNotReady;
+
+  /// No description provided for @rewardGot.
+  ///
+  /// In en, this message translates to:
+  /// **'+{n} Coin!'**
+  String rewardGot(int n);
+
+  /// No description provided for @notEnoughCoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough Coin'**
+  String get notEnoughCoin;
+
+  /// No description provided for @storeSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Store is not connected yet.'**
+  String get storeSoon;
+
+  /// No description provided for @coinAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} Coin'**
+  String coinAmount(int n);
+
+  /// No description provided for @pkgSpark.
+  ///
+  /// In en, this message translates to:
+  /// **'Spark'**
+  String get pkgSpark;
+
+  /// No description provided for @pkgFuse.
+  ///
+  /// In en, this message translates to:
+  /// **'Fuse'**
+  String get pkgFuse;
+
+  /// No description provided for @pkgDynamite.
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamite'**
+  String get pkgDynamite;
+
+  /// No description provided for @pkgDepot.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomb depot'**
+  String get pkgDepot;
+
+  /// No description provided for @mostPopular.
+  ///
+  /// In en, this message translates to:
+  /// **'MOST POPULAR'**
+  String get mostPopular;
+
+  /// No description provided for @bestValue.
+  ///
+  /// In en, this message translates to:
+  /// **'BEST VALUE'**
+  String get bestValue;
+
+  /// No description provided for @bonusPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'+{n}% bonus'**
+  String bonusPercent(int n);
+
+  /// No description provided for @removeAds.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove ads'**
+  String get removeAds;
+
+  /// No description provided for @removeAdsDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'No more banners or pop-up ads.'**
+  String get removeAdsDesc;
+
+  /// No description provided for @unlockFor.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock for {n} Coin?'**
+  String unlockFor(int n);
+
+  /// No description provided for @buy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get buy;
+
+  /// No description provided for @watchAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch ad'**
+  String get watchAd;
+
+  /// No description provided for @close.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get close;
+
+  /// No description provided for @livesOutTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Out of lives'**
+  String get livesOutTitle;
+
+  /// No description provided for @livesOutBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Every story attempt costs a life; you get it back when you win. A new life arrives in {time}.'**
+  String livesOutBody(String time);
+
+  /// No description provided for @livesRefillAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch ad: +1 life'**
+  String get livesRefillAd;
+
+  /// No description provided for @livesRefillCoins.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy 1 life · {n} coins'**
+  String livesRefillCoins(int n);
+
+  /// No description provided for @livesWait.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll wait'**
+  String get livesWait;
+
+  /// No description provided for @livesChipLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} of {max} lives'**
+  String livesChipLabel(int n, int max);
+
+  /// No description provided for @achSeries_kills.
+  ///
+  /// In en, this message translates to:
+  /// **'Exterminator'**
+  String get achSeries_kills;
+
+  /// No description provided for @achStat_kills.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Defeat 1 enemy} other{Defeat {n} enemies}}'**
+  String achStat_kills(int n);
+
+  /// No description provided for @achSeries_blocks.
+  ///
+  /// In en, this message translates to:
+  /// **'Demolition crew'**
+  String get achSeries_blocks;
+
+  /// No description provided for @achStat_blocks.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Destroy 1 crate} other{Destroy {n} crates}}'**
+  String achStat_blocks(int n);
+
+  /// No description provided for @achSeries_bombs.
+  ///
+  /// In en, this message translates to:
+  /// **'Bomber'**
+  String get achSeries_bombs;
+
+  /// No description provided for @achStat_bombs.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Place 1 bomb} other{Place {n} bombs}}'**
+  String achStat_bombs(int n);
+
+  /// No description provided for @achSeries_powerups.
+  ///
+  /// In en, this message translates to:
+  /// **'Collector'**
+  String get achSeries_powerups;
+
+  /// No description provided for @achStat_powerups.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Collect 1 power-up} other{Collect {n} power-ups}}'**
+  String achStat_powerups(int n);
+
+  /// No description provided for @achSeries_levels.
+  ///
+  /// In en, this message translates to:
+  /// **'Explorer'**
+  String get achSeries_levels;
+
+  /// No description provided for @achStat_levels.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Clear 1 level} other{Clear {n} levels}}'**
+  String achStat_levels(int n);
+
+  /// No description provided for @achSeries_stars.
+  ///
+  /// In en, this message translates to:
+  /// **'Star gazer'**
+  String get achSeries_stars;
+
+  /// No description provided for @achStat_stars.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Collect 1 star} other{Collect {n} stars}}'**
+  String achStat_stars(int n);
+
+  /// No description provided for @achSeries_perfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Perfectionist'**
+  String get achSeries_perfect;
+
+  /// No description provided for @achStat_perfect.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Get three stars on 1 level} other{Get three stars on {n} levels}}'**
+  String achStat_perfect(int n);
+
+  /// No description provided for @achSeries_bosses.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss slayer'**
+  String get achSeries_bosses;
+
+  /// No description provided for @achStat_bosses.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Beat 1 boss} other{Beat {n} bosses}}'**
+  String achStat_bosses(int n);
+
+  /// No description provided for @achSeries_wins.
+  ///
+  /// In en, this message translates to:
+  /// **'Champion'**
+  String get achSeries_wins;
+
+  /// No description provided for @achStat_wins.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Win 1 battle} other{Win {n} battles}}'**
+  String achStat_wins(int n);
+
+  /// No description provided for @achSeries_onlineWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Online ace'**
+  String get achSeries_onlineWins;
+
+  /// No description provided for @achStat_onlineWins.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Win 1 online match} other{Win {n} online matches}}'**
+  String achStat_onlineWins(int n);
+
+  /// No description provided for @achSeries_onlineGames.
+  ///
+  /// In en, this message translates to:
+  /// **'Online regular'**
+  String get achSeries_onlineGames;
+
+  /// No description provided for @achStat_onlineGames.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Play 1 online match} other{Play {n} online matches}}'**
+  String achStat_onlineGames(int n);
+
+  /// No description provided for @achSeries_games.
+  ///
+  /// In en, this message translates to:
+  /// **'Veteran'**
+  String get achSeries_games;
+
+  /// No description provided for @achStat_games.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Play 1 game} other{Play {n} games}}'**
+  String achStat_games(int n);
+
+  /// No description provided for @achSeries_emotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Chatterbox'**
+  String get achSeries_emotes;
+
+  /// No description provided for @achStat_emotes.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Send 1 emote} other{Send {n} emotes}}'**
+  String achStat_emotes(int n);
+
+  /// No description provided for @achSeries_ads.
+  ///
+  /// In en, this message translates to:
+  /// **'Supporter'**
+  String get achSeries_ads;
+
+  /// No description provided for @achStat_ads.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Watch 1 reward ad} other{Watch {n} reward ads}}'**
+  String achStat_ads(int n);
+
+  /// No description provided for @achSeries_owned.
+  ///
+  /// In en, this message translates to:
+  /// **'Fashionista'**
+  String get achSeries_owned;
+
+  /// No description provided for @achStat_owned.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Own 1 wardrobe item} other{Own {n} wardrobe items}}'**
+  String achStat_owned(int n);
+
+  /// No description provided for @achSeries_invites.
+  ///
+  /// In en, this message translates to:
+  /// **'Recruiter'**
+  String get achSeries_invites;
+
+  /// No description provided for @achStat_invites.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Invite 1 friend} other{Invite {n} friends}}'**
+  String achStat_invites(int n);
+
+  /// No description provided for @achSeries_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'Streak keeper'**
+  String get achSeries_streak;
+
+  /// No description provided for @achStat_streak.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{Play 1 day in a row} other{Play {n} days in a row}}'**
+  String achStat_streak(int n);
+
+  /// No description provided for @achClaim.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim'**
+  String get achClaim;
+
+  /// No description provided for @achClaimAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Claim all'**
+  String get achClaimAll;
+
+  /// No description provided for @achReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to claim'**
+  String get achReady;
+
+  /// No description provided for @achInProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'In progress'**
+  String get achInProgress;
+
+  /// No description provided for @achDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get achDone;
+
+  /// No description provided for @achReward.
+  ///
+  /// In en, this message translates to:
+  /// **'{n} coins'**
+  String achReward(int n);
+
+  /// No description provided for @wardrobeEmotes.
+  ///
+  /// In en, this message translates to:
+  /// **'Emotes'**
+  String get wardrobeEmotes;
+
+  /// No description provided for @boostWatchAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch ad: start with {n} bombs'**
+  String boostWatchAd(int n);
+
+  /// No description provided for @boostReady.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next match starts with {n} bombs'**
+  String boostReady(int n);
+
+  /// No description provided for @boostBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'starts with {n} bombs'**
+  String boostBadge(int n);
+
+  /// No description provided for @editName.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit name'**
+  String get editName;
+
+  /// No description provided for @randomName.
+  ///
+  /// In en, this message translates to:
+  /// **'Random name'**
+  String get randomName;
+
+  /// No description provided for @save.
+  ///
+  /// In en, this message translates to:
+  /// **'Save'**
+  String get save;
+
+  /// No description provided for @nameRule.
+  ///
+  /// In en, this message translates to:
+  /// **'{min}–{max} letters, numbers, spaces, _ . -'**
+  String nameRule(int min, int max);
+
+  /// No description provided for @nameInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This name is not allowed.'**
+  String get nameInvalid;
+
+  /// No description provided for @accountGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest account'**
+  String get accountGuest;
+
+  /// No description provided for @accountApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Apple'**
+  String get accountApple;
+
+  /// No description provided for @accountGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Google'**
+  String get accountGoogle;
+
+  /// No description provided for @starterTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Starter pack'**
+  String get starterTitle;
+
+  /// No description provided for @starterBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{coins} coins + all lives refilled'**
+  String starterBody(int coins);
+
+  /// No description provided for @starterEnds.
+  ///
+  /// In en, this message translates to:
+  /// **'Ends in {time}'**
+  String starterEnds(String time);
+
+  /// No description provided for @firstBuyBonus.
+  ///
+  /// In en, this message translates to:
+  /// **'First purchase: +{n} bonus coins'**
+  String firstBuyBonus(int n);
+
+  /// No description provided for @storeUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'The store is not available right now.'**
+  String get storeUnavailable;
+
+  /// No description provided for @productMissing.
+  ///
+  /// In en, this message translates to:
+  /// **'This product is not available yet.'**
+  String get productMissing;
+
+  /// No description provided for @purchaseFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchase failed. You were not charged.'**
+  String get purchaseFailed;
+
+  /// No description provided for @restorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchases'**
+  String get restorePurchases;
+
+  /// No description provided for @purchasesRestored.
+  ///
+  /// In en, this message translates to:
+  /// **'Restoring purchases…'**
+  String get purchasesRestored;
+
+  /// No description provided for @adsRemovedThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Ads removed. Thank you!'**
+  String get adsRemovedThanks;
+
+  /// No description provided for @purchased.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchased'**
+  String get purchased;
+
+  /// No description provided for @daily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get daily;
+
+  /// No description provided for @dailyLoginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily reward'**
+  String get dailyLoginTitle;
+
+  /// No description provided for @dayN.
+  ///
+  /// In en, this message translates to:
+  /// **'Day {n}'**
+  String dayN(int n);
+
+  /// No description provided for @streakDays.
+  ///
+  /// In en, this message translates to:
+  /// **'{n, plural, =1{1-day streak} other{{n}-day streak}}'**
+  String streakDays(int n);
+
+  /// No description provided for @dailyQuests.
+  ///
+  /// In en, this message translates to:
+  /// **'Today\'s quests'**
+  String get dailyQuests;
+
+  /// No description provided for @dailyAllDone.
+  ///
+  /// In en, this message translates to:
+  /// **'All quests done: +{n} coins'**
+  String dailyAllDone(int n);
+
+  /// No description provided for @dailyComeBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Collected – come back tomorrow'**
+  String get dailyComeBack;
+
+  /// No description provided for @dailyReset.
+  ///
+  /// In en, this message translates to:
+  /// **'New quests every day at midnight.'**
+  String get dailyReset;
+
+  /// No description provided for @quickParty.
+  ///
+  /// In en, this message translates to:
+  /// **'{n}-player party'**
+  String quickParty(int n);
+
+  /// No description provided for @controlsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize controls'**
+  String get controlsTitle;
+
+  /// No description provided for @controlsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the joystick and the bomb button to where your thumbs feel best.'**
+  String get controlsHint;
+
+  /// No description provided for @controlsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get controlsReset;
+
+  /// No description provided for @controlsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get controlsDone;
+
+  /// No description provided for @achievementToastTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievement unlocked'**
+  String get achievementToastTitle;
+
+  /// No description provided for @howRules.
+  ///
+  /// In en, this message translates to:
+  /// **'Rules'**
+  String get howRules;
+
+  /// No description provided for @howPowerUps.
+  ///
+  /// In en, this message translates to:
+  /// **'Power-ups'**
+  String get howPowerUps;
+
+  /// No description provided for @quickDuelDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'A fast, tense duel'**
+  String get quickDuelDesc;
+
+  /// No description provided for @quickBrawlDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'The classic four-way brawl'**
+  String get quickBrawlDesc;
+
+  /// No description provided for @quickPartyDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Chaos with up to seven buddies'**
+  String get quickPartyDesc;
+
+  /// No description provided for @shopPacks.
+  ///
+  /// In en, this message translates to:
+  /// **'Coin packs'**
+  String get shopPacks;
+
+  /// No description provided for @firstBuyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Your first pack pays a bonus.'**
+  String get firstBuyNote;
+
+  /// No description provided for @firstBuyChip.
+  ///
+  /// In en, this message translates to:
+  /// **'+{n} bonus coins'**
+  String firstBuyChip(int n);
+
+  /// No description provided for @hatName8.
+  ///
+  /// In en, this message translates to:
+  /// **'Beanie'**
+  String get hatName8;
+
+  /// No description provided for @hatName9.
+  ///
+  /// In en, this message translates to:
+  /// **'Chef hat'**
+  String get hatName9;
+
+  /// No description provided for @hatName10.
+  ///
+  /// In en, this message translates to:
+  /// **'Pirate hat'**
+  String get hatName10;
+
+  /// No description provided for @hatName11.
+  ///
+  /// In en, this message translates to:
+  /// **'Viking helmet'**
+  String get hatName11;
+
+  /// No description provided for @hatName12.
+  ///
+  /// In en, this message translates to:
+  /// **'Cat ears'**
+  String get hatName12;
+
+  /// No description provided for @hatName13.
+  ///
+  /// In en, this message translates to:
+  /// **'Bunny ears'**
+  String get hatName13;
+
+  /// No description provided for @hatName14.
+  ///
+  /// In en, this message translates to:
+  /// **'Top hat'**
+  String get hatName14;
+
+  /// No description provided for @hatName15.
+  ///
+  /// In en, this message translates to:
+  /// **'Daisy'**
+  String get hatName15;
+
+  /// No description provided for @hatName16.
+  ///
+  /// In en, this message translates to:
+  /// **'Headphones'**
+  String get hatName16;
+
+  /// No description provided for @hatName17.
+  ///
+  /// In en, this message translates to:
+  /// **'Propeller cap'**
+  String get hatName17;
+
+  /// No description provided for @hatName18.
+  ///
+  /// In en, this message translates to:
+  /// **'Santa hat'**
+  String get hatName18;
+
+  /// No description provided for @hatName19.
+  ///
+  /// In en, this message translates to:
+  /// **'Ninja band'**
+  String get hatName19;
+
+  /// No description provided for @hatName20.
+  ///
+  /// In en, this message translates to:
+  /// **'Flame hair'**
+  String get hatName20;
+
+  /// No description provided for @hatName21.
+  ///
+  /// In en, this message translates to:
+  /// **'Jester hat'**
+  String get hatName21;
+
+  /// No description provided for @hatName22.
+  ///
+  /// In en, this message translates to:
+  /// **'Laurel wreath'**
+  String get hatName22;
+
+  /// No description provided for @hatName23.
+  ///
+  /// In en, this message translates to:
+  /// **'Rainbow afro'**
+  String get hatName23;
+
+  /// No description provided for @faceName6.
+  ///
+  /// In en, this message translates to:
+  /// **'Sleepy'**
+  String get faceName6;
+
+  /// No description provided for @faceName7.
+  ///
+  /// In en, this message translates to:
+  /// **'Surprised'**
+  String get faceName7;
+
+  /// No description provided for @faceName8.
+  ///
+  /// In en, this message translates to:
+  /// **'Heart eyes'**
+  String get faceName8;
+
+  /// No description provided for @faceName9.
+  ///
+  /// In en, this message translates to:
+  /// **'Silly'**
+  String get faceName9;
+
+  /// No description provided for @faceName10.
+  ///
+  /// In en, this message translates to:
+  /// **'Robot visor'**
+  String get faceName10;
+
+  /// No description provided for @faceName11.
+  ///
+  /// In en, this message translates to:
+  /// **'Cyclops'**
+  String get faceName11;
+
+  /// No description provided for @tutTitle0.
+  ///
+  /// In en, this message translates to:
+  /// **'Move'**
+  String get tutTitle0;
+
+  /// No description provided for @tutBody0.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the joystick to the glowing spot.'**
+  String get tutBody0;
+
+  /// No description provided for @tutTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'Drop a bomb'**
+  String get tutTitle1;
+
+  /// No description provided for @tutBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'Stand next to the crate and tap the bomb button.'**
+  String get tutBody1;
+
+  /// No description provided for @tutTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'Run!'**
+  String get tutTitle2;
+
+  /// No description provided for @tutBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'The bomb explodes after 3 seconds in a plus shape. Get out of its line!'**
+  String get tutBody2;
+
+  /// No description provided for @tutTitle3.
+  ///
+  /// In en, this message translates to:
+  /// **'Power-up!'**
+  String get tutTitle3;
+
+  /// No description provided for @tutBody3.
+  ///
+  /// In en, this message translates to:
+  /// **'Crates hide power-ups. Walk over it to collect it.'**
+  String get tutBody3;
+
+  /// No description provided for @tutTitle4.
+  ///
+  /// In en, this message translates to:
+  /// **'Beat the enemy'**
+  String get tutTitle4;
+
+  /// No description provided for @tutBody4.
+  ///
+  /// In en, this message translates to:
+  /// **'Wait for it to come close, drop a bomb and run. Don\'t get caught in your own blast!'**
+  String get tutBody4;
+
+  /// No description provided for @tutTitle5.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re ready!'**
+  String get tutTitle5;
+
+  /// No description provided for @tutBody5.
+  ///
+  /// In en, this message translates to:
+  /// **'Defeat every enemy, then step on the exit door. Earn up to 3 stars on each level.'**
+  String get tutBody5;
+
+  /// No description provided for @tutTooFar.
+  ///
+  /// In en, this message translates to:
+  /// **'That was too far away. Try again right next to the crate.'**
+  String get tutTooFar;
+
+  /// No description provided for @tutSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get tutSkip;
+
+  /// No description provided for @tutDoneStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Start the story'**
+  String get tutDoneStart;
+
+  /// No description provided for @welcomeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, buddy!'**
+  String get welcomeTitle;
+
+  /// No description provided for @welcomeBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn the basics in under a minute and get {n} coins.'**
+  String welcomeBody(int n);
+
+  /// No description provided for @welcomeStart.
+  ///
+  /// In en, this message translates to:
+  /// **'Let\'s go'**
+  String get welcomeStart;
+
+  /// No description provided for @welcomeSkip.
+  ///
+  /// In en, this message translates to:
+  /// **'Maybe later'**
+  String get welcomeSkip;
+
+  /// No description provided for @howToTutorial.
+  ///
+  /// In en, this message translates to:
+  /// **'Play the tutorial'**
+  String get howToTutorial;
 }
 
 class _AppLocalizationsDelegate

@@ -73,8 +73,8 @@
   },
   "joystick": "Movement joystick",
   "bombButton": "Drop bomb",
-  "howMove": "Move with the joystick (arrow keys / WASD).",
-  "howBomb": "Drop a bomb with the bomb button (Space). It explodes after 3 seconds in a plus shape.",
+  "howMove": "Move with the joystick.",
+  "howBomb": "Drop a bomb with the bomb button. It explodes after 3 seconds in a plus shape.",
   "howBlocks": "Blasts destroy crates but stop at steel walls. Bombs set off other bombs.",
   "howEnemies": "Defeat every enemy to open the exit door, then step on it. Watch out for chasers and speedsters!",
   "howShield": "Shield: protects you for a few seconds.",
@@ -323,155 +323,438 @@
   "stat_stars": "Stars",
   "stat_powerups": "Power-ups collected",
   "stat_perfect": "Three-star levels",
-  "ach_firstBlood": "First blood",
-  "achDesc_firstBlood": "Defeat {n} enemy",
-  "@achDesc_firstBlood": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_firstWin": "First victory",
-  "achDesc_firstWin": "Win {n} battle",
-  "@achDesc_firstWin": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_bomber": "Bomber",
-  "achDesc_bomber": "Place {n} bombs",
-  "@achDesc_bomber": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_demolition": "Demolition crew",
-  "achDesc_demolition": "Destroy {n} crates",
-  "@achDesc_demolition": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_collector": "Collector",
-  "achDesc_collector": "Collect {n} power-ups",
-  "@achDesc_collector": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_chapter": "Chapter one",
-  "achDesc_chapter": "Clear {n} levels",
-  "@achDesc_chapter": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_stars30": "Star gazer",
-  "achDesc_stars30": "Collect {n} stars",
-  "@achDesc_stars30": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_exterminator": "Exterminator",
-  "achDesc_exterminator": "Defeat {n} enemies",
-  "@achDesc_exterminator": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_champion": "Champion",
-  "achDesc_champion": "Win {n} battles",
-  "@achDesc_champion": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_online1": "Online debut",
-  "achDesc_online1": "Win {n} online match",
-  "@achDesc_online1": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_boss1": "Boss slayer",
-  "achDesc_boss1": "Beat {n} boss",
-  "@achDesc_boss1": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_perfectionist": "Perfectionist",
-  "achDesc_perfectionist": "Get three stars on {n} levels",
-  "@achDesc_perfectionist": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_explorer": "Explorer",
-  "achDesc_explorer": "Clear {n} levels",
-  "@achDesc_explorer": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_online10": "Online ace",
-  "achDesc_online10": "Win {n} online matches",
-  "@achDesc_online10": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_bosses4": "Boss master",
-  "achDesc_bosses4": "Beat all {n} bosses",
-  "@achDesc_bosses4": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
-  "ach_legend": "Legend",
-  "achDesc_legend": "Clear all {n} levels",
-  "@achDesc_legend": {
-    "placeholders": {
-      "n": {
-        "type": "int"
-      }
-    }
-  },
   "powerDetonator": "Detonator",
   "powerGhost": "Ghost",
-  "howDetonator": "Detonator: use the blast button (key E) to set off all your bombs at once.",
+  "howDetonator": "Detonator: use the blast button to set off all your bombs at once.",
   "howGhost": "Ghost: walk through crates for a few seconds.",
   "howBoss": "Every 25th level ends with a boss. Hit it several times!",
-  "howStars": "Earn up to 3 stars per level: no hits taken and plenty of time left. Stars unlock hats, faces and colours.",
-  "detonateButton": "Detonate bombs"
+  "howStars": "Earn up to 3 stars per level: finish fast and take as few hits as possible. 2 stars allow one hit, 3 stars need a flawless run and lots of time left. Every new star pays coins.",
+  "detonateButton": "Detonate bombs",
+  "coin": "Coin",
+  "earnCoin": "Free Coin",
+  "shopTitle": "Coin shop",
+  "shopHint": "Coins buy hats, faces, colours, emotes and extra lives. No pay-to-win: power-ups are never for sale.",
+  "adNotReady": "No ad available right now. Try again in a moment.",
+  "rewardGot": "+{n} Coin!",
+  "@rewardGot": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "notEnoughCoin": "Not enough Coin",
+  "storeSoon": "Store is not connected yet.",
+  "coinAmount": "{n} Coin",
+  "@coinAmount": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "pkgSpark": "Spark",
+  "pkgFuse": "Fuse",
+  "pkgDynamite": "Dynamite",
+  "pkgDepot": "Bomb depot",
+  "mostPopular": "MOST POPULAR",
+  "bestValue": "BEST VALUE",
+  "bonusPercent": "+{n}% bonus",
+  "@bonusPercent": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "removeAds": "Remove ads",
+  "removeAdsDesc": "No more banners or pop-up ads.",
+  "unlockFor": "Unlock for {n} Coin?",
+  "@unlockFor": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "buy": "Buy",
+  "watchAd": "Watch ad",
+  "close": "Close",
+  "livesOutTitle": "Out of lives",
+  "livesOutBody": "Every story attempt costs a life; you get it back when you win. A new life arrives in {time}.",
+  "@livesOutBody": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "livesRefillAd": "Watch ad: +1 life",
+  "livesRefillCoins": "Buy 1 life · {n} coins",
+  "@livesRefillCoins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "livesWait": "I'll wait",
+  "livesChipLabel": "{n} of {max} lives",
+  "@livesChipLabel": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_kills": "Exterminator",
+  "achStat_kills": "{n, plural, =1{Defeat 1 enemy} other{Defeat {n} enemies}}",
+  "@achStat_kills": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_blocks": "Demolition crew",
+  "achStat_blocks": "{n, plural, =1{Destroy 1 crate} other{Destroy {n} crates}}",
+  "@achStat_blocks": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_bombs": "Bomber",
+  "achStat_bombs": "{n, plural, =1{Place 1 bomb} other{Place {n} bombs}}",
+  "@achStat_bombs": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_powerups": "Collector",
+  "achStat_powerups": "{n, plural, =1{Collect 1 power-up} other{Collect {n} power-ups}}",
+  "@achStat_powerups": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_levels": "Explorer",
+  "achStat_levels": "{n, plural, =1{Clear 1 level} other{Clear {n} levels}}",
+  "@achStat_levels": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_stars": "Star gazer",
+  "achStat_stars": "{n, plural, =1{Collect 1 star} other{Collect {n} stars}}",
+  "@achStat_stars": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_perfect": "Perfectionist",
+  "achStat_perfect": "{n, plural, =1{Get three stars on 1 level} other{Get three stars on {n} levels}}",
+  "@achStat_perfect": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_bosses": "Boss slayer",
+  "achStat_bosses": "{n, plural, =1{Beat 1 boss} other{Beat {n} bosses}}",
+  "@achStat_bosses": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_wins": "Champion",
+  "achStat_wins": "{n, plural, =1{Win 1 battle} other{Win {n} battles}}",
+  "@achStat_wins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_onlineWins": "Online ace",
+  "achStat_onlineWins": "{n, plural, =1{Win 1 online match} other{Win {n} online matches}}",
+  "@achStat_onlineWins": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_onlineGames": "Online regular",
+  "achStat_onlineGames": "{n, plural, =1{Play 1 online match} other{Play {n} online matches}}",
+  "@achStat_onlineGames": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_games": "Veteran",
+  "achStat_games": "{n, plural, =1{Play 1 game} other{Play {n} games}}",
+  "@achStat_games": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_emotes": "Chatterbox",
+  "achStat_emotes": "{n, plural, =1{Send 1 emote} other{Send {n} emotes}}",
+  "@achStat_emotes": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_ads": "Supporter",
+  "achStat_ads": "{n, plural, =1{Watch 1 reward ad} other{Watch {n} reward ads}}",
+  "@achStat_ads": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_owned": "Fashionista",
+  "achStat_owned": "{n, plural, =1{Own 1 wardrobe item} other{Own {n} wardrobe items}}",
+  "@achStat_owned": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_invites": "Recruiter",
+  "achStat_invites": "{n, plural, =1{Invite 1 friend} other{Invite {n} friends}}",
+  "@achStat_invites": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achSeries_streak": "Streak keeper",
+  "achStat_streak": "{n, plural, =1{Play 1 day in a row} other{Play {n} days in a row}}",
+  "@achStat_streak": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "achClaim": "Claim",
+  "achClaimAll": "Claim all",
+  "achReady": "Ready to claim",
+  "achInProgress": "In progress",
+  "achDone": "Completed",
+  "achReward": "{n} coins",
+  "@achReward": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "wardrobeEmotes": "Emotes",
+  "boostWatchAd": "Watch ad: start with {n} bombs",
+  "@boostWatchAd": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "boostReady": "Your next match starts with {n} bombs",
+  "@boostReady": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "boostBadge": "starts with {n} bombs",
+  "@boostBadge": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "editName": "Edit name",
+  "randomName": "Random name",
+  "save": "Save",
+  "nameRule": "{min}–{max} letters, numbers, spaces, _ . -",
+  "@nameRule": {
+    "placeholders": {
+      "min": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "nameInvalid": "This name is not allowed.",
+  "accountGuest": "Guest account",
+  "accountApple": "Signed in with Apple",
+  "accountGoogle": "Signed in with Google",
+  "starterTitle": "Starter pack",
+  "starterBody": "{coins} coins + all lives refilled",
+  "@starterBody": {
+    "placeholders": {
+      "coins": {
+        "type": "int"
+      }
+    }
+  },
+  "starterEnds": "Ends in {time}",
+  "@starterEnds": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "firstBuyBonus": "First purchase: +{n} bonus coins",
+  "@firstBuyBonus": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "storeUnavailable": "The store is not available right now.",
+  "productMissing": "This product is not available yet.",
+  "purchaseFailed": "Purchase failed. You were not charged.",
+  "restorePurchases": "Restore purchases",
+  "purchasesRestored": "Restoring purchases…",
+  "adsRemovedThanks": "Ads removed. Thank you!",
+  "purchased": "Purchased",
+  "daily": "Daily",
+  "dailyLoginTitle": "Daily reward",
+  "dayN": "Day {n}",
+  "@dayN": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "streakDays": "{n, plural, =1{1-day streak} other{{n}-day streak}}",
+  "@streakDays": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dailyQuests": "Today's quests",
+  "dailyAllDone": "All quests done: +{n} coins",
+  "@dailyAllDone": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "dailyComeBack": "Collected – come back tomorrow",
+  "dailyReset": "New quests every day at midnight.",
+  "quickParty": "{n}-player party",
+  "@quickParty": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "controlsTitle": "Customize controls",
+  "controlsHint": "Drag the joystick and the bomb button to where your thumbs feel best.",
+  "controlsReset": "Reset",
+  "controlsDone": "Done",
+  "achievementToastTitle": "Achievement unlocked",
+  "howRules": "Rules",
+  "howPowerUps": "Power-ups",
+  "quickDuelDesc": "A fast, tense duel",
+  "quickBrawlDesc": "The classic four-way brawl",
+  "quickPartyDesc": "Chaos with up to seven buddies",
+  "shopPacks": "Coin packs",
+  "firstBuyNote": "Your first pack pays a bonus.",
+  "firstBuyChip": "+{n} bonus coins",
+  "@firstBuyChip": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "hatName8": "Beanie",
+  "hatName9": "Chef hat",
+  "hatName10": "Pirate hat",
+  "hatName11": "Viking helmet",
+  "hatName12": "Cat ears",
+  "hatName13": "Bunny ears",
+  "hatName14": "Top hat",
+  "hatName15": "Daisy",
+  "hatName16": "Headphones",
+  "hatName17": "Propeller cap",
+  "hatName18": "Santa hat",
+  "hatName19": "Ninja band",
+  "hatName20": "Flame hair",
+  "hatName21": "Jester hat",
+  "hatName22": "Laurel wreath",
+  "hatName23": "Rainbow afro",
+  "faceName6": "Sleepy",
+  "faceName7": "Surprised",
+  "faceName8": "Heart eyes",
+  "faceName9": "Silly",
+  "faceName10": "Robot visor",
+  "faceName11": "Cyclops",
+  "tutTitle0": "Move",
+  "tutBody0": "Drag the joystick to the glowing spot.",
+  "tutTitle1": "Drop a bomb",
+  "tutBody1": "Stand next to the crate and tap the bomb button.",
+  "tutTitle2": "Run!",
+  "tutBody2": "The bomb explodes after 3 seconds in a plus shape. Get out of its line!",
+  "tutTitle3": "Power-up!",
+  "tutBody3": "Crates hide power-ups. Walk over it to collect it.",
+  "tutTitle4": "Beat the enemy",
+  "tutBody4": "Wait for it to come close, drop a bomb and run. Don't get caught in your own blast!",
+  "tutTitle5": "You're ready!",
+  "tutBody5": "Defeat every enemy, then step on the exit door. Earn up to 3 stars on each level.",
+  "tutTooFar": "That was too far away. Try again right next to the crate.",
+  "tutSkip": "Skip",
+  "tutDoneStart": "Start the story",
+  "welcomeTitle": "Welcome, buddy!",
+  "welcomeBody": "Learn the basics in under a minute and get {n} coins.",
+  "@welcomeBody": {
+    "placeholders": {
+      "n": {
+        "type": "int"
+      }
+    }
+  },
+  "welcomeStart": "Let's go",
+  "welcomeSkip": "Maybe later",
+  "howToTutorial": "Play the tutorial"
 }
