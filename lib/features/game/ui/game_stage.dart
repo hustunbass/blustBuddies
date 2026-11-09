@@ -1,9 +1,15 @@
+import 'dart:async';
+
+import 'package:blast_buddies/core/economy/wallet.dart';
+import 'package:blast_buddies/core/emotes.dart';
+import 'package:blast_buddies/core/settings/control_layout.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
+import 'package:blast_buddies/core/settings/stats.dart';
 import 'package:blast_buddies/features/game/application/game_state.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/features/game/ui/controls.dart';
-import 'package:blast_buddies/features/game/render/world_painter.dart';
 import 'package:blast_buddies/features/game/ui/game_hud.dart';
+import 'package:blast_buddies/features/shop/purchase.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +25,7 @@ class GameStage extends ConsumerWidget {
     required this.onPause,
     this.names,
     this.teams = false,
+    this.showHud = true,
   });
 
   /// Running game.
@@ -36,11 +43,14 @@ class GameStage extends ConsumerWidget {
   /// Show team colours in the battle HUD.
   final bool teams;
 
+  /// Show the top bar (the tutorial has its own).
+  final bool showHud;
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return LayoutBuilder(builder: (context, c) {
       final portrait = c.maxHeight > c.maxWidth;
-      final hud = ValueListenableBuilder<HudState>(
+      final hud = !showHud ? const SizedBox.shrink() : ValueListenableBuilder<HudState>(
         valueListenable: game.hud,
         builder: (_, s, _) =>
             GameHud(state: s, battle: battle, onPause: onPause, names: names, teams: teams),
@@ -83,6 +93,7 @@ class _ControlsState extends ConsumerState<_Controls> {
 
   @override
   Widget build(BuildContext context) {
+    final wallet = ref.watch(walletProvider);
     final l = AppLocalizations.of(context);
     final s = ref.watch(settingsProvider);
     final game = widget.game;
@@ -90,37 +101,45 @@ class _ControlsState extends ConsumerState<_Controls> {
     final stickSide = left ? Alignment.bottomRight : Alignment.bottomLeft;
     final stickSize = scaled(140, s.controlScale);
     return LayoutBuilder(builder: (context, c) {
+      final area = Size(c.maxWidth, c.maxHeight);
+      final layout = widget.landscape ? s.controlsLandscape : s.controlsPortrait;
+      final stickRect = ControlGeometry.stick(area, stickSize, leftHanded: left, layout: layout);
+      final bombSize = scaled(96, s.controlScale);
+      final bombRect = ControlGeometry.bomb(area, bombSize, leftHanded: left, layout: layout);
       final zone = c.maxWidth * (widget.landscape ? .42 : .58);
+      // The floating stick listens in a zone that follows the moved joystick.
+      final zoneLeft = ((left ? c.maxWidth - zone : 0.0) + layout.stickDx * c.maxWidth).clamp(0.0, c.maxWidth - zone);
       final stick = s.floatingStick
           ? Positioned(
               top: 0,
               bottom: 0,
-              left: left ? null : 0,
-              right: left ? 0 : null,
+              left: zoneLeft,
               width: zone,
               child: FloatingJoystick(
                 size: stickSize,
                 alignment: stickSide,
+                home: Offset(
+                  (stickRect.center.dx - zoneLeft).clamp(stickSize / 2, zone - stickSize / 2),
+                  stickRect.center.dy,
+                ),
                 semanticLabel: l.joystick,
                 onChanged: (d) => game.touchDir = d,
               ),
             )
           : Positioned(
-              bottom: 12,
-              left: left ? null : 24,
-              right: left ? 24 : null,
+              left: stickRect.left,
+              top: stickRect.top,
               child: VirtualJoystick(
                 size: stickSize,
                 semanticLabel: l.joystick,
                 onChanged: (d) => game.touchDir = d,
               ),
             );
-      final bombSize = scaled(96, s.controlScale);
       final small = scaled(56, s.controlScale);
       final buttons = Positioned(
-        bottom: 12,
-        left: left ? 24 : null,
-        right: left ? null : 24,
+        bottom: c.maxHeight - bombRect.bottom,
+        left: left ? bombRect.left : null,
+        right: left ? null : c.maxWidth - bombRect.right,
         child: ValueListenableBuilder<HudState>(
           valueListenable: game.hud,
           builder: (_, hud, _) => Column(
@@ -130,23 +149,33 @@ class _ControlsState extends ConsumerState<_Controls> {
               if (_emotes && game.remote != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
-                  child: Wrap(
-                    spacing: 6,
-                    runSpacing: 6,
-                    alignment: left ? WrapAlignment.start : WrapAlignment.end,
-                    children: [
-                      for (var i = 0; i < WorldPainter.emoji.length; i++)
-                        _RoundButton(
-                          size: small,
-                          color: Colors.white24,
-                          semanticLabel: l.emote,
-                          onTap: () {
-                            game.remote!.emote(i);
-                            setState(() => _emotes = false);
-                          },
-                          child: Text(WorldPainter.emoji[i], style: TextStyle(fontSize: small * .5)),
-                        ),
-                    ],
+                  // Two rows of six: free emotes first, then the premium ones.
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 6 * small + 5 * 6),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      alignment: left ? WrapAlignment.start : WrapAlignment.end,
+                      children: [
+                        for (var i = 0; i < Emotes.count; i++)
+                          _EmoteButton(
+                            size: small,
+                            index: i,
+                            owned: Emotes.isFree(i) || wallet.has(Emotes.key(i)),
+                            label: l.emote,
+                            onTap: () async {
+                              final remote = game.remote!;
+                              if (!Emotes.isFree(i) &&
+                                  !await purchaseWithCoins(context, ref, Emotes.key(i), Emotes.price)) {
+                                return;
+                              }
+                              remote.emote(i);
+                              unawaited(ref.read(statsProvider.notifier).add({'emotes': 1}));
+                              if (mounted) setState(() => _emotes = false);
+                            },
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               Row(mainAxisSize: MainAxisSize.min, children: [
@@ -178,6 +207,49 @@ class _ControlsState extends ConsumerState<_Controls> {
       return Stack(children: [stick, buttons]);
     });
   }
+}
+
+/// One emote in the picker; premium ones show a lock until bought.
+class _EmoteButton extends StatelessWidget {
+  const _EmoteButton({
+    required this.size,
+    required this.index,
+    required this.owned,
+    required this.label,
+    required this.onTap,
+  });
+
+  final double size;
+  final int index;
+  final bool owned;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Stack(clipBehavior: Clip.none, children: [
+        Opacity(
+          opacity: owned ? 1 : .55,
+          child: _RoundButton(
+            size: size,
+            color: owned ? Colors.white24 : Colors.black45,
+            semanticLabel: label,
+            onTap: onTap,
+            child: Text(Emotes.emoji[index], style: TextStyle(fontSize: size * .5)),
+          ),
+        ),
+        if (!owned)
+          Positioned(
+            right: -2,
+            bottom: -2,
+            child: IgnorePointer(
+              child: Container(
+                padding: const EdgeInsets.all(2),
+                decoration: const BoxDecoration(color: Colors.black87, shape: BoxShape.circle),
+                child: Icon(Icons.lock, size: size * .28, color: Colors.amber),
+              ),
+            ),
+          ),
+      ]);
 }
 
 class _RoundButton extends StatelessWidget {

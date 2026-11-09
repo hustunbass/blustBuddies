@@ -1,3 +1,4 @@
+import 'package:blast_buddies/core/settings/stats.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 
 /// Localised names for catalogue entries (generated lookups).
@@ -30,65 +31,99 @@ class Names {
       };
 
   /// Hat name.
-  static String hat(AppLocalizations l, int i) => switch (i) {
-        0 => l.hatName0,
-        1 => l.hatName1,
-        2 => l.hatName2,
-        3 => l.hatName3,
-        4 => l.hatName4,
-        5 => l.hatName5,
-        6 => l.hatName6,
-        _ => l.hatName7,
-      };
+  static String hat(AppLocalizations l, int i) => [
+        l.hatName0,
+        l.hatName1,
+        l.hatName2,
+        l.hatName3,
+        l.hatName4,
+        l.hatName5,
+        l.hatName6,
+        l.hatName7,
+        l.hatName8,
+        l.hatName9,
+        l.hatName10,
+        l.hatName11,
+        l.hatName12,
+        l.hatName13,
+        l.hatName14,
+        l.hatName15,
+        l.hatName16,
+        l.hatName17,
+        l.hatName18,
+        l.hatName19,
+        l.hatName20,
+        l.hatName21,
+        l.hatName22,
+        l.hatName23,
+      ][i.clamp(0, 23)];
 
   /// Face name.
-  static String face(AppLocalizations l, int i) => switch (i) {
-        0 => l.faceName0,
-        1 => l.faceName1,
-        2 => l.faceName2,
-        3 => l.faceName3,
-        4 => l.faceName4,
-        _ => l.faceName5,
-      };
+  static String face(AppLocalizations l, int i) => [
+        l.faceName0,
+        l.faceName1,
+        l.faceName2,
+        l.faceName3,
+        l.faceName4,
+        l.faceName5,
+        l.faceName6,
+        l.faceName7,
+        l.faceName8,
+        l.faceName9,
+        l.faceName10,
+        l.faceName11,
+      ][i.clamp(0, 11)];
 
-  /// Achievement title.
-  static String achievement(AppLocalizations l, String id) => switch (id) {
-        'firstBlood' => l.ach_firstBlood,
-        'firstWin' => l.ach_firstWin,
-        'bomber' => l.ach_bomber,
-        'demolition' => l.ach_demolition,
-        'collector' => l.ach_collector,
-        'chapter' => l.ach_chapter,
-        'stars30' => l.ach_stars30,
-        'exterminator' => l.ach_exterminator,
-        'champion' => l.ach_champion,
-        'online1' => l.ach_online1,
-        'boss1' => l.ach_boss1,
-        'perfectionist' => l.ach_perfectionist,
-        'explorer' => l.ach_explorer,
-        'online10' => l.ach_online10,
-        'bosses4' => l.ach_bosses4,
-        _ => l.ach_legend,
-      };
+  static const _roman = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII', 'IX', 'X', 'XI', 'XII'];
 
-  /// Achievement description with goal [n].
-  static String achievementDesc(AppLocalizations l, String id, int n) => switch (id) {
-        'firstBlood' => l.achDesc_firstBlood(n),
-        'firstWin' => l.achDesc_firstWin(n),
-        'bomber' => l.achDesc_bomber(n),
-        'demolition' => l.achDesc_demolition(n),
-        'collector' => l.achDesc_collector(n),
-        'chapter' => l.achDesc_chapter(n),
-        'stars30' => l.achDesc_stars30(n),
-        'exterminator' => l.achDesc_exterminator(n),
-        'champion' => l.achDesc_champion(n),
-        'online1' => l.achDesc_online1(n),
-        'boss1' => l.achDesc_boss1(n),
-        'perfectionist' => l.achDesc_perfectionist(n),
-        'explorer' => l.achDesc_explorer(n),
-        'online10' => l.achDesc_online10(n),
-        'bosses4' => l.achDesc_bosses4(n),
-        _ => l.achDesc_legend(n),
+  /// Achievement title: series name plus rank, e.g. "Bomber III".
+  static String achievement(AppLocalizations l, Achievement a) {
+    final series = switch (a.stat) {
+        'kills' => l.achSeries_kills,
+        'blocks' => l.achSeries_blocks,
+        'bombs' => l.achSeries_bombs,
+        'powerups' => l.achSeries_powerups,
+        'levels' => l.achSeries_levels,
+        'stars' => l.achSeries_stars,
+        'perfect' => l.achSeries_perfect,
+        'bosses' => l.achSeries_bosses,
+        'wins' => l.achSeries_wins,
+        'onlineWins' => l.achSeries_onlineWins,
+        'onlineGames' => l.achSeries_onlineGames,
+        'games' => l.achSeries_games,
+        'emotes' => l.achSeries_emotes,
+        'ads' => l.achSeries_ads,
+        'owned' => l.achSeries_owned,
+        'invites' => l.achSeries_invites,
+        'streak' => l.achSeries_streak,
+        _ => a.stat,
+      };
+    return '$series ${_roman[(a.rank - 1).clamp(0, _roman.length - 1)]}';
+  }
+
+  /// Achievement description.
+  static String achievementDesc(AppLocalizations l, Achievement a) => goalDesc(l, a.stat, a.goal);
+
+  /// "Do [n] of [stat]" text, shared by achievements and daily quests.
+  static String goalDesc(AppLocalizations l, String stat, int n) => switch (stat) {
+        'kills' => l.achStat_kills(n),
+        'blocks' => l.achStat_blocks(n),
+        'bombs' => l.achStat_bombs(n),
+        'powerups' => l.achStat_powerups(n),
+        'levels' => l.achStat_levels(n),
+        'stars' => l.achStat_stars(n),
+        'perfect' => l.achStat_perfect(n),
+        'bosses' => l.achStat_bosses(n),
+        'wins' => l.achStat_wins(n),
+        'onlineWins' => l.achStat_onlineWins(n),
+        'onlineGames' => l.achStat_onlineGames(n),
+        'games' => l.achStat_games(n),
+        'emotes' => l.achStat_emotes(n),
+        'ads' => l.achStat_ads(n),
+        'owned' => l.achStat_owned(n),
+        'invites' => l.achStat_invites(n),
+        'streak' => l.achStat_streak(n),
+        _ => '$n',
       };
 
   /// Statistic label.

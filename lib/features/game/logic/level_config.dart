@@ -47,6 +47,21 @@ class LevelConfig {
   /// Every 25th level ends with a boss fight.
   static bool isBossLevel(int level) => level % 25 == 0;
 
+  /// Star rating for a cleared level.
+  ///
+  /// 1 star: cleared. 2 stars: at most one hit and enough time left.
+  /// 3 stars: no hit at all and a lot of time left. The time requirements
+  /// tighten with the level number and are relaxed on boss levels.
+  int starsFor({required int hits, required double timeLeft}) {
+    final frac = timeLeft / timeLimit;
+    final boss = bossHp > 0;
+    final three = 0.50 + 0.0013 * level - (boss ? 0.15 : 0);
+    final two = 0.30 + 0.0015 * level - (boss ? 0.10 : 0);
+    if (hits == 0 && frac >= three) return 3;
+    if (hits <= 1 && frac >= two) return 2;
+    return 1;
+  }
+
   /// Total enemy count.
   int get enemyCount => enemies.values.fold(0, (a, b) => a + b);
 

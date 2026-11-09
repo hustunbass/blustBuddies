@@ -1,4 +1,6 @@
+import 'package:blast_buddies/core/combat/powerups.dart';
 import 'package:blast_buddies/core/theme.dart';
+import 'package:blast_buddies/features/game/render/powerup_art.dart';
 import 'package:blast_buddies/features/game/application/game_state.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -49,6 +51,14 @@ class GameHud extends StatelessWidget {
       color: Colors.black26,
       child: Row(
         children: [
+         // Everything but the pause button scales down to fit, never overflows.
+         Expanded(
+          child: FittedBox(
+           fit: BoxFit.scaleDown,
+           alignment: Alignment.centerLeft,
+           child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
           if (battle)
             for (var i = 0; i < state.alive.length; i++)
               Padding(
@@ -90,18 +100,22 @@ class GameHud extends StatelessWidget {
               ]),
             ),
           ],
-          const Spacer(),
+          const SizedBox(width: 16),
           if (!battle) ...[
-            _Stat(Icons.circle, '${state.maxBombs}', Colors.blueGrey.shade200),
-            _Stat(Icons.add, '${state.range}', Colors.deepOrangeAccent),
-            _Stat(Icons.bolt, state.speed.toStringAsFixed(1), Colors.yellow),
-            if (state.kick) const _Stat(Icons.sports_soccer, '', Colors.purpleAccent),
-            if (state.detonate) const _Stat(Icons.flash_on, '', Colors.redAccent),
-            if (state.ghost > 0) _Stat(Icons.visibility_off, '${state.ghost}', Colors.blueGrey.shade100),
-            if (state.shield > 0) _Stat(Icons.shield, '${state.shield}', Colors.lightBlueAccent),
+            _Stat(PowerUpType.bomb, '${state.maxBombs}'),
+            _Stat(PowerUpType.range, '${state.range}'),
+            _Stat(PowerUpType.speed, state.speed.toStringAsFixed(1)),
+            if (state.kick) const _Stat(PowerUpType.kick, ''),
+            if (state.detonate) const _Stat(PowerUpType.detonator, ''),
+            if (state.ghost > 0) _Stat(PowerUpType.ghost, '${state.ghost}'),
+            if (state.shield > 0) _Stat(PowerUpType.shield, '${state.shield}'),
             const SizedBox(width: 10),
           ],
           time,
+            ],
+           ),
+          ),
+         ),
           IconButton(
             tooltip: l.pause,
             onPressed: onPause,
@@ -114,18 +128,17 @@ class GameHud extends StatelessWidget {
 }
 
 class _Stat extends StatelessWidget {
-  const _Stat(this.icon, this.text, this.color);
+  const _Stat(this.type, this.text);
 
-  final IconData icon;
+  final PowerUpType type;
   final String text;
-  final Color color;
 
   @override
   Widget build(BuildContext context) => Padding(
         padding: const EdgeInsets.only(left: 8),
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Icon(icon, size: 16, color: color),
-          if (text.isNotEmpty) Text(text, style: const TextStyle(fontSize: 14)),
+          PowerUpIcon(type, size: 20),
+          if (text.isNotEmpty) Padding(padding: const EdgeInsets.only(left: 3), child: Text(text, style: const TextStyle(fontSize: 14))),
         ]),
       );
 }

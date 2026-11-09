@@ -1,4 +1,5 @@
 import 'package:blast_buddies/core/settings/settings.dart';
+import 'package:blast_buddies/core/grid/map_generator.dart';
 import 'package:blast_buddies/core/theme.dart';
 import 'package:blast_buddies/features/game/logic/bot_brain.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +8,7 @@ import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-/// Battle mode setup: one human against 1–3 bots.
+/// Battle mode setup: one human against 1–6 bots.
 class BattleSetupScreen extends ConsumerStatefulWidget {
   /// Creates the screen.
   const BattleSetupScreen({super.key});
@@ -42,12 +43,12 @@ class _BattleSetupScreenState extends ConsumerState<BattleSetupScreen> {
                     label: l.botPlayers,
                     value: _bots,
                     min: 1,
-                    max: 3,
+                    max: MapGenerator.maxPlayers - 1,
                     onChanged: (v) => setState(() => _bots = v),
                   ),
                   const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
+                  Wrap(
+                    alignment: WrapAlignment.center,
                     children: [
                       for (var i = 0; i < total; i++)
                         Padding(

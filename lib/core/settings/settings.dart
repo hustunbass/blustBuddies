@@ -1,3 +1,4 @@
+import 'package:blast_buddies/core/settings/control_layout.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,6 +21,8 @@ class AppSettings {
     this.floatingStick = true,
     this.leftHanded = false,
     this.botLevel = 1,
+    this.controlsPortrait = const ControlLayout(),
+    this.controlsLandscape = const ControlLayout(),
   });
 
   /// Sound effects on.
@@ -46,6 +49,9 @@ class AppSettings {
   /// Default bot difficulty (index into `BotLevel`).
   final int botLevel;
 
+  /// Where the joystick and the bomb button sit, portrait / landscape.
+  final ControlLayout controlsPortrait, controlsLandscape;
+
   /// Copy with changes.
   AppSettings copyWith({
     bool? sound,
@@ -58,6 +64,8 @@ class AppSettings {
     bool? floatingStick,
     bool? leftHanded,
     int? botLevel,
+    ControlLayout? controlsPortrait,
+    ControlLayout? controlsLandscape,
   }) =>
       AppSettings(
         sound: sound ?? this.sound,
@@ -70,6 +78,8 @@ class AppSettings {
         floatingStick: floatingStick ?? this.floatingStick,
         leftHanded: leftHanded ?? this.leftHanded,
         botLevel: botLevel ?? this.botLevel,
+        controlsPortrait: controlsPortrait ?? this.controlsPortrait,
+        controlsLandscape: controlsLandscape ?? this.controlsLandscape,
       );
 }
 
@@ -89,6 +99,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
       floatingStick: p.getBool('floatingStick') ?? true,
       leftHanded: p.getBool('leftHanded') ?? false,
       botLevel: (p.getInt('botLevel') ?? 1).clamp(0, 2),
+      controlsPortrait: ControlLayout.decode(p.getString('controlsP')),
+      controlsLandscape: ControlLayout.decode(p.getString('controlsL')),
     );
   }
 
@@ -106,6 +118,8 @@ class SettingsNotifier extends Notifier<AppSettings> {
     await p.setBool('floatingStick', s.floatingStick);
     await p.setBool('leftHanded', s.leftHanded);
     await p.setInt('botLevel', s.botLevel);
+    await p.setString('controlsP', s.controlsPortrait.encode());
+    await p.setString('controlsL', s.controlsLandscape.encode());
   }
 }
 

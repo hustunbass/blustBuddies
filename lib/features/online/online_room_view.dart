@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:blast_buddies/core/theme.dart';
+import 'package:blast_buddies/core/ui/toast.dart';
+import 'package:blast_buddies/features/online/boost_button.dart';
 import 'package:blast_buddies/features/online/online_screen.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
@@ -67,9 +69,7 @@ class OnlineRoomView extends StatelessWidget {
                       child: TextButton.icon(
                         onPressed: () {
                           Clipboard.setData(ClipboardData(text: room.id));
-                          ScaffoldMessenger.of(context)
-                            ..hideCurrentSnackBar()
-                            ..showSnackBar(SnackBar(content: Text(l.codeCopied)));
+                          showToast(l.codeCopied, kind: ToastKind.success);
                         },
                         icon: const Icon(Icons.copy, size: 16),
                         label: Text(l.roomCode(room.id),
@@ -85,6 +85,10 @@ class OnlineRoomView extends StatelessWidget {
                       child: Semantics(liveRegion: true, child: status),
                     ),
                     const SizedBox(height: 16),
+                    if (room.phase != RoomPhase.playing) ...[
+                      BoostButton(client: client),
+                      const SizedBox(height: 10),
+                    ],
                     FilledButton.icon(
                       style: FilledButton.styleFrom(
                         backgroundColor: ready ? Colors.blueGrey : Colors.green,
@@ -142,7 +146,14 @@ class _SlotTile extends StatelessWidget {
             color: m == null ? Colors.white38 : null,
           ),
         ),
-        subtitle: team == null ? null : Text(l.teamN(team + 1), style: TextStyle(color: BuddyColors.teams[team])),
+        subtitle: team == null && !(m?.boost ?? false)
+            ? null
+            : Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                if (team != null) Text(l.teamN(team + 1), style: TextStyle(color: BuddyColors.teams[team])),
+                if (m?.boost ?? false)
+                  Text('⚡ ${l.boostBadge(boostedStartBombs)}',
+                      style: const TextStyle(color: Colors.amber, fontWeight: FontWeight.w700)),
+              ]),
         trailing: m == null
             ? null
             : Chip(

@@ -2,6 +2,9 @@ import 'dart:async';
 
 import 'package:blast_buddies/core/audio/audio_service.dart';
 import 'package:blast_buddies/core/cosmetics.dart';
+import 'package:blast_buddies/core/ads/ad_service.dart';
+import 'package:blast_buddies/core/economy/lives.dart';
+import 'package:blast_buddies/core/economy/wallet.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
 import 'package:blast_buddies/core/settings/stats.dart';
 import 'package:blast_buddies/features/game/application/game_state.dart';
@@ -9,6 +12,8 @@ import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/features/game/logic/level_config.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/features/game/ui/game_stage.dart';
+import 'package:blast_buddies/features/menu/achievement_toast.dart';
+import 'package:blast_buddies/features/shop/lives_ui.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/l10n/names.dart';
 import 'package:flutter/material.dart';
@@ -116,17 +121,7 @@ class _GameScreenState extends ConsumerState<GameScreen> with WidgetsBindingObse
     _delta.clear();
     final fresh = await ref.read(statsProvider.notifier).add(delta);
     if (!mounted || fresh.isEmpty) return;
-    final l = AppLocalizations.of(context);
-    final m = ScaffoldMessenger.of(context);
-    for (final a in fresh) {
-      m.showSnackBar(SnackBar(
-        content: Row(children: [
-          const Icon(Icons.emoji_events, color: Colors.amber),
-          const SizedBox(width: 10),
-          Expanded(child: Text(l.achievementUnlocked(Names.achievement(l, a.id)))),
-        ]),
-      ));
-    }
+    toastAchievements(AppLocalizations.of(context), fresh);
   }
 
   void _pause() {
@@ -151,7 +146,13 @@ class _GameScreenState extends ConsumerState<GameScreen> with WidgetsBindingObse
       if (status == WorldStatus.levelComplete) {
         final lv = widget.args.level;
         final cfg = LevelConfig.forLevel(lv);
-        _stars = 1 + (w.hits == 0 ? 1 : 0) + (w.timeLeft >= cfg.timeLimit * 0.4 ? 1 : 0);
+        _stars = cfg.starsFor(hits: w.hits, timeLeft: w.timeLeft);
+        // A won attempt gives its life back.
+        ref.read(livesProvider.notifier).add();
+        final before = ref.read(progressProvider).stars[lv] ?? 0;
+        if (_stars > before) {
+          ref.read(walletProvider.notifier).earn((_stars - before) * WalletNotifier.perStar);
+        }
         ref.read(progressProvider.notifier)
           ..unlock(lv + 1)
           ..recordStars(lv, _stars);
@@ -171,23 +172,35 @@ class _GameScreenState extends ConsumerState<GameScreen> with WidgetsBindingObse
     });
   }
 
-  void _restart() => context.pushReplacement(
-        '/game',
-        extra: widget.args.mode == GameMode.story
-            ? GameArgs.story(level: widget.args.level)
-            : GameArgs.battle(
-                humans: widget.args.humans,
-                bots: widget.args.bots,
-                teams: widget.args.teams,
-                botLevel: widget.args.botLevel,
-                daily: widget.args.daily,
-              ),
-      );
+  Future<void> _restart() async {
+    // Pop-up ads only at the result screen, never when restarting from pause.
+    final atResult = _overlay.value == _Overlay.finished;
+    if (!_battle && !await startStoryAttempt(context, ref)) return;
+    if (atResult && !_battle) await ref.read(adServiceProvider).maybeShowInterstitial();
+    if (!mounted) return;
+    context.pushReplacement(
+      '/game',
+      extra: widget.args.mode == GameMode.story
+          ? GameArgs.story(level: widget.args.level)
+          : GameArgs.battle(
+              humans: widget.args.humans,
+              bots: widget.args.bots,
+              teams: widget.args.teams,
+              botLevel: widget.args.botLevel,
+              daily: widget.args.daily,
+            ),
+    );
+  }
 
-  void _next() => context.pushReplacement(
-        '/game',
-        extra: GameArgs.story(level: widget.args.level + 1, carry: _game!.sim.players.first),
-      );
+  Future<void> _next() async {
+    if (!await startStoryAttempt(context, ref)) return;
+    await ref.read(adServiceProvider).maybeShowInterstitial();
+    if (!mounted) return;
+    context.pushReplacement(
+      '/game',
+      extra: GameArgs.story(level: widget.args.level + 1, carry: _game!.sim.players.first),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {

@@ -1,7 +1,15 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:blast_buddies/core/grid/map_generator.dart';
+import 'package:blast_buddies/core/daily/daily.dart';
+import 'package:blast_buddies/core/onboarding.dart';
 import 'package:blast_buddies/core/theme.dart';
+import 'package:blast_buddies/features/profile/profile_widgets.dart';
+import 'package:blast_buddies/features/tutorial/welcome_dialog.dart';
+import 'package:blast_buddies/features/shop/ad_banner_slot.dart';
+import 'package:blast_buddies/features/shop/economy_widgets.dart';
+import 'package:blast_buddies/features/shop/lives_ui.dart';
 import 'package:blast_buddies/l10n/names.dart';
 import 'package:blast_buddies/features/game/logic/level_config.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
@@ -93,9 +101,35 @@ class _LogoPainter extends CustomPainter {
 }
 
 /// Main menu.
-class MenuScreen extends StatelessWidget {
+class MenuScreen extends ConsumerStatefulWidget {
   /// Creates the screen.
   const MenuScreen({super.key});
+
+  @override
+  ConsumerState<MenuScreen> createState() => _MenuScreenState();
+}
+
+class _MenuScreenState extends ConsumerState<MenuScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // New players are offered the tutorial once; it stays available in
+    // "How to Play" afterwards.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final ob = ref.read(onboardingProvider);
+      if (ob.offered || ob.done) return;
+      await ref.read(onboardingProvider.notifier).markOffered();
+      if (!mounted) return;
+      final start = await showWelcomeDialog(context);
+      if (!mounted) return;
+      if (start == true) {
+        unawaited(context.push('/tutorial'));
+      } else {
+        await ref.read(onboardingProvider.notifier).skip();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +144,12 @@ class MenuScreen extends StatelessWidget {
           ),
         ),
         child: SafeArea(
+         child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+            child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 440), child: const EconomyBar()),
+          ),
+          Expanded(
           child: Center(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
@@ -123,26 +163,48 @@ class MenuScreen extends StatelessWidget {
                     child: Text(l.appTitle,
                         style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w900, letterSpacing: 1)),
                   ),
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 4),
+                  const ProfileTag(),
+                  const SizedBox(height: 16),
                   _MenuButton(l.storyMode, Icons.play_arrow, () => context.push('/levels')),
                   _MenuButton(l.battleMode, Icons.groups, () => context.push('/battle')),
                   _MenuButton(l.onlineMode, Icons.public, () => context.push('/online')),
                   const SizedBox(height: 14),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    alignment: WrapAlignment.center,
-                    children: [
-                      _MiniButton(l.wardrobe, Icons.checkroom, () => context.push('/wardrobe')),
-                      _MiniButton(l.achievements, Icons.emoji_events, () => context.push('/achievements')),
-                      _MiniButton(l.howToPlay, Icons.help_outline, () => context.push('/howto')),
-                      _MiniButton(l.settings, Icons.settings, () => context.push('/settings')),
-                    ],
+                  // Secondary entries in a 2 - 1 - 2 grid.
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 380),
+                    child: Column(children: [
+                      Row(children: [
+                        Consumer(
+                          builder: (context, ref, _) => _MiniButton(
+                            l.daily,
+                            Icons.event_available_rounded,
+                            () => context.push('/daily'),
+                            badge: ref.watch(dailyAttentionProvider),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        _MiniButton(l.wardrobe, Icons.checkroom_rounded, () => context.push('/wardrobe')),
+                      ]),
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        _MiniButton(l.achievements, Icons.emoji_events_rounded, () => context.push('/achievements')),
+                      ]),
+                      const SizedBox(height: 10),
+                      Row(children: [
+                        _MiniButton(l.howToPlay, Icons.help_outline_rounded, () => context.push('/howto')),
+                        const SizedBox(width: 10),
+                        _MiniButton(l.settings, Icons.settings_rounded, () => context.push('/settings')),
+                      ]),
+                    ]),
                   ),
                 ],
               ),
             ),
           ),
+          ),
+          const AdBannerSlot(),
+         ]),
         ),
       ),
     );
@@ -150,35 +212,63 @@ class MenuScreen extends StatelessWidget {
 }
 
 class _MiniButton extends StatelessWidget {
-  const _MiniButton(this.label, this.icon, this.onTap);
+  const _MiniButton(this.label, this.icon, this.onTap, {this.badge = false});
 
   final String label;
   final IconData icon;
   final VoidCallback onTap;
 
+  /// Red dot: something is waiting.
+  final bool badge;
+
   @override
-  Widget build(BuildContext context) => Semantics(
-        button: true,
-        label: label,
-        child: SizedBox(
-          width: 80,
+  Widget build(BuildContext context) => Expanded(
+        child: Semantics(
+          button: true,
+          label: label,
           child: Material(
-            color: Colors.white10,
-            borderRadius: BorderRadius.circular(16),
+            color: BuddyColors.panel,
+            borderRadius: BorderRadius.circular(18),
             child: InkWell(
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               onTap: onTap,
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
-                child: ExcludeSemantics(
-                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(icon, size: 26, color: Colors.white70),
-                    const SizedBox(height: 4),
-                    Text(label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 11, color: Colors.white70)),
-                  ]),
+              child: SizedBox(
+                height: 58,
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: ExcludeSemantics(
+                    child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                      Stack(clipBehavior: Clip.none, children: [
+                        Icon(icon, size: 24, color: BuddyColors.accent),
+                        if (badge)
+                          Positioned(
+                            right: -3,
+                            top: -2,
+                            child: Container(
+                              width: 11,
+                              height: 11,
+                              decoration: BoxDecoration(
+                                color: Colors.redAccent,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: BuddyColors.panel, width: 1.5),
+                              ),
+                            ),
+                          ),
+                      ]),
+                      const SizedBox(width: 10),
+                      // Long (translated) labels shrink instead of being clipped.
+                      Flexible(
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            label,
+                            maxLines: 1,
+                            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    ]),
+                  ),
                 ),
               ),
             ),
@@ -252,6 +342,14 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+              child: Row(children: [
+                const LivesChip(),
+                const Spacer(),
+                const CoinChip(),
+              ]),
+            ),
             Row(mainAxisAlignment: MainAxisAlignment.center, children: [
               const Icon(Icons.star, color: Colors.amber, size: 20),
               const SizedBox(width: 4),
@@ -284,7 +382,11 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
                               stars: progress.stars[level] ?? 0,
                               locked: level > progress.unlockedLevel,
                               current: level == progress.unlockedLevel,
-                              onTap: () => widget.onStart(context, level),
+                              onTap: () async {
+                                if (await startStoryAttempt(context, ref) && context.mounted) {
+                                  widget.onStart(context, level);
+                                }
+                              },
                             );
                           },
                         ),
@@ -294,6 +396,7 @@ class _LevelSelectScreenState extends ConsumerState<LevelSelectScreen> {
                 ],
               ),
             ),
+            const AdBannerSlot(),
           ],
         ),
       ),

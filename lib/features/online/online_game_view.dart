@@ -2,8 +2,9 @@ import 'dart:async';
 
 import 'package:blast_buddies/core/audio/audio_service.dart';
 import 'package:blast_buddies/core/settings/stats.dart';
+import 'package:blast_buddies/core/ui/toast.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
-import 'package:blast_buddies/l10n/names.dart';
+import 'package:blast_buddies/features/menu/achievement_toast.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/features/game/ui/game_stage.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
@@ -44,9 +45,7 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
     _left = widget.match.leftSlots.listen((slot) {
       if (!mounted || slot == widget.match.localId || slot >= widget.match.names.length) return;
       final l = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(l.playerLeftMatch(widget.match.names[slot]))));
+      showToast(l.playerLeftMatch(widget.match.names[slot]), kind: ToastKind.info);
     });
   }
 
@@ -71,11 +70,7 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
     _delta.clear();
     final fresh = await ref.read(statsProvider.notifier).add(delta);
     if (!mounted) return;
-    final l = AppLocalizations.of(context);
-    final m = ScaffoldMessenger.of(context);
-    for (final a in fresh) {
-      m.showSnackBar(SnackBar(content: Text(l.achievementUnlocked(Names.achievement(l, a.id)))));
-    }
+    toastAchievements(AppLocalizations.of(context), fresh);
   }
 
   @override

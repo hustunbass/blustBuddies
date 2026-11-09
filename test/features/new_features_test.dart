@@ -1,5 +1,6 @@
 import 'package:blast_buddies/core/combat/powerups.dart';
 import 'package:blast_buddies/core/cosmetics.dart';
+import 'package:blast_buddies/core/economy/wallet.dart';
 import 'package:blast_buddies/core/grid/grid_model.dart';
 import 'package:blast_buddies/core/grid/grid_pos.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
@@ -160,11 +161,11 @@ void main() {
       final c = await container();
       final s = c.read(statsProvider.notifier);
       final first = await s.add({'kills': 1, 'games': 1});
-      expect(first.map((a) => a.id), ['firstBlood']);
+      expect(first.map((a) => a.id), containsAll(['kills_1', 'games_1']));
       expect(await s.add({'kills': 1}), isEmpty);
       final more = await s.add({'kills': 120});
-      expect(more.map((a) => a.id), ['exterminator']);
-      expect(c.read(statsProvider).unlocked, containsAll(['firstBlood', 'exterminator']));
+      expect(more.map((a) => a.id), ['kills_10', 'kills_50', 'kills_100']);
+      expect(c.read(statsProvider).unlocked, containsAll(['kills_1', 'kills_100']));
       expect(c.read(prefsProvider).getInt('stat_kills'), 122);
     });
 
@@ -174,7 +175,50 @@ void main() {
         await c.read(progressProvider.notifier).recordStars(l, 3);
       }
       final fresh = await c.read(statsProvider.notifier).check();
-      expect(fresh.map((a) => a.id), containsAll(['stars30', 'perfectionist']));
+      expect(fresh.map((a) => a.id), containsAll(['stars_30', 'perfect_10']));
+    });
+
+    test('there are at least 100 uniquely identified achievements with tiered rewards', () {
+      expect(achievements.length, greaterThanOrEqualTo(100));
+      expect(achievements.map((a) => a.id).toSet().length, achievements.length);
+      // Within a series goals grow strictly and rewards never shrink.
+      final byStat = <String, List<Achievement>>{};
+      for (final a in achievements) {
+        byStat.putIfAbsent(a.stat, () => []).add(a);
+      }
+      for (final list in byStat.values) {
+        for (var i = 1; i < list.length; i++) {
+          expect(list[i].goal, greaterThan(list[i - 1].goal));
+          expect(list[i].tier.index, greaterThanOrEqualTo(list[i - 1].tier.index));
+          expect(list[i].rank, i + 1);
+        }
+      }
+      expect(AchTier.easy.coins < AchTier.medium.coins && AchTier.hard.coins < AchTier.legend.coins, isTrue);
+    });
+
+    test('rewards are paid once and only for unlocked achievements', () async {
+      final c = await container({'walletInit': true, 'coin': 0});
+      final s = c.read(statsProvider.notifier);
+      final kills1 = achievements.firstWhere((a) => a.id == 'kills_1');
+      final kills10 = achievements.firstWhere((a) => a.id == 'kills_10');
+      expect(await s.claim(kills1), 0); // locked
+      await s.add({'kills': 1});
+      expect(s.claimable.map((a) => a.id), ['kills_1']);
+      expect(await s.claim(kills1), kills1.reward);
+      expect(await s.claim(kills1), 0); // already claimed
+      await s.add({'kills': 9});
+      expect(await s.claimAll(), kills10.reward);
+      expect(c.read(walletProvider).coin, kills1.reward + kills10.reward);
+      expect(c.read(statsProvider).claimed, {'kills_1', 'kills_10'});
+      final again = await container({'walletInit': true, 'coin': c.read(walletProvider).coin, 'ach': ['kills_1', 'kills_10'], 'achClaimed': ['kills_1', 'kills_10']});
+      expect(again.read(statsProvider.notifier).claimable, isEmpty);
+    });
+
+    test('buying cosmetics counts towards the wardrobe achievements', () async {
+      final c = await container({'walletInit': true, 'coin': 500});
+      await c.read(walletProvider.notifier).buy('hat:1', 30);
+      final fresh = await c.read(statsProvider.notifier).check();
+      expect(fresh.map((a) => a.id), ['owned_1']);
     });
   });
 

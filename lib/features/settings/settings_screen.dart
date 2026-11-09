@@ -1,8 +1,10 @@
 import 'package:blast_buddies/core/audio/audio_service.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
+import 'package:blast_buddies/features/profile/profile_widgets.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 /// Sound, music, vibration and control-size options.
 class SettingsScreen extends ConsumerWidget {
@@ -20,6 +22,8 @@ class SettingsScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(12),
           children: [
+            const AccountTile(),
+            const Divider(),
             SwitchListTile(
               title: Text(l.sound),
               value: s.sound,
@@ -47,7 +51,19 @@ class SettingsScreen extends ConsumerWidget {
             SwitchListTile(
               title: Text(l.leftHanded),
               value: s.leftHanded,
-              onChanged: (v) => notifier.update(s.copyWith(leftHanded: v)),
+              // Switching hands mirrors any custom placement too.
+              onChanged: (v) => notifier.update(s.copyWith(
+                leftHanded: v,
+                controlsPortrait: s.controlsPortrait.mirrored(),
+                controlsLandscape: s.controlsLandscape.mirrored(),
+              )),
+            ),
+            ListTile(
+              leading: const Icon(Icons.open_with),
+              title: Text(l.controlsTitle),
+              subtitle: Text(l.controlsHint),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => context.push('/controls'),
             ),
             ListTile(
               title: Text(l.controlSize),

@@ -110,6 +110,7 @@ class FloatingJoystick extends StatefulWidget {
     required this.onChanged,
     this.size = 140,
     this.alignment = Alignment.bottomLeft,
+    this.home,
     this.semanticLabel = 'Joystick',
   });
 
@@ -121,6 +122,9 @@ class FloatingJoystick extends StatefulWidget {
 
   /// Resting position inside the zone.
   final Alignment alignment;
+
+  /// Centre of the resting ring in zone coordinates; overrides [alignment].
+  final Offset? home;
 
   /// Accessibility label.
   final String semanticLabel;
@@ -174,9 +178,10 @@ class _FloatingJoystickState extends State<FloatingJoystick> {
     return Semantics(
       label: widget.semanticLabel,
       child: LayoutBuilder(builder: (context, c) {
-        final rest = widget.alignment
-            .inscribe(Size.square(widget.size), Offset.zero & Size(c.maxWidth, c.maxHeight))
-            .center;
+        final rest = widget.home ??
+            widget.alignment
+                .inscribe(Size.square(widget.size), Offset.zero & Size(c.maxWidth, c.maxHeight))
+                .center;
         return Listener(
           behavior: HitTestBehavior.opaque,
           onPointerDown: (e) {

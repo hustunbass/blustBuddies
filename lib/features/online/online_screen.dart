@@ -1,8 +1,13 @@
 import 'dart:async';
 
+import 'package:blast_buddies/core/grid/map_generator.dart';
+import 'package:blast_buddies/core/profile/profile.dart';
+import 'package:blast_buddies/core/ui/toast.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
+import 'package:blast_buddies/features/online/boost_button.dart';
 import 'package:blast_buddies/features/online/online_game_view.dart';
 import 'package:blast_buddies/features/online/online_room_view.dart';
+import 'package:blast_buddies/features/online/quick_match_dialog.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
 import 'package:blast_buddies/net/protocol.dart';
@@ -64,9 +69,7 @@ class _OnlineScreenState extends ConsumerState<OnlineScreen> {
         }
         return;
       }
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(errorText(AppLocalizations.of(context), code))));
+      showToast(errorText(AppLocalizations.of(context), code), kind: ToastKind.error);
     });
   }
 
@@ -120,7 +123,7 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
   void initState() {
     super.initState();
     final p = ref.read(prefsProvider);
-    _name = TextEditingController(text: p.getString('onlineName') ?? '');
+    _name = TextEditingController(text: ref.read(profileProvider).name);
     _server = TextEditingController(text: p.getString('onlineCustomServer') ?? '');
   }
 
@@ -133,14 +136,18 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
 
   Future<void> _connect() async {
     final p = ref.read(prefsProvider);
-    await p.setString('onlineName', _name.text.trim());
+    // Editing the name here edits the profile (invalid input keeps the old one).
+    final profile = ref.read(profileProvider.notifier);
+    if (PlayerNames.clean(_name.text) != ref.read(profileProvider).name) await profile.rename(_name.text);
+    final name = ref.read(profileProvider).name;
+    _name.text = name;
     _cancelled = false;
     final custom = _server.text.trim();
     await p.setString('onlineCustomServer', custom);
     final st = ref.read(settingsProvider);
     final ok = await widget.client.connect(
       custom.isEmpty ? defaultServerUrl : custom,
-      _name.text,
+      name,
       skin: [st.hat, st.face, st.color],
     );
     if (mounted) setState(() => _failed = !ok && !_cancelled);
@@ -239,21 +246,7 @@ class _RoomListView extends StatelessWidget {
   final void Function(String code) onJoinCode;
 
   Future<void> _quick(BuildContext context) async {
-    final l = AppLocalizations.of(context);
-    final cap = await showDialog<int>(
-      context: context,
-      builder: (_) => SimpleDialog(
-        title: Text(l.quickMatch),
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(24, 0, 24, 8),
-            child: Text(l.quickHint, style: const TextStyle(color: Colors.white70)),
-          ),
-          SimpleDialogOption(onPressed: () => Navigator.pop(context, 2), child: Text(l.quick1v1)),
-          SimpleDialogOption(onPressed: () => Navigator.pop(context, 4), child: Text(l.quick4)),
-        ],
-      ),
-    );
+    final cap = await showQuickMatchDialog(context);
     if (cap != null) client.quickMatch(cap);
   }
 
@@ -313,17 +306,25 @@ class _RoomListView extends StatelessWidget {
         ],
       ),
       body: SafeArea(
-        child: rooms.isEmpty
-            ? Center(child: Text(l.noRooms, style: const TextStyle(fontSize: 18, color: Colors.white70)))
-            : ListView.separated(
-                padding: const EdgeInsets.fromLTRB(12, 12, 12, 150),
-                itemCount: rooms.length,
-                separatorBuilder: (_, _) => const SizedBox(height: 8),
-                itemBuilder: (context, i) {
-                  final r = rooms[i];
-                  return _RoomCard(room: r, onJoin: r.joinable ? () => _join(context, r) : null);
-                },
-              ),
+        child: Column(children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: BoostButton(client: client),
+          ),
+          Expanded(
+            child: rooms.isEmpty
+                ? Center(child: Text(l.noRooms, style: const TextStyle(fontSize: 18, color: Colors.white70)))
+                : ListView.separated(
+                    padding: const EdgeInsets.fromLTRB(12, 12, 12, 150),
+                    itemCount: rooms.length,
+                    separatorBuilder: (_, _) => const SizedBox(height: 8),
+                    itemBuilder: (context, i) {
+                      final r = rooms[i];
+                      return _RoomCard(room: r, onJoin: r.joinable ? () => _join(context, r) : null);
+                    },
+                  ),
+          ),
+        ]),
       ),
     );
   }
@@ -593,10 +594,17 @@ class _CreateRoomDialogState extends State<_CreateRoomDialog> {
             const SizedBox(height: 8),
             Text(l.playerCount),
             const SizedBox(height: 6),
-            SegmentedButton<int>(
-              segments: [for (final n in [2, 3, 4]) ButtonSegment(value: n, label: Text('$n'))],
-              selected: {_capacity},
-              onSelectionChanged: (s) => setState(() => _capacity = s.first),
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              children: [
+                for (var n = 2; n <= MapGenerator.maxPlayers; n++)
+                  ChoiceChip(
+                    label: Text('$n'),
+                    selected: _capacity == n,
+                    onSelected: (_) => setState(() => _capacity = n),
+                  ),
+              ],
             ),
             SwitchListTile(
               contentPadding: EdgeInsets.zero,
