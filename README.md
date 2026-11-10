@@ -1,13 +1,18 @@
-# Blast Buddies
+# Boom Pals
 
 A colourful, original arcade maze-bomber for iOS and Android built with
-**Flutter + Flame**. Round "buddy" robots, crates, chain explosions, power-ups,
+**Flutter + Flame**. Round "pal" robots, crates, chain explosions, power-ups,
 100 story levels in 10 worlds, Battle mode against bots and online matches for
 up to 7 players.
 
 > All art is drawn in code and all characters are original. No assets,
 > names or sounds from any commercial game are used. See
 > [assets/CREDITS.md](assets/CREDITS.md).
+
+> The Dart package, bundle id (`com.hustunbas.blastbuddies`) and the hosted
+> server name still use the old working title *blast_buddies*. Players never
+> see them, and renaming them would only churn imports and break the live
+> server address.
 
 ## Run
 
@@ -186,7 +191,7 @@ curl localhost:8080/health   # -> blast-buddies ok
 4. Watching a rewarded ad before the match gives a small advantage: you start
    with extra bombs for that one match (the room sees a badge). The server
    cannot verify the ad, which is why the advantage is deliberately small.
-5. During a match, tap an emote to flash it above your buddy (throttled to one
+5. During a match, tap an emote to flash it above your pal (throttled to one
    per 0.8 s; premium emotes must be owned).
 
 ### Reconnecting to a running match
@@ -195,7 +200,7 @@ Phones lose their connection all the time (Wi-Fi to mobile handover, tunnel,
 lock screen, app switch). A dropped player **keeps their seat**:
 
 * The server issues a random session **token** in `welcome` (`tok`). When a
-  socket closes mid-match the buddy stands still for up to **30 s**
+  socket closes mid-match the pal stands still for up to **30 s**
   (`BlastServer.reconnectGrace`) and the others get an `away` message
   (a toast "X lost connection").
 * The client keeps the match on screen ("Reconnecting…") and retries every

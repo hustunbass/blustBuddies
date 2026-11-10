@@ -101,7 +101,7 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'Blast Buddies'**
+  /// **'Boom Pals'**
   String get appTitle;
 
   /// No description provided for @storyMode.
@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @howBattle.
   ///
   /// In en, this message translates to:
-  /// **'Battle: last buddy standing wins. Play with friends or bots.'**
+  /// **'Battle: last pal standing wins. Play with friends or bots.'**
   String get howBattle;
 
   /// No description provided for @howTime.
@@ -815,7 +815,7 @@ abstract class AppLocalizations {
   /// No description provided for @worldStory0.
   ///
   /// In en, this message translates to:
-  /// **'The buddies wake up in a neon training arena. Time to learn the ropes!'**
+  /// **'The pals wake up in a neon training arena. Time to learn the ropes!'**
   String get worldStory0;
 
   /// No description provided for @worldStory1.
@@ -851,7 +851,7 @@ abstract class AppLocalizations {
   /// No description provided for @worldStory6.
   ///
   /// In en, this message translates to:
-  /// **'The last station in space. Nothing can stop the buddies now.'**
+  /// **'The last station in space. Nothing can stop the pals now.'**
   String get worldStory6;
 
   /// No description provided for @worldStory7.
@@ -869,7 +869,7 @@ abstract class AppLocalizations {
   /// No description provided for @worldStory9.
   ///
   /// In en, this message translates to:
-  /// **'The final stretch. Become the Blast Buddy legend!'**
+  /// **'The final stretch. Become the Boom Pals legend!'**
   String get worldStory9;
 
   /// No description provided for @achievementUnlocked.
@@ -1895,7 +1895,7 @@ abstract class AppLocalizations {
   /// No description provided for @quickPartyDesc.
   ///
   /// In en, this message translates to:
-  /// **'Chaos with up to seven buddies'**
+  /// **'Chaos with up to seven pals'**
   String get quickPartyDesc;
 
   /// No description provided for @shopPacks.
@@ -2141,7 +2141,7 @@ abstract class AppLocalizations {
   /// No description provided for @welcomeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Welcome, buddy!'**
+  /// **'Welcome, pal!'**
   String get welcomeTitle;
 
   /// No description provided for @welcomeBody.

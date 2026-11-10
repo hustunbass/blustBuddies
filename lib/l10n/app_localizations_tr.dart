@@ -9,7 +9,7 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
-  String get appTitle => 'Blast Buddies';
+  String get appTitle => 'Boom Pals';
 
   @override
   String get storyMode => 'Hikaye';
@@ -168,7 +168,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howBattle =>
-      'Savaş: ayakta kalan son buddy kazanır. Arkadaşlarınla ya da botlarla oyna.';
+      'Savaş: ayakta kalan son pal kazanır. Arkadaşlarınla ya da botlarla oyna.';
 
   @override
   String get howTime =>
@@ -409,7 +409,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get worldStory0 =>
-      'Buddy\'ler neon bir eğitim arenasında uyanıyor. İpleri öğrenme zamanı!';
+      'Pal\'ler neon bir eğitim arenasında uyanıyor. İpleri öğrenme zamanı!';
 
   @override
   String get worldStory1 =>
@@ -431,7 +431,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get worldStory6 =>
-      'Uzaydaki son istasyon. Artık Buddy\'leri hiçbir şey durduramaz.';
+      'Uzaydaki son istasyon. Artık Pal\'leri hiçbir şey durduramaz.';
 
   @override
   String get worldStory7 => 'Yine orman — ama robotlar daha güçlü döndü.';
@@ -440,7 +440,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get worldStory8 => 'Kumullar kayıyor, robotlar çoğalıyor.';
 
   @override
-  String get worldStory9 => 'Son etap. Blast Buddy efsanesi ol!';
+  String get worldStory9 => 'Son etap. Boom Pals efsanesi ol!';
 
   @override
   String achievementUnlocked(String name) {
@@ -851,7 +851,7 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
-  String get achSeries_owned => 'Şık Buddy';
+  String get achSeries_owned => 'Şık Pal';
 
   @override
   String achStat_owned(int n) {
@@ -1171,7 +1171,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get tutDoneStart => 'Hikayeye başla';
 
   @override
-  String get welcomeTitle => 'Hoş geldin, buddy!';
+  String get welcomeTitle => 'Hoş geldin, pal!';
 
   @override
   String welcomeBody(int n) {

@@ -9,7 +9,7 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
-  String get appTitle => 'Blast Buddies';
+  String get appTitle => 'Boom Pals';
 
   @override
   String get storyMode => 'Story';
@@ -168,7 +168,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howBattle =>
-      'Battle: last buddy standing wins. Play with friends or bots.';
+      'Battle: last pal standing wins. Play with friends or bots.';
 
   @override
   String get howTime =>
@@ -410,7 +410,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get worldStory0 =>
-      'The buddies wake up in a neon training arena. Time to learn the ropes!';
+      'The pals wake up in a neon training arena. Time to learn the ropes!';
 
   @override
   String get worldStory1 =>
@@ -431,7 +431,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get worldStory6 =>
-      'The last station in space. Nothing can stop the buddies now.';
+      'The last station in space. Nothing can stop the pals now.';
 
   @override
   String get worldStory7 =>
@@ -441,7 +441,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get worldStory8 => 'The dunes shift, the robots multiply.';
 
   @override
-  String get worldStory9 => 'The final stretch. Become the Blast Buddy legend!';
+  String get worldStory9 => 'The final stretch. Become the Boom Pals legend!';
 
   @override
   String achievementUnlocked(String name) {
@@ -1150,7 +1150,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickBrawlDesc => 'The classic four-way brawl';
 
   @override
-  String get quickPartyDesc => 'Chaos with up to seven buddies';
+  String get quickPartyDesc => 'Chaos with up to seven pals';
 
   @override
   String get shopPacks => 'Coin packs';
@@ -1279,7 +1279,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tutDoneStart => 'Start the story';
 
   @override
-  String get welcomeTitle => 'Welcome, buddy!';
+  String get welcomeTitle => 'Welcome, pal!';
 
   @override
   String welcomeBody(int n) {

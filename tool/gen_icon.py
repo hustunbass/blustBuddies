@@ -1,4 +1,4 @@
-"""Draws the original Blast Buddies app icon and splash logo (CC0).
+"""Draws the original Boom Pals app icon and splash logo (CC0).
 
 Run: python3 tool/gen_icon.py   (needs Pillow)
 """

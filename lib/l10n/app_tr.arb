@@ -1,6 +1,6 @@
 {
   "@@locale": "tr",
-  "appTitle": "Blast Buddies",
+  "appTitle": "Boom Pals",
   "storyMode": "Hikaye",
   "battleMode": "Savaş",
   "howToPlay": "Nasıl Oynanır",
@@ -48,7 +48,7 @@
   "powerSpeed": "Hız artışı",
   "powerShield": "Kalkan",
   "powerKick": "Bomba tekmeleme",
-  "howBattle": "Savaş: ayakta kalan son buddy kazanır. Arkadaşlarınla ya da botlarla oyna.",
+  "howBattle": "Savaş: ayakta kalan son pal kazanır. Arkadaşlarınla ya da botlarla oyna.",
   "howTime": "Hikaye bölümleri süreli (ilerledikçe biraz kısalır) ve 3 canın var.",
   "back": "Geri",
   "language": "Dil, cihaz ayarlarını izler.",
@@ -154,16 +154,16 @@
   "mapName4": "Lav Demirhanesi",
   "mapName5": "Derin Okyanus",
   "mapName6": "Uzay İstasyonu",
-  "worldStory0": "Buddy'ler neon bir eğitim arenasında uyanıyor. İpleri öğrenme zamanı!",
+  "worldStory0": "Pal'ler neon bir eğitim arenasında uyanıyor. İpleri öğrenme zamanı!",
   "worldStory1": "Antik harabelerde hazine sandıkları ve kızgın robotlar saklı.",
   "worldStory2": "Sıcak kum, uzun gölgeler. Robotlar burada hiç uyumuyor.",
   "worldStory3": "Buzla kaplı bir zirve. Gergin sinirler, keskin patlamalar.",
   "worldStory4": "Demirhane gece gündüz yanıyor. Adımına dikkat!",
   "worldStory5": "Dalgaların altında robotlar bir üs kurmuş.",
-  "worldStory6": "Uzaydaki son istasyon. Artık Buddy'leri hiçbir şey durduramaz.",
+  "worldStory6": "Uzaydaki son istasyon. Artık Pal'leri hiçbir şey durduramaz.",
   "worldStory7": "Yine orman — ama robotlar daha güçlü döndü.",
   "worldStory8": "Kumullar kayıyor, robotlar çoğalıyor.",
-  "worldStory9": "Son etap. Blast Buddy efsanesi ol!",
+  "worldStory9": "Son etap. Boom Pals efsanesi ol!",
   "achievementUnlocked": "Başarım kazanıldı: {name}",
   "@achievementUnlocked": {
     "placeholders": {
@@ -466,7 +466,7 @@
       }
     }
   },
-  "achSeries_owned": "Şık Buddy",
+  "achSeries_owned": "Şık Pal",
   "achStat_owned": "{n} gardırop eşyasına sahip ol",
   "@achStat_owned": {
     "placeholders": {
@@ -675,7 +675,7 @@
   "tutTooFar": "Biraz uzak kaldı. Sandığın hemen yanında tekrar dene.",
   "tutSkip": "Atla",
   "tutDoneStart": "Hikayeye başla",
-  "welcomeTitle": "Hoş geldin, buddy!",
+  "welcomeTitle": "Hoş geldin, pal!",
   "welcomeBody": "Temel bilgileri bir dakikadan kısa sürede öğren ve {n} coin kazan.",
   "@welcomeBody": {
     "placeholders": {

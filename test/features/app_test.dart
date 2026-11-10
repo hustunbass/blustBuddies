@@ -38,7 +38,7 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('en')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await pumpApp(tester);
-    expect(find.text('Blast Buddies'), findsOneWidget);
+    expect(find.text('Boom Pals'), findsOneWidget);
     for (final t in ['Story', 'Battle', 'Online', 'How to Play', 'Settings']) {
       expect(find.text(t), findsOneWidget);
     }
@@ -69,12 +69,12 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('en')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     final c = await pumpApp(tester, prefs: {'onboardingOffered': false});
-    expect(find.text('Welcome, buddy!'), findsOneWidget);
+    expect(find.text('Welcome, pal!'), findsOneWidget);
     expect(find.text('Learn the basics in under a minute and get 50 coins.'), findsOneWidget);
     expect(c.read(onboardingProvider).offered, isTrue);
     await tester.tap(find.text('Maybe later'));
     await tester.pumpAndSettle();
-    expect(find.text('Welcome, buddy!'), findsNothing);
+    expect(find.text('Welcome, pal!'), findsNothing);
     expect(c.read(onboardingProvider).done, isTrue);
     expect(c.read(walletProvider).coin, 100, reason: 'only the welcome gift, no tutorial reward');
   });
@@ -83,7 +83,7 @@ void main() {
     tester.platformDispatcher.localesTestValue = const [Locale('en')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await pumpApp(tester, prefs: {'onboardingOffered': true});
-    expect(find.text('Welcome, buddy!'), findsNothing);
+    expect(find.text('Welcome, pal!'), findsNothing);
   });
 
   testWidgets('"Let\'s go" opens the tutorial', (tester) async {
