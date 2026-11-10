@@ -482,6 +482,24 @@ abstract class AppLocalizations {
   /// **'Connection lost.'**
   String get connectionLost;
 
+  /// No description provided for @reconnecting.
+  ///
+  /// In en, this message translates to:
+  /// **'Reconnecting…'**
+  String get reconnecting;
+
+  /// No description provided for @playerAway.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} lost connection'**
+  String playerAway(String name);
+
+  /// No description provided for @playerBack.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is back'**
+  String playerBack(String name);
+
   /// No description provided for @rooms.
   ///
   /// In en, this message translates to:

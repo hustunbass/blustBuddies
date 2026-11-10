@@ -30,6 +30,7 @@ class BlastServer {
     this.passwordWindow = const Duration(minutes: 1),
     this.log,
     this.statsLogEvery = const Duration(minutes: 5),
+    this.reconnectGrace = const Duration(seconds: 30),
     Random? random,
   }) : _rng = random ?? Random.secure();
 
@@ -60,10 +61,18 @@ class BlastServer {
   /// How often a stats line is logged while anyone is connected.
   final Duration statsLogEvery;
 
+  /// How long a player whose connection dropped mid-match keeps their seat
+  /// (the buddy stands still) before being eliminated. Zero = no grace.
+  final Duration reconnectGrace;
+
   final Random _rng;
   HttpServer? _http;
   final Set<_Client> _clients = {};
   final Map<String, _Room> _rooms = {};
+
+  /// Session token -> client, for taking over a seat after a dropped
+  /// connection (see [Msg.hello] `resume`).
+  final Map<String, _Client> _tokens = {};
   int _nextClientId = 1;
 
   final Stopwatch _uptime = Stopwatch();
@@ -131,6 +140,7 @@ class BlastServer {
       r.dispose();
     }
     _rooms.clear();
+    _tokens.clear();
     for (final c in _clients.toList()) {
       await c.ws.close();
     }
@@ -146,7 +156,9 @@ class BlastServer {
         await req.response.close();
         return;
       }
-      final ws = await WebSocketTransformer.upgrade(req);
+      // No permessage-deflate: it would compress every 30 Hz snapshot once per
+      // client (CPU a small host cannot spare) for frames of < 1 KB.
+      final ws = await WebSocketTransformer.upgrade(req, compression: CompressionOptions.compressionOff);
       ws.pingInterval = const Duration(seconds: 10);
       final c = _Client(_nextClientId++, ws);
       _clients.add(c);
@@ -232,7 +244,69 @@ class BlastServer {
 
   void _onGone(_Client c) {
     if (!_clients.remove(c)) return;
+    final r = c.room;
+    final match = r?.match;
+    if (r != null && match != null && c.token != null && reconnectGrace > Duration.zero) {
+      // Keep the seat for a while: the buddy stands still and the player can
+      // come back with their token.
+      final slot = r.slots.indexOf(c);
+      match.world.setMove(slot, Dir.none);
+      for (final o in r.members) {
+        if (o != c) _send(o, {'t': Msg.away, 'slot': slot, 'away': true});
+      }
+      c.graceTimer = Timer(reconnectGrace, () {
+        c.graceTimer = null;
+        _forget(c);
+        _leave(c);
+      });
+      log?.call('${c.name} dropped from room ${r.id}, seat held for ${reconnectGrace.inSeconds}s');
+      return;
+    }
+    _forget(c);
     _leave(c);
+  }
+
+  void _forget(_Client c) {
+    final t = c.token;
+    if (t != null && _tokens[t] == c) _tokens.remove(t);
+  }
+
+  String _newToken() =>
+      List.generate(16, (_) => _rng.nextInt(256).toRadixString(16).padLeft(2, '0')).join();
+
+  /// Gives the seat of the client owning [token] to [c] (a fresh connection)
+  /// and brings it up to date. False if there is nothing to resume.
+  bool _resume(_Client c, String token) {
+    final old = _tokens[token];
+    final r = old?.room;
+    final match = r?.match;
+    if (old == null || old == c || r == null || match == null) return false;
+    final slot = r.slots.indexOf(old);
+    if (slot < 0) return false;
+    old.graceTimer?.cancel();
+    old.graceTimer = null;
+    // The old socket may still look alive (half-open TCP); drop it.
+    _clients.remove(old);
+    r.slots[slot] = c;
+    if (r.ready.remove(old)) r.ready.add(c);
+    c
+      ..room = r
+      ..name = old.name
+      ..skin = old.skin
+      ..token = token;
+    _tokens[token] = c;
+    old
+      ..room = null
+      ..token = null;
+    old.ws.close().ignore();
+    _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true, 'tok': token, 'resumed': true});
+    _send(c, _startMessage(r, match, slot, resume: true));
+    c.ws.add(jsonEncode(encodeSnapshot(match.world, const [], serverTime: match.ticks / tickRate)));
+    for (final o in r.members) {
+      if (o != c) _send(o, {'t': Msg.away, 'slot': slot, 'away': false});
+    }
+    log?.call('${c.name} resumed room ${r.id}');
+    return true;
   }
 
   // --------------------------------------------------------------- lobby
@@ -242,6 +316,8 @@ class BlastServer {
       _error(c, ErrorCode.versionMismatch);
       return;
     }
+    final resume = m['resume'];
+    if (resume is String && _resume(c, resume)) return;
     final name = cleanText(m['name'], Limits.name);
     c.name = name.isEmpty ? 'Player ${c.id}' : name;
     final sk = m['skin'];
@@ -250,7 +326,10 @@ class BlastServer {
     }
     final online = _clients.where((x) => x.name != null).length;
     if (online > _peakOnline) _peakOnline = online;
-    _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true});
+    _forget(c);
+    c.token = _newToken();
+    _tokens[c.token!] = c;
+    _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true, 'tok': c.token});
     _sendRoomList(c);
   }
 
@@ -501,10 +580,6 @@ class BlastServer {
     }
     r.lastStyle = MapGenerator.styleFor(seed);
     final world = GameWorld.battle(humans: r.capacity, bots: 0, seed: seed, teams: r.teams);
-    final match = _Match(world);
-    r
-      ..phase = RoomPhase.playing
-      ..match = match;
     final names = [for (final c in r.slots) c?.name ?? ''];
     // Everybody keeps their look, but two buddies never share a body colour.
     final usedColors = <int>{};
@@ -526,17 +601,12 @@ class BlastServer {
     for (final c in r.slots) {
       c?.boost = false;
     }
+    final match = _Match(world, seed: seed, names: names, skins: skins, boosted: boosted);
+    r
+      ..phase = RoomPhase.playing
+      ..match = match;
     for (final c in r.members) {
-      _send(c, {
-        't': Msg.start,
-        'seed': seed,
-        'cap': r.capacity,
-        'teams': r.teams,
-        'you': r.slots.indexOf(c),
-        'names': names,
-        'skins': [for (final k in skins) [k.hat, k.face, k.color ?? 0]],
-        'boost': boosted,
-      });
+      _send(c, _startMessage(r, match, r.slots.indexOf(c)));
     }
     _broadcastRoom(r);
     _broadcastRoomList();
@@ -568,6 +638,18 @@ class BlastServer {
     log?.call('room ${r.id} match started (seed $seed)');
   }
 
+  Map<String, dynamic> _startMessage(_Room r, _Match m, int slot, {bool resume = false}) => {
+        't': Msg.start,
+        'seed': m.seed,
+        'cap': r.capacity,
+        'teams': r.teams,
+        'you': slot,
+        'names': m.names,
+        'skins': [for (final k in m.skins) [k.hat, k.face, k.color ?? 0]],
+        'boost': m.boosted,
+        if (resume) 'resume': true,
+      };
+
   void _sendSnapshot(_Room r, _Match match) {
     match.lastSnapshotTick = match.ticks;
     final msg = jsonEncode(encodeSnapshot(match.world, match.pending, serverTime: match.ticks / tickRate));
@@ -588,6 +670,14 @@ class BlastServer {
     }
     _broadcastRoom(r);
     _broadcastRoomList();
+    // Players still away when the match ends do not get a seat in the lobby.
+    for (final c in r.members.toList()) {
+      if (_clients.contains(c)) continue;
+      c.graceTimer?.cancel();
+      c.graceTimer = null;
+      _forget(c);
+      _leave(c);
+    }
     log?.call('room ${r.id} match over (winner ${match.world.winnerId})');
   }
 
@@ -616,6 +706,12 @@ class _Client {
   _Room? room;
   Skin skin = const Skin();
   DateTime? lastEmote;
+
+  /// Session token for resuming a match after a dropped connection.
+  String? token;
+
+  /// Seat-holding timer while the connection is down mid-match.
+  Timer? graceTimer;
 
   /// Next match starts with extra bombs (rewarded ad watched).
   bool boost = false;
@@ -680,13 +776,21 @@ class _Room {
   void dispose() {
     countdownTimer?.cancel();
     match?.timer?.cancel();
+    for (final c in members) {
+      c.graceTimer?.cancel();
+      c.graceTimer = null;
+    }
   }
 }
 
 class _Match {
-  _Match(this.world);
+  _Match(this.world, {required this.seed, required this.names, required this.skins, required this.boosted});
 
   final GameWorld world;
+  final int seed;
+  final List<String> names;
+  final List<Skin> skins;
+  final List<bool> boosted;
   final Stopwatch clock = Stopwatch();
   final List<GameEvent> pending = [];
   Timer? timer;

@@ -99,6 +99,23 @@
   "disconnect": "Disconnect",
   "connectFailed": "Could not connect to the server.",
   "connectionLost": "Connection lost.",
+  "reconnecting": "Reconnecting…",
+  "playerAway": "{name} lost connection",
+  "@playerAway": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "playerBack": "{name} is back",
+  "@playerBack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rooms": "Rooms",
   "noRooms": "No rooms yet. Create one!",
   "createRoom": "Create room",

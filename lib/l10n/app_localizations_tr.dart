@@ -218,6 +218,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get connectionLost => 'Bağlantı koptu.';
 
   @override
+  String get reconnecting => 'Yeniden bağlanılıyor…';
+
+  @override
+  String playerAway(String name) {
+    return '$name bağlantısını kaybetti';
+  }
+
+  @override
+  String playerBack(String name) {
+    return '$name geri döndü';
+  }
+
+  @override
   String get rooms => 'Odalar';
 
   @override

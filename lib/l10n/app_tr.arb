@@ -64,6 +64,23 @@
   "disconnect": "Bağlantıyı kes",
   "connectFailed": "Sunucuya bağlanılamadı.",
   "connectionLost": "Bağlantı koptu.",
+  "reconnecting": "Yeniden bağlanılıyor…",
+  "playerAway": "{name} bağlantısını kaybetti",
+  "@playerAway": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "playerBack": "{name} geri döndü",
+  "@playerBack": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
   "rooms": "Odalar",
   "noRooms": "Henüz oda yok. Bir tane kur!",
   "createRoom": "Oda kur",

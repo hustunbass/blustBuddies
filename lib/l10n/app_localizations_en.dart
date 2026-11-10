@@ -219,6 +219,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectionLost => 'Connection lost.';
 
   @override
+  String get reconnecting => 'Reconnecting…';
+
+  @override
+  String playerAway(String name) {
+    return '$name lost connection';
+  }
+
+  @override
+  String playerBack(String name) {
+    return '$name is back';
+  }
+
+  @override
   String get rooms => 'Rooms';
 
   @override

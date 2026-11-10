@@ -36,6 +36,7 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
   final ValueNotifier<_Overlay> _overlay = ValueNotifier(_Overlay.none);
   final Map<String, int> _delta = {};
   StreamSubscription<int>? _left;
+  StreamSubscription<(int, bool)>? _away;
 
   @override
   void initState() {
@@ -46,6 +47,13 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
       if (!mounted || slot == widget.match.localId || slot >= widget.match.names.length) return;
       final l = AppLocalizations.of(context);
       showToast(l.playerLeftMatch(widget.match.names[slot]), kind: ToastKind.info);
+    });
+    _away = widget.match.awaySlots.listen((e) {
+      final (slot, away) = e;
+      if (!mounted || slot == widget.match.localId || slot >= widget.match.names.length) return;
+      final l = AppLocalizations.of(context);
+      final name = widget.match.names[slot];
+      showToast(away ? l.playerAway(name) : l.playerBack(name), kind: ToastKind.info);
     });
   }
 
@@ -104,6 +112,7 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
   void dispose() {
     _audio.stopMusic();
     unawaited(_left?.cancel());
+    unawaited(_away?.cancel());
     _overlay.dispose();
     super.dispose();
   }
@@ -140,6 +149,20 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
               ValueListenableBuilder<_Overlay>(
                 valueListenable: _overlay,
                 builder: (_, o, _) {
+                  if (match.disconnected && widget.client.reconnecting) {
+                    return ResultPanel(
+                      title: l.reconnecting,
+                      actions: [
+                        FilledButton.tonal(
+                          onPressed: () async {
+                            await widget.client.disconnect();
+                            widget.client.closeMatch();
+                          },
+                          child: Text(l.leaveMatch),
+                        ),
+                      ],
+                    );
+                  }
                   if (match.disconnected) {
                     return ResultPanel(
                       title: l.connectionLost,

@@ -45,7 +45,7 @@ Uri? parseServerAddress(String input) {
 class OnlineMatch implements RemoteSession {
   /// Creates the mirror world for the server's [seed] and room shape.
   OnlineMatch({
-    required int seed,
+    required this.seed,
     required int capacity,
     required bool teams,
     required this.localId,
@@ -63,6 +63,9 @@ class OnlineMatch implements RemoteSession {
       world.players[i].skin = skins[i];
     }
   }
+
+  /// Arena seed; identifies the match when resuming after a reconnect.
+  final int seed;
 
   /// Mirror of the server world (never ticked locally).
   final GameWorld world;
@@ -86,6 +89,30 @@ class OnlineMatch implements RemoteSession {
   /// Reports that [slot] left.
   void playerLeft(int slot) {
     if (!_left.isClosed) _left.add(slot);
+  }
+
+  final StreamController<(int, bool)> _away = StreamController.broadcast();
+
+  /// Players that lost their connection (`true`) or came back (`false`).
+  Stream<(int, bool)> get awaySlots => _away.stream;
+
+  /// Reports that [slot] lost its connection or came back.
+  void playerAway(int slot, bool away) {
+    if (!_away.isClosed) _away.add((slot, away));
+  }
+
+  /// Called after this device reconnected: forgets everything buffered from
+  /// before the gap so the next snapshot is taken as the new truth.
+  void resync() {
+    disconnected = false;
+    _hasSnapshot = false;
+    _sentDir = Dir.none;
+    for (final b in _buf) {
+      b.clear();
+    }
+    _history.clear();
+    _pendX = 0;
+    _pendY = 0;
   }
 
   /// Shows emote [e] above player [slot] for a couple of seconds.
@@ -324,7 +351,9 @@ class OnlineClient extends ChangeNotifier {
     Future<WebSocket> Function(Uri)? connector,
     this.wakeUpTime = const Duration(seconds: 90),
     this.retryDelay = const Duration(seconds: 3),
-  }) : _connector = connector ?? ((u) => WebSocket.connect(u.toString()));
+    this.reconnectWindow = const Duration(seconds: 25),
+    this.reconnectDelay = const Duration(seconds: 1),
+  }) : _connector = connector ?? ((u) => WebSocket.connect(u.toString(), compression: CompressionOptions.compressionOff));
 
   final Future<WebSocket> Function(Uri) _connector;
 
@@ -334,8 +363,32 @@ class OnlineClient extends ChangeNotifier {
   /// Pause between connection attempts.
   final Duration retryDelay;
 
+  /// How long to try to get back into a running match after the connection
+  /// dropped (the server keeps the seat for slightly longer).
+  final Duration reconnectWindow;
+
+  /// Pause between reconnect attempts.
+  final Duration reconnectDelay;
+
   /// True while retrying because the first attempt failed (server waking up).
   bool waking = false;
+
+  /// True while the connection is down and we are trying to get back into the
+  /// running match.
+  bool reconnecting = false;
+
+  String? _address;
+  String? _name;
+  List<int>? _skin;
+  String? _token;
+  bool _resumed = false;
+  double _lastRx = 0;
+
+  /// Silence (seconds) after which a running match counts as disconnected.
+  /// The server streams snapshots 30 times a second, so a few seconds of
+  /// nothing means the link is dead even if the OS has not noticed yet (Wi-Fi
+  /// to mobile handover leaves half-open sockets that take minutes to time out).
+  static const double _silenceLimit = 5;
 
   /// Smoothed round-trip time to the server in seconds.
   double rtt = 0.15;
@@ -381,6 +434,10 @@ class OnlineClient extends ChangeNotifier {
   Future<bool> connect(String address, String name, {List<int>? skin}) async {
     final uri = parseServerAddress(address);
     if (uri == null || status != OnlineStatus.disconnected) return false;
+    _address = address;
+    _name = name;
+    _skin = skin;
+    _token = null;
     status = OnlineStatus.connecting;
     lostConnection = false;
     notifyListeners();
@@ -412,6 +469,17 @@ class OnlineClient extends ChangeNotifier {
 
   /// Closes the connection and clears all state.
   Future<void> disconnect() async {
+    reconnecting = false;
+    // A deliberate disconnect gives the seat up at once (the server would
+    // otherwise hold it for a while in case the player comes back). The server
+    // answers a leave with the room list, which tells us the frame arrived
+    // before the socket is torn down.
+    if (_ws != null && status == OnlineStatus.connected && match != null) {
+      final ack = _leaveAck = Completer<void>();
+      _send({'t': Msg.leaveRoom});
+      await ack.future.timeout(const Duration(milliseconds: 600), onTimeout: () {});
+      _leaveAck = null;
+    }
     final ws = _ws;
     _ws = null;
     await _sub?.cancel();
@@ -420,6 +488,8 @@ class OnlineClient extends ChangeNotifier {
     notifyListeners();
     await ws?.close();
   }
+
+  Completer<void>? _leaveAck;
 
   /// Opens the socket, retrying while the server wakes up. Null if it gave up
   /// or the attempt was cancelled with [disconnect].
@@ -472,9 +542,98 @@ class OnlineClient extends ChangeNotifier {
   void _onClosed() {
     if (_ws == null) return;
     _ws = null;
+    if (reconnecting) {
+      // A reconnect attempt died before it was accepted; the loop retries.
+      _completeWelcome(false);
+      return;
+    }
+    final m = match;
+    if (status == OnlineStatus.connected && m != null && !m.ended && _token != null && !_disposed) {
+      unawaited(_reconnect(m));
+      return;
+    }
     lostConnection = status == OnlineStatus.connected;
     _reset();
     notifyListeners();
+  }
+
+  /// The socket dropped during a match: keep the match on screen and try to
+  /// take the seat back with the session token. Gives up after
+  /// [reconnectWindow].
+  Future<void> _reconnect(OnlineMatch m) async {
+    final uri = parseServerAddress(_address ?? '');
+    final token = _token;
+    _pinger?.cancel();
+    _pinger = null;
+    await _sub?.cancel();
+    _sub = null;
+    if (uri == null || token == null) {
+      lostConnection = true;
+      _reset();
+      notifyListeners();
+      return;
+    }
+    reconnecting = true;
+    status = OnlineStatus.connecting;
+    m.disconnected = true;
+    notifyListeners();
+    final sw = Stopwatch()..start();
+    var success = false;
+    while (reconnecting && !_disposed && sw.elapsed < reconnectWindow && !m.ended) {
+      WebSocket? ws;
+      try {
+        ws = await _connector(uri).timeout(const Duration(seconds: 6));
+        if (!reconnecting || _disposed) {
+          unawaited(ws.close());
+          return;
+        }
+        ws.pingInterval = const Duration(seconds: 10);
+        _ws = ws;
+        _resumed = false;
+        _welcome = Completer();
+        _sub = ws.listen(_onData, onDone: _onClosed, onError: (_) => _onClosed());
+        _helloSentAt = _now;
+        _send({
+          't': Msg.hello,
+          'name': cleanText(_name ?? '', Limits.name),
+          'v': protocolVersion,
+          'resume': token,
+          if (_skin != null) 'skin': _skin,
+        });
+        final ok = await _welcome!.future.timeout(const Duration(seconds: 6), onTimeout: () => false);
+        if (ok && _resumed) {
+          success = true;
+          break;
+        }
+        // Greeted but the seat is gone (match over / grace expired): give up.
+        if (ok) break;
+      } on Object {
+        // Network still down: try again below.
+      }
+      final dead = ws;
+      await _sub?.cancel();
+      _sub = null;
+      _ws = null;
+      if (dead != null) unawaited(dead.close());
+      if (!reconnecting || _disposed) return;
+      await Future<void>.delayed(reconnectDelay);
+    }
+    if (_disposed || !reconnecting) return;
+    reconnecting = false;
+    if (success) {
+      m.resync();
+      status = OnlineStatus.connected;
+      notifyListeners();
+      return;
+    }
+    lostConnection = true;
+    final ws = _ws;
+    _ws = null;
+    await _sub?.cancel();
+    _sub = null;
+    _reset();
+    notifyListeners();
+    if (ws != null) unawaited(ws.close());
   }
 
   void _send(Map<String, dynamic> m) => _ws?.add(jsonEncode(m));
@@ -515,8 +674,20 @@ class OnlineClient extends ChangeNotifier {
     notifyListeners();
   }
 
+  void _checkAlive() {
+    final m = match;
+    final ws = _ws;
+    if (m == null || m.ended || ws == null || reconnecting || status != OnlineStatus.connected) return;
+    if (_now - _lastRx < _silenceLimit) return;
+    // Treat the socket as dead; the close handshake of a half-open socket may
+    // never finish, so do not wait for it.
+    _onClosed();
+    unawaited(ws.close().then<void>((_) {}, onError: (Object _) {}));
+  }
+
   void _onData(Object? data) {
-    if (data is! String) return;
+    if (data is! String || _ws == null) return;
+    _lastRx = _now;
     final Map<String, dynamic> m;
     try {
       m = jsonDecode(data) as Map<String, dynamic>;
@@ -530,11 +701,17 @@ class OnlineClient extends ChangeNotifier {
       case Msg.welcome:
         status = OnlineStatus.connected;
         waking = false;
+        final tok = m['tok'];
+        if (tok is String) _token = tok;
+        _resumed = m['resumed'] == true;
         final sent = _helloSentAt;
         if (sent != null) rtt = (_now - sent).clamp(0.02, 1.0);
         if (m['ping'] == true) {
           _pinger?.cancel();
-          _pinger = Timer.periodic(const Duration(seconds: 2), (_) => _send({'t': Msg.ping, 'c': _now}));
+          _pinger = Timer.periodic(const Duration(seconds: 2), (_) {
+            _send({'t': Msg.ping, 'c': _now});
+            _checkAlive();
+          });
         }
         _completeWelcome(true);
       case Msg.pong:
@@ -542,12 +719,20 @@ class OnlineClient extends ChangeNotifier {
         if (c is num) _addRttSample(_now - c);
         return;
       case Msg.rooms:
+        final ack = _leaveAck;
+        if (ack != null && !ack.isCompleted) ack.complete();
         rooms = [
           for (final r in m['rooms'] as List) RoomSummary.fromJson((r as Map).cast<String, dynamic>()),
         ];
       case Msg.room:
         room = RoomDetails.fromJson((m['room'] as Map).cast<String, dynamic>());
       case Msg.start:
+        final current = match;
+        if (m['resume'] == true && current != null && !current.ended && current.seed == m['seed']) {
+          // Same match after a reconnect: keep the world, wait for the snapshot.
+          current.resync();
+          break;
+        }
         winner = null;
         winnerTeam = null;
         // The server used the advantage up for this match.
@@ -574,6 +759,9 @@ class OnlineClient extends ChangeNotifier {
         return;
       case Msg.left:
         match?.playerLeft(m['slot'] as int);
+        return;
+      case Msg.away:
+        match?.playerAway(m['slot'] as int, m['away'] == true);
         return;
       case Msg.end:
         winner = m['winner'] as int?;

@@ -431,4 +431,126 @@ void main() {
     await waitFor(() => left.isNotEmpty);
     expect(left, [1]);
   });
+
+  group('reconnect', () {
+    late BlastServer grace;
+    late String addr;
+    final sockets = <WebSocket>[];
+    var blockConnect = false;
+
+    Future<WebSocket> tracked(Uri u) async {
+      if (blockConnect) throw const SocketException('offline');
+      final ws = await WebSocket.connect(u.toString());
+      sockets.add(ws);
+      return ws;
+    }
+
+    setUp(() async {
+      blockConnect = false;
+      sockets.clear();
+      grace = BlastServer(countdown: const Duration(milliseconds: 100), reconnectGrace: const Duration(milliseconds: 800));
+      addr = '127.0.0.1:${await grace.start(port: 0, address: '127.0.0.1')}';
+    });
+
+    tearDown(() async {
+      await grace.close();
+    });
+
+    Future<(OnlineClient, OnlineClient)> startMatch() async {
+      final a = OnlineClient(
+        connector: tracked,
+        reconnectDelay: const Duration(milliseconds: 50),
+        reconnectWindow: const Duration(milliseconds: 1500),
+      );
+      final b = OnlineClient();
+      clients.addAll([a, b]);
+      expect(await a.connect(addr, 'Ann'), isTrue);
+      expect(await b.connect(addr, 'Bob'), isTrue);
+      a.quickMatch(2);
+      await waitFor(() => a.room != null);
+      b.quickMatch(2);
+      await waitFor(() => a.match != null && b.match != null);
+      return (a, b);
+    }
+
+    test('a dropped player gets the same seat and the same match back', () async {
+      final (a, b) = await startMatch();
+      final match = a.match!;
+      final seat = match.localId;
+      final away = <(int, bool)>[];
+      b.match!.awaySlots.listen(away.add);
+      await waitFor(() => match.world.timeLeft > 0);
+      final before = match.world.timeLeft;
+
+      var sawReconnecting = false;
+      a.addListener(() => sawReconnecting |= a.reconnecting && match.disconnected);
+      sockets.last.close().ignore();
+      await waitFor(() => away.length == 2);
+      await waitFor(() => !a.reconnecting && !match.disconnected);
+      expect(sawReconnecting, isTrue, reason: 'the UI is told while the connection is down');
+
+      expect(identical(a.match, match), isTrue, reason: 'the match object survives');
+      expect(match.localId, seat);
+      expect(a.status, OnlineStatus.connected);
+      expect(a.lostConnection, isFalse);
+      expect(away, [(seat, true), (seat, false)]);
+      // Snapshots flow again after the gap.
+      await waitFor(() => match.world.timeLeft < before);
+      expect(grace.roomCount, 1);
+
+      // The returned player can still act.
+      match.move(Dir.down);
+      await waitFor(() => match.world.players[seat].moveDir == Dir.down);
+    });
+
+    test('the seat is lost after the grace time', () async {
+      final (a, b) = await startMatch();
+      final left = <int>[];
+      b.match!.leftSlots.listen(left.add);
+      blockConnect = true;
+      sockets.last.close().ignore();
+      await waitFor(() => left.isNotEmpty, timeout: const Duration(seconds: 4));
+      expect(left, [a.match!.localId]);
+      await waitFor(() => b.match!.ended, timeout: const Duration(seconds: 4));
+      expect(b.match!.world.winnerId, b.match!.localId);
+      await waitFor(() => a.lostConnection, timeout: const Duration(seconds: 4));
+      expect(a.match!.disconnected, isTrue);
+      expect(a.reconnecting, isFalse);
+    });
+
+    test('a finished match cannot be resumed and the seat is cleaned up', () async {
+      final (a, b) = await startMatch();
+      blockConnect = true;
+      sockets.last.close().ignore();
+      await waitFor(() => a.reconnecting);
+      b.leaveRoom(); // the opponent leaves: the match ends while A is away
+      await waitFor(() => grace.roomCount == 0, timeout: const Duration(seconds: 4));
+      blockConnect = false;
+      await waitFor(() => a.lostConnection, timeout: const Duration(seconds: 4));
+    });
+
+    test('a client that never had a match just disconnects without reconnecting', () async {
+      final a = OnlineClient(connector: tracked);
+      clients.add(a);
+      expect(await a.connect(addr, 'Solo'), isTrue);
+      sockets.last.close().ignore();
+      await waitFor(() => a.status == OnlineStatus.disconnected);
+      expect(a.reconnecting, isFalse);
+      expect(a.lostConnection, isTrue);
+    });
+
+    test('a forged token does not take anyone\'s seat', () async {
+      final (_, b) = await startMatch();
+      final ws = await WebSocket.connect('ws://$addr');
+      final got = <Map<String, dynamic>>[];
+      ws.listen((m) => got.add(jsonDecode(m as String) as Map<String, dynamic>));
+      ws.add(jsonEncode({'t': Msg.hello, 'name': 'Eve', 'v': protocolVersion, 'resume': 'deadbeef'}));
+      await waitFor(() => got.any((m) => m['t'] == Msg.welcome));
+      final w = got.firstWhere((m) => m['t'] == Msg.welcome);
+      expect(w['resumed'], isNull);
+      expect(got.any((m) => m['t'] == Msg.start), isFalse);
+      expect(b.match!.ended, isFalse);
+      await ws.close();
+    });
+  });
 }

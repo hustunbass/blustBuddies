@@ -37,7 +37,9 @@ class Msg {
 
   // client -> server
 
-  /// `{name, v, skin: [hat, face, colour]}` first message.
+  /// `{name, v, skin: [hat, face, colour], resume?: token}` first message.
+  /// `resume` is the `tok` of an earlier [welcome]: the server then hands the
+  /// player's seat in a running match to this new connection.
   static const hello = 'hello';
 
   /// `{name, capacity, teams, password?}`.
@@ -70,7 +72,10 @@ class Msg {
 
   // server -> client
 
-  /// `{id, ping: true}` reply to hello (`ping` = server answers [ping]).
+  /// `{id, ping: true, tok, resumed?: true}` reply to hello (`ping` = server
+  /// answers [ping]; `tok` is the session token for `resume`; `resumed` is
+  /// set when the connection took over a running match, which is then
+  /// re-sent as [start] with `resume: true` followed by a snapshot).
   static const welcome = 'welcome';
 
   /// `{c}` echo of a [ping].
@@ -88,8 +93,12 @@ class Msg {
   /// `{slot}` a player left the running match.
   static const left = 'left';
 
-  /// `{seed, cap, teams, you, names, skins, boost: [bool]}` match begins
-  /// (`boost[i]`: slot i starts with extra bombs).
+  /// `{slot, away}` a player lost the connection (`away: true`, they have a
+  /// short time to come back) or returned (`away: false`).
+  static const away = 'away';
+
+  /// `{seed, cap, teams, you, names, skins, boost: [bool], resume?: true}`
+  /// match begins (`boost[i]`: slot i starts with extra bombs).
   static const start = 'start';
 
   /// World snapshot (see `snapshot.dart`).
