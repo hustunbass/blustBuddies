@@ -91,7 +91,7 @@ address and the date above updated. Material changes will be announced in the
 app.
 
 ## 10. Contact
-[DEVELOPER NAME] — [EMAIL]
+Hakan Ustunbas — hakan9007@gmail.com
 
 ---
 
@@ -189,4 +189,4 @@ Bu politika değişirse güncel hâli aynı adreste yayımlanır ve yukarıdaki 
 güncellenir. Önemli değişiklikler uygulama içinde duyurulur.
 
 ## 10. İletişim
-[GELİŞTİRİCİ ADI] — [E-POSTA]
+Hakan Ustunbas — hakan9007@gmail.com

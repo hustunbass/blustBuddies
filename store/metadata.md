@@ -19,7 +19,7 @@ Play Console before creating the listing, and search USPTO / TÜRKPATENT for
 Name, subtitle and keywords are indexed together: do not repeat a word across
 them. **Category:** Games → Arcade (secondary: Action). **Price:** Free.
 
-**What's New (1.1.0)**
+**What's New** (not asked for the first release, 1.0.0; use it from the first update on)
 - EN: Rejoin your online match if the connection drops, smoother online play, plus a refreshed economy, daily quests, wardrobe and tutorial.
 - TR: Bağlantın koparsa çevrimiçi maça geri dönebilirsin, daha akıcı çevrimiçi oyun, ayrıca yenilenen ekonomi, günlük görevler, gardırop ve öğretici.
 
@@ -97,7 +97,11 @@ the server is awake.
 
 **Export compliance:** `ITSAppUsesNonExemptEncryption = false` (HTTPS/WSS only).
 **IDFA:** Yes, to serve ads; no install or ad-action attribution.
-**Support URL / Privacy URL:** _to be filled in_ (host `privacy_policy.md`).
+**Support URL:** https://boompals.hakan9007.workers.dev/support
+**Marketing URL:** https://boompals.hakan9007.workers.dev/
+**Privacy Policy URL:** https://boompals.hakan9007.workers.dev/privacy
+(Static site in `site/`, built by `tool/site/build_site.py`, hosted on Cloudflare;
+`app-ads.txt` for AdMob is served from the same root.)
 **Screenshots:** 6.9" iPhone (1320×2868) and 13" iPad (2064×2752); the app
 supports both.
 
@@ -121,8 +125,8 @@ feature graphic, 2-8 phone screenshots.
 - Create an upload keystore and configure Android signing; configure iOS signing team.
 - Android AdMob: real app id in `AndroidManifest.xml` and units in `AdConfig.androidUnits`.
 - Create the IAP products in both consoles and test purchase and restore.
-- Publish the privacy policy (fill `[DATE]`, `[POLICY URL]`, `[DEVELOPER NAME]`,
-  `[EMAIL]`) and update it for ads/purchases.
+- Privacy policy is published at the URL above; rebuild and redeploy `site/` after
+  changing `store/privacy_policy.md`.
 - Replace placeholder audio, update `assets/CREDITS.md`.
 - Deploy the latest server before submitting.
 - `flutter build appbundle` / `flutter build ipa`.
