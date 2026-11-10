@@ -773,6 +773,10 @@ class GameWorld {
     return danger;
   }
 
+  /// Slot of the player whose bomb lit the flame at ([x],[y]) (meaningful only
+  /// while that cell burns). Used by tests and bot tuning.
+  int flameOwnerAt(int x, int y) => _flameOwner[y * GridModel.cols + x];
+
   /// Whether a bot/enemy may step on ([x],[y]) (no wall/block/bomb).
   bool walkable(int x, int y) => !_solidOrBomb(x, y, null);
 }

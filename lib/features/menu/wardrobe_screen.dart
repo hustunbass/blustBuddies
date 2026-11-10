@@ -1,4 +1,5 @@
 import 'package:blast_buddies/core/cosmetics.dart';
+import 'package:blast_buddies/core/economy/price_format.dart';
 import 'package:blast_buddies/core/economy/wallet.dart';
 import 'package:blast_buddies/core/emotes.dart';
 import 'package:blast_buddies/features/shop/economy_widgets.dart';
@@ -34,10 +35,28 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> with SingleTick
     super.dispose();
   }
 
-  Future<void> _pick(AppSettings next, String key, int price) async {
-    if (!await purchaseWithCoins(context, ref, key, price) || !mounted) return;
+  Future<void> _pick(AppSettings next, String key, int price, {Widget? preview}) async {
+    if (!await purchaseWithCoins(context, ref, key, price, preview: preview) || !mounted) return;
     await ref.read(settingsProvider.notifier).update(next);
   }
+
+  /// What the unlock dialog shows: the buddy wearing the item, so the player
+  /// sees exactly what they are buying.
+  Widget _buddyPreview(Skin skin) => SizedBox(
+        width: 88,
+        height: 88,
+        child: CustomPaint(painter: _TilePainter(_tilePainter, skin, dimmed: false)),
+      );
+
+  Widget _colorPreview(Color color) => Container(
+        width: 72,
+        height: 72,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: color,
+          border: Border.all(color: Colors.white54, width: 3),
+        ),
+      );
 
   bool _owned(WalletData w, String kind, int i, CosmeticItem item) => item.price == 0 || w.has('$kind:$i');
 
@@ -68,12 +87,18 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> with SingleTick
             const SizedBox(height: 16),
             _Section(l.wardrobeColor, [
               for (final i in Cosmetics.byPrice(Cosmetics.colors))
-                _Swatch(
+                _ColorTile(
                   color: Cosmetics.colors[i].color == null ? BuddyColors.players[0] : Color(Cosmetics.colors[i].color!),
                   auto: i == 0,
                   selected: s.color == i,
-                  locked: !_owned(wallet, 'color', i, Cosmetics.colors[i]),
-                  onTap: () => _pick(s.copyWith(color: i), 'color:$i', Cosmetics.colors[i].price),
+                  price: _owned(wallet, 'color', i, Cosmetics.colors[i]) ? 0 : Cosmetics.colors[i].price,
+                  onTap: () => _pick(
+                    s.copyWith(color: i),
+                    'color:$i',
+                    Cosmetics.colors[i].price,
+                    preview: _colorPreview(
+                        Cosmetics.colors[i].color == null ? BuddyColors.players[0] : Color(Cosmetics.colors[i].color!)),
+                  ),
                 ),
             ]),
             _Section(l.wardrobeHat, [
@@ -84,7 +109,8 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> with SingleTick
                   painter: _tilePainter,
                   price: _owned(wallet, 'hat', i, Cosmetics.hats[i]) ? 0 : Cosmetics.hats[i].price,
                   selected: s.hat == i,
-                  onTap: () => _pick(s.copyWith(hat: i), 'hat:$i', Cosmetics.hats[i].price),
+                  onTap: () => _pick(s.copyWith(hat: i), 'hat:$i', Cosmetics.hats[i].price,
+                      preview: _buddyPreview(Cosmetics.skin(i, s.face, s.color))),
                 ),
             ]),
             _Section(l.wardrobeFace, [
@@ -95,19 +121,27 @@ class _WardrobeScreenState extends ConsumerState<WardrobeScreen> with SingleTick
                   painter: _tilePainter,
                   price: _owned(wallet, 'face', i, Cosmetics.faces[i]) ? 0 : Cosmetics.faces[i].price,
                   selected: s.face == i,
-                  onTap: () => _pick(s.copyWith(face: i), 'face:$i', Cosmetics.faces[i].price),
+                  onTap: () => _pick(s.copyWith(face: i), 'face:$i', Cosmetics.faces[i].price,
+                      preview: _buddyPreview(Cosmetics.skin(s.hat, i, s.color))),
                 ),
             ]),
             _Section(l.wardrobeEmotes, [
-              for (var i = 0; i < Emotes.count; i++)
-                if (Emotes.isFree(i) || wallet.has(Emotes.key(i)))
-                  Chip(label: Text(Emotes.emoji[i], style: const TextStyle(fontSize: 18)))
-                else
-                  ActionChip(
-                    avatar: const Icon(Icons.lock, size: 16),
-                    label: _PriceLabel(Emotes.emoji[i], Emotes.price, fontSize: 18),
-                    onPressed: () => purchaseWithCoins(context, ref, Emotes.key(i), Emotes.price),
+              // Free emotes first, then the ones to save up for.
+              for (final i in [
+                ...List.generate(Emotes.count, (i) => i).where(Emotes.isFree),
+                ...List.generate(Emotes.count, (i) => i).where((i) => !Emotes.isFree(i)),
+              ])
+                _EmoteTile(
+                  emoji: Emotes.emoji[i],
+                  price: Emotes.isFree(i) || wallet.has(Emotes.key(i)) ? 0 : Emotes.price,
+                  onTap: () => purchaseWithCoins(
+                    context,
+                    ref,
+                    Emotes.key(i),
+                    Emotes.price,
+                    preview: Text(Emotes.emoji[i], style: const TextStyle(fontSize: 56)),
                   ),
+                ),
             ]),
           ],
         ),
@@ -132,6 +166,10 @@ class _PreviewPainter extends CustomPainter {
   bool shouldRepaint(_PreviewPainter old) => true;
 }
 
+/// Every wardrobe list is a grid of exactly four columns, whatever the phone.
+const int _wardrobeColumns = 4;
+const double _wardrobeGap = 10;
+
 class _Section extends StatelessWidget {
   const _Section(this.title, this.children);
 
@@ -144,44 +182,164 @@ class _Section extends StatelessWidget {
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 10),
-          Wrap(spacing: 10, runSpacing: 10, children: children),
+          LayoutBuilder(builder: (context, c) {
+            final w = (c.maxWidth - _wardrobeGap * (_wardrobeColumns - 1)) / _wardrobeColumns;
+            return Wrap(
+              spacing: _wardrobeGap,
+              runSpacing: _wardrobeGap,
+              children: [for (final child in children) SizedBox(width: w, child: child)],
+            );
+          }),
         ]),
       );
 }
 
-class _Swatch extends StatelessWidget {
-  const _Swatch({
+/// Shared look of a wardrobe tile (panel, border, tap area).
+class _TileFrame extends StatelessWidget {
+  const _TileFrame({required this.selected, required this.onTap, required this.semanticLabel, required this.child});
+
+  final bool selected;
+  final VoidCallback onTap;
+  final String semanticLabel;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        button: true,
+        selected: selected,
+        label: semanticLabel,
+        child: Material(
+          color: BuddyColors.panel,
+          borderRadius: BorderRadius.circular(16),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: onTap,
+            child: Container(
+              padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: selected ? BuddyColors.gold : Colors.white12, width: selected ? 2.5 : 1),
+              ),
+              child: ExcludeSemantics(child: child),
+            ),
+          ),
+        ),
+      );
+}
+
+/// Price line of a tile: coin and amount while locked, a tick otherwise.
+class _TileFooter extends StatelessWidget {
+  const _TileFooter({required this.price, required this.selected, this.showCheck = true});
+
+  final int price;
+  final bool selected;
+  final bool showCheck;
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 16,
+        child: price > 0
+            ? Row(mainAxisSize: MainAxisSize.min, children: [
+                const CoinIcon(size: 13),
+                const SizedBox(width: 3),
+                Text(coinShort(price),
+                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: BuddyColors.gold)),
+              ])
+            : showCheck
+                ? Icon(selected ? Icons.check_circle_rounded : Icons.circle_outlined,
+                    size: 14, color: selected ? BuddyColors.gold : Colors.white24)
+                : null,
+      );
+}
+
+/// A body colour: the real colour stays visible while locked (dimmed, with a
+/// lock) so the player can see what they would unlock.
+class _ColorTile extends StatelessWidget {
+  const _ColorTile({
     required this.color,
     required this.auto,
     required this.selected,
-    required this.locked,
+    required this.price,
     required this.onTap,
   });
 
   final Color color;
   final bool auto;
   final bool selected;
-  final bool locked;
+  final int price;
   final VoidCallback onTap;
 
   @override
-  Widget build(BuildContext context) => GestureDetector(
-        onTap: onTap,
-        child: Container(
-          width: 46,
-          height: 46,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: locked ? Colors.white12 : color,
-            border: Border.all(color: selected ? Colors.amber : Colors.white24, width: selected ? 4 : 2),
+  Widget build(BuildContext context) {
+    final locked = price > 0;
+    return _TileFrame(
+      selected: selected,
+      onTap: onTap,
+      semanticLabel: locked ? '$price' : '',
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        LayoutBuilder(builder: (context, c) {
+          final d = (c.maxWidth - 16).clamp(34.0, 56.0);
+          return SizedBox(
+            height: 64,
+            child: Center(
+              child: Stack(alignment: Alignment.center, children: [
+                Container(
+                  width: d,
+                  height: d,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: locked ? color.withValues(alpha: .55) : color,
+                    border: Border.all(color: Colors.white38, width: 2),
+                  ),
+                  child: auto && !locked ? const Icon(Icons.auto_awesome, size: 20, color: Colors.white) : null,
+                ),
+                if (locked)
+                  Container(
+                    padding: const EdgeInsets.all(4),
+                    decoration: const BoxDecoration(color: Colors.black54, shape: BoxShape.circle),
+                    child: const Icon(Icons.lock_rounded, size: 14, color: Colors.white70),
+                  ),
+              ]),
+            ),
+          );
+        }),
+        const SizedBox(height: 2),
+        _TileFooter(price: price, selected: selected),
+      ]),
+    );
+  }
+}
+
+/// An emote: free ones can be used right away, the others show their price.
+class _EmoteTile extends StatelessWidget {
+  const _EmoteTile({required this.emoji, required this.price, required this.onTap});
+
+  final String emoji;
+  final int price;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final locked = price > 0;
+    return _TileFrame(
+      selected: false,
+      onTap: onTap,
+      semanticLabel: locked ? '$emoji, $price' : emoji,
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        SizedBox(
+          height: 64,
+          child: Center(
+            child: Stack(clipBehavior: Clip.none, alignment: Alignment.center, children: [
+              Opacity(opacity: locked ? .5 : 1, child: Text(emoji, style: const TextStyle(fontSize: 34))),
+              if (locked) const Positioned(right: -10, bottom: -4, child: Icon(Icons.lock_rounded, size: 16, color: Colors.white70)),
+            ]),
           ),
-          child: locked
-              ? const Icon(Icons.lock, size: 18, color: Colors.white38)
-              : auto
-                  ? const Icon(Icons.auto_awesome, size: 18, color: Colors.white)
-                  : null,
         ),
-      );
+        const SizedBox(height: 2),
+        _TileFooter(price: price, selected: false, showCheck: false),
+      ]),
+    );
+  }
 }
 
 /// A hat or face shown on the buddy, with its name and price.
@@ -207,56 +365,30 @@ class _CosmeticTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locked = price > 0;
-    return Semantics(
-      button: true,
+    return _TileFrame(
       selected: selected,
-      label: locked ? '$label, $price' : label,
-      child: Material(
-        color: BuddyColors.panel,
-        borderRadius: BorderRadius.circular(16),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(16),
-          onTap: onTap,
-          child: Container(
-            width: 84,
-            padding: const EdgeInsets.fromLTRB(4, 6, 4, 6),
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: selected ? BuddyColors.gold : Colors.white12, width: selected ? 2.5 : 1),
-            ),
-            child: ExcludeSemantics(
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                SizedBox(
-                  height: 64,
-                  width: 64,
-                  child: Stack(alignment: Alignment.center, children: [
-                    CustomPaint(size: const Size(64, 64), painter: _TilePainter(painter, skin, dimmed: locked)),
-                    if (locked) const Icon(Icons.lock_rounded, size: 18, color: Colors.white70),
-                  ]),
-                ),
-                const SizedBox(height: 2),
-                Text(label,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70)),
-                const SizedBox(height: 3),
-                SizedBox(
-                  height: 16,
-                  child: locked
-                      ? Row(mainAxisSize: MainAxisSize.min, children: [
-                          const CoinIcon(size: 13),
-                          const SizedBox(width: 3),
-                          Text('$price',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: BuddyColors.gold)),
-                        ])
-                      : Icon(selected ? Icons.check_circle_rounded : Icons.circle_outlined,
-                          size: 14, color: selected ? BuddyColors.gold : Colors.white24),
-                ),
-              ]),
-            ),
-          ),
-        ),
-      ),
+      onTap: onTap,
+      semanticLabel: locked ? '$label, $price' : label,
+      child: Column(mainAxisSize: MainAxisSize.min, children: [
+        LayoutBuilder(builder: (context, c) {
+          final d = (c.maxWidth - 8).clamp(40.0, 64.0);
+          return SizedBox(
+            height: 64,
+            width: d,
+            child: Stack(alignment: Alignment.center, children: [
+              CustomPaint(size: Size(d, 64), painter: _TilePainter(painter, skin, dimmed: locked)),
+              if (locked) const Icon(Icons.lock_rounded, size: 18, color: Colors.white70),
+            ]),
+          );
+        }),
+        const SizedBox(height: 2),
+        Text(label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: Colors.white70)),
+        const SizedBox(height: 3),
+        _TileFooter(price: price, selected: selected),
+      ]),
     );
   }
 }
@@ -277,20 +409,4 @@ class _TilePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_TilePainter old) => old.skin != skin || old.dimmed != dimmed;
-}
-
-/// "Name · 120 [coin]" with the real coin picture.
-class _PriceLabel extends StatelessWidget {
-  const _PriceLabel(this.name, this.price, {this.fontSize});
-
-  final String name;
-  final int price;
-  final double? fontSize;
-
-  @override
-  Widget build(BuildContext context) => Row(mainAxisSize: MainAxisSize.min, children: [
-        Text('$name · $price', style: TextStyle(fontSize: fontSize)),
-        const SizedBox(width: 4),
-        const CoinIcon(size: 16),
-      ]);
 }

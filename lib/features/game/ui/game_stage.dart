@@ -1,10 +1,12 @@
 import 'dart:async';
 
+import 'package:blast_buddies/core/economy/price_format.dart';
 import 'package:blast_buddies/core/economy/wallet.dart';
 import 'package:blast_buddies/core/emotes.dart';
 import 'package:blast_buddies/core/settings/control_layout.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
 import 'package:blast_buddies/core/settings/stats.dart';
+import 'package:blast_buddies/core/theme.dart';
 import 'package:blast_buddies/features/game/application/game_state.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/features/game/ui/controls.dart';
@@ -89,11 +91,78 @@ class _Controls extends ConsumerStatefulWidget {
 }
 
 class _ControlsState extends ConsumerState<_Controls> {
-  bool _emotes = false;
+  /// Opens the emote picker in a dialog. An inline popup above the button was
+  /// clipped by the control area (and ended up behind the map) whenever the
+  /// player had moved the buttons up in the layout editor.
+  Future<void> _openEmotes() async {
+    final remote = widget.game.remote;
+    if (remote == null) return;
+    final l = AppLocalizations.of(context);
+    final picked = await showDialog<int>(
+      context: context,
+      barrierColor: Colors.black45,
+      builder: (dialog) => Consumer(builder: (dialog, ref, _) {
+        final wallet = ref.watch(walletProvider);
+        return Dialog(
+          backgroundColor: BuddyColors.panel,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Text(l.emote, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 12,
+                runSpacing: 12,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final i in [
+                    ...List.generate(Emotes.count, (i) => i).where(Emotes.isFree),
+                    ...List.generate(Emotes.count, (i) => i).where((i) => !Emotes.isFree(i)),
+                  ])
+                    SizedBox(
+                      width: 64,
+                      child: Column(mainAxisSize: MainAxisSize.min, children: [
+                        _EmoteButton(
+                          size: 56,
+                          index: i,
+                          owned: Emotes.isFree(i) || wallet.has(Emotes.key(i)),
+                          label: l.emote,
+                          onTap: () => Navigator.pop(dialog, i),
+                        ),
+                        SizedBox(
+                          height: 16,
+                          child: Emotes.isFree(i) || wallet.has(Emotes.key(i))
+                              ? null
+                              : Text(coinShort(Emotes.price),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w900, color: BuddyColors.gold)),
+                        ),
+                      ]),
+                    ),
+                ],
+              ),
+            ]),
+          ),
+        );
+      }),
+    );
+    if (picked == null || !mounted) return;
+    if (!Emotes.isFree(picked) &&
+        !await purchaseWithCoins(
+          context,
+          ref,
+          Emotes.key(picked),
+          Emotes.price,
+          preview: Text(Emotes.emoji[picked], style: const TextStyle(fontSize: 56)),
+        )) {
+      return;
+    }
+    remote.emote(picked);
+    unawaited(ref.read(statsProvider.notifier).add({'emotes': 1}));
+  }
 
   @override
   Widget build(BuildContext context) {
-    final wallet = ref.watch(walletProvider);
     final l = AppLocalizations.of(context);
     final s = ref.watch(settingsProvider);
     final game = widget.game;
@@ -105,7 +174,15 @@ class _ControlsState extends ConsumerState<_Controls> {
       final layout = widget.landscape ? s.controlsLandscape : s.controlsPortrait;
       final stickRect = ControlGeometry.stick(area, stickSize, leftHanded: left, layout: layout);
       final bombSize = scaled(96, s.controlScale);
-      final bombRect = ControlGeometry.bomb(area, bombSize, leftHanded: left, layout: layout);
+      var bombRect = ControlGeometry.bomb(area, bombSize, leftHanded: left, layout: layout);
+      // The emote / detonate row sits above the bomb button. When the button
+      // was dragged to the top of the area that row would stick out above it
+      // (hidden under the map and out of reach), so keep room for it.
+      final rowAbove = scaled(56, s.controlScale) + 8 + 10;
+      final minTop = ControlGeometry.edge + rowAbove;
+      if (game.remote != null && bombRect.top < minTop && minTop + bombSize <= area.height) {
+        bombRect = bombRect.shift(Offset(0, minTop - bombRect.top));
+      }
       final zone = c.maxWidth * (widget.landscape ? .42 : .58);
       // The floating stick listens in a zone that follows the moved joystick.
       final zoneLeft = ((left ? c.maxWidth - zone : 0.0) + layout.stickDx * c.maxWidth).clamp(0.0, c.maxWidth - zone);
@@ -146,45 +223,13 @@ class _ControlsState extends ConsumerState<_Controls> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: left ? CrossAxisAlignment.start : CrossAxisAlignment.end,
             children: [
-              if (_emotes && game.remote != null)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
-                  // Two rows of six: free emotes first, then the premium ones.
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 6 * small + 5 * 6),
-                    child: Wrap(
-                      spacing: 6,
-                      runSpacing: 6,
-                      alignment: left ? WrapAlignment.start : WrapAlignment.end,
-                      children: [
-                        for (var i = 0; i < Emotes.count; i++)
-                          _EmoteButton(
-                            size: small,
-                            index: i,
-                            owned: Emotes.isFree(i) || wallet.has(Emotes.key(i)),
-                            label: l.emote,
-                            onTap: () async {
-                              final remote = game.remote!;
-                              if (!Emotes.isFree(i) &&
-                                  !await purchaseWithCoins(context, ref, Emotes.key(i), Emotes.price)) {
-                                return;
-                              }
-                              remote.emote(i);
-                              unawaited(ref.read(statsProvider.notifier).add({'emotes': 1}));
-                              if (mounted) setState(() => _emotes = false);
-                            },
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
               Row(mainAxisSize: MainAxisSize.min, children: [
                 if (game.remote != null)
                   _RoundButton(
                     size: small,
                     color: Colors.white24,
                     semanticLabel: l.emote,
-                    onTap: () => setState(() => _emotes = !_emotes),
+                    onTap: _openEmotes,
                     child: Icon(Icons.emoji_emotions, size: small * .55, color: Colors.white),
                   ),
                 if (hud.detonate) ...[

@@ -53,18 +53,25 @@ Regenerate generated assets:
 
 **Battle**
 
-* Local Battle: you against 1–3 bots (easy / normal / hard), optional 2v2 teams.
+* Local Battle: you against 1–3 bots, optional 2v2 teams. The three levels
+  differ clearly: **easy** bots are slow, hesitant and passive (they mostly
+  blast crates), **normal** bots are a fair fight (they go for you and for
+  power-ups), **hard** bots are faster than you, hunt you down, trap you in
+  corridors and plan timed escape routes. No level kills itself on purpose:
+  bots plan every step against the blast and flame timings.
 * **Daily arena** and **daily quests** that pay coins.
 * Online battle on separate devices (see [Online](#online)): room list,
   password rooms, 1v1, 2v2 and 3–7 player free-for-all, **Quick match**, room
-  codes to share, 12 emotes (6 free, 6 bought with coins).
+  codes to share, 12 emotes (3 free, the other 9 cost 10K coins each).
 
 **Progression and economy**
 
 * **Coins** from quests, achievements and ads; spent on lives, premium emotes
   and cosmetics.
-* **Wardrobe**: hats, faces and body colours, bought with coins (the price
-  scales with the item's star tier).
+* **Wardrobe**: every player starts with 3 hats, 3 faces, 3 colours and 3
+  emotes; everything else is bought with coins at 1K to 5K per item (the rarer
+  the item, the dearer; emotes are a flat 10K). Coin earnings are unchanged, so
+  these are long-term goals. The wardrobe grids are always four columns wide.
 * **Achievements**, statistics and a player profile.
 * **Shop** (in-app purchases): four coin packs (`coin_500`, `coin_1500`,
   `coin_4000`, `coin_10000`), a one-time starter pack (`starter_pack`, offered

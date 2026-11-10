@@ -35,12 +35,28 @@ void main() {
       expect((Cosmetics.hats.length - 1) + (Cosmetics.faces.length - 1), greaterThanOrEqualTo(31));
     });
 
-    test('the default of each kind is free, everything else costs coins', () {
+    test('each kind starts with three free items, everything else costs 1K-5K coins', () {
+      int free(List<CosmeticItem> l) => l.where((i) => i.price == 0).length;
+      expect(free(Cosmetics.hats), 3, reason: 'none, cap, beanie');
+      expect(free(Cosmetics.faces), 3, reason: 'classic, happy, sleepy');
+      // The slot colour plus three real colours.
+      expect(free(Cosmetics.colors), 4);
+      expect(Cosmetics.colors.where((c) => c.price == 0 && c.color != null).length, 3);
       for (final list in [Cosmetics.hats, Cosmetics.faces, Cosmetics.colors]) {
         expect(list.first.price, 0);
-        for (final item in list.skip(1)) {
-          expect(item.price, greaterThan(0));
+        for (final item in list.where((i) => !i.free)) {
+          expect(item.price, inInclusiveRange(1000, 5000));
+          expect(item.price % 1000, 0);
         }
+      }
+      // Rarer means dearer: the price never goes down as the rank goes up.
+      for (final list in [Cosmetics.hats, Cosmetics.faces, Cosmetics.colors]) {
+        final paid = list.where((i) => !i.free).toList()..sort((a, b) => a.stars.compareTo(b.stars));
+        for (var i = 1; i < paid.length; i++) {
+          expect(paid[i].price, greaterThanOrEqualTo(paid[i - 1].price));
+        }
+        expect(paid.first.price, 1000);
+        expect(paid.last.price, 5000);
       }
     });
 
@@ -51,14 +67,16 @@ void main() {
       expect(values.toSet().length, values.length);
     });
 
-    test('byPrice lists every item once, cheapest first, the free default first', () {
+    test('byPrice lists every item once, free ones first, then cheapest first', () {
       for (final items in [Cosmetics.hats, Cosmetics.faces, Cosmetics.colors]) {
         final order = Cosmetics.byPrice(items);
         expect(order.toSet().length, items.length);
         expect(order.first, 0);
         for (var i = 1; i < order.length; i++) {
-          expect(items[order[i]].stars, greaterThanOrEqualTo(items[order[i - 1]].stars));
+          expect(items[order[i]].price, greaterThanOrEqualTo(items[order[i - 1]].price));
         }
+        final freeCount = items.where((i) => i.free).length;
+        expect(order.take(freeCount).every((i) => items[i].free), isTrue);
       }
     });
 
@@ -127,12 +145,13 @@ void main() {
   });
 
   group('wardrobe', () {
-    Future<ProviderContainer> open(WidgetTester tester, {int coins = 500, Map<String, Object> extra = const {}}) async {
+    Future<ProviderContainer> open(WidgetTester tester,
+        {int coins = 500, Map<String, Object> extra = const {}, double width = 430}) async {
       SharedPreferences.setMockInitialValues({'walletInit': true, 'coin': coins, ...extra});
       final sp = await SharedPreferences.getInstance();
       final c = ProviderContainer(overrides: [prefsProvider.overrideWithValue(sp)]);
       addTearDown(c.dispose);
-      tester.view.physicalSize = const Size(430, 6000);
+      tester.view.physicalSize = Size(width, 6000);
       tester.view.devicePixelRatio = 1;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
@@ -161,22 +180,60 @@ void main() {
       expect(x('Crown'), lessThan(x('Horns')));
     });
 
+    testWidgets('every list is exactly four columns wide on every phone', (tester) async {
+      // iPhone SE, 15, 16, 16 Pro and Plus/Max widths.
+      for (final width in [320.0, 375.0, 393.0, 402.0, 430.0]) {
+        await open(tester, width: width);
+        double y(String t) => tester.getCenter(find.text(t)).dy;
+        double x(String t) => tester.getCenter(find.text(t)).dx;
+        // Hats: None, Cap and Beanie are free, Cat ears is the cheapest paid one.
+        final row = ['None', 'Cap', 'Beanie', 'Cat ears'];
+        for (final n in row.skip(1)) {
+          expect(y(n), closeTo(y('None'), 4), reason: '$n on a ${width.toInt()} wide phone');
+        }
+        for (var i = 1; i < row.length; i++) {
+          expect(x(row[i]), greaterThan(x(row[i - 1])), reason: '${width.toInt()}');
+        }
+        // The fifth hat starts the second row, under the first one.
+        expect(y('Chef hat'), greaterThan(y('None') + 20), reason: '${width.toInt()}');
+        expect(x('Chef hat'), closeTo(x('None'), 1), reason: '${width.toInt()}');
+        // The tiles fill the width in four equal columns.
+        final span = x('Cat ears') - x('None');
+        expect(span, closeTo((width - 32 - 30) / 4 * 3 + 30, 2), reason: '${width.toInt()}');
+      }
+    });
+
+    testWidgets('a locked colour still shows its real colour and the unlock dialog previews it', (tester) async {
+      await open(tester, coins: 5000);
+      const purple = Color(0xFF8E24AA); // 10 stars: 1K
+      bool isSwatch(Widget w, Color c) => w is Container && w.decoration is BoxDecoration && (w.decoration as BoxDecoration).color == c;
+      final locked = find.byWidgetPredicate((w) => isSwatch(w, purple.withValues(alpha: .55)));
+      expect(locked, findsOneWidget, reason: 'dimmed colour, not a grey lock');
+      expect(find.byIcon(Icons.lock_rounded), findsWidgets);
+      await tester.tap(locked);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.text('Buy'), findsOneWidget);
+      // The dialog repeats the colour at full strength above the question.
+      expect(find.descendant(of: find.byType(AlertDialog), matching: find.byWidgetPredicate((w) => isSwatch(w, purple))), findsOneWidget);
+    });
+
     testWidgets('buying a new hat takes its price and puts it on', (tester) async {
-      final c = await open(tester, coins: 100);
-      await tester.tap(find.text('Beanie')); // 4 stars = 40 coins
+      final c = await open(tester, coins: 5000);
+      await tester.tap(find.text('Party hat')); // 1K
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       await tester.tap(find.text('Buy'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
-      expect(c.read(walletProvider).coin, 60);
-      expect(c.read(walletProvider).has('hat:8'), isTrue);
-      expect(c.read(settingsProvider).hat, 8);
+      expect(c.read(walletProvider).coin, 4000);
+      expect(c.read(walletProvider).has('hat:2'), isTrue);
+      expect(c.read(settingsProvider).hat, 2);
     });
 
     testWidgets('too poor: nothing is bought and the hat stays off', (tester) async {
       final c = await open(tester, coins: 10);
-      await tester.tap(find.text('Rainbow afro')); // 800 coins
+      await tester.tap(find.text('Rainbow afro')); // 5K
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       await tester.tap(find.text('Buy'));

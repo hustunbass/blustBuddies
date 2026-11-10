@@ -149,30 +149,29 @@ void main() {
     expect(find.text('Ready to claim'), findsNothing);
   });
 
-  testWidgets('wardrobe sells premium emotes for coins, free ones stay free', (tester) async {
+  testWidgets('wardrobe sells premium emotes for a flat 10K, free ones stay free', (tester) async {
     tester.platformDispatcher.localesTestValue = const [Locale('en')];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
-    final c = await pumpApp(tester, prefs: {'walletInit': true, 'coin': 200});
+    final c = await pumpApp(tester, prefs: {'walletInit': true, 'coin': 15000});
     await tester.tap(find.text('Wardrobe'));
     // The buddy preview animates forever, so never wait for it to settle.
     await tester.pump(const Duration(milliseconds: 400));
     await tester.scrollUntilVisible(find.text('Emotes'), 200, scrollable: find.byType(Scrollable).first);
-    expect(find.text('👍'), findsOneWidget); // free, plain chip
-    final locked = find.text('😭 · 120');
+    expect(find.text('👍'), findsOneWidget); // free
+    final locked = find.text('😭');
     await tester.scrollUntilVisible(locked, 100, scrollable: find.byType(Scrollable).first);
     await tester.tap(locked);
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.text('Buy'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(c.read(walletProvider).coin, 80);
+    expect(c.read(walletProvider).coin, 5000);
     expect(c.read(walletProvider).has(Emotes.key(6)), isTrue);
-    expect(find.text('😭 · 120'), findsNothing);
-    // 80 coins is too little for the next one: nothing is bought.
-    await tester.tap(find.text('🥳 · 120'));
+    // 5K is too little for the next one: nothing is bought.
+    await tester.tap(find.text('🥳'));
     await tester.pump(const Duration(milliseconds: 400));
     await tester.tap(find.text('Buy'));
     await tester.pump(const Duration(milliseconds: 400));
-    expect(c.read(walletProvider).coin, 80);
+    expect(c.read(walletProvider).coin, 5000);
     expect(c.read(walletProvider).has(Emotes.key(7)), isFalse);
   });
 

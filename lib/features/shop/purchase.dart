@@ -8,16 +8,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// Asks to unlock item [key] for [price] coins and buys it on confirmation.
-/// Offers the shop when the wallet is too empty. Returns true if the item is
-/// owned afterwards.
-Future<bool> purchaseWithCoins(BuildContext context, WidgetRef ref, String key, int price) async {
+/// [preview] shows what is being bought (a colour, a hat, an emoji...) above
+/// the question. Offers the shop when the wallet is too empty. Returns true if
+/// the item is owned afterwards.
+Future<bool> purchaseWithCoins(
+  BuildContext context,
+  WidgetRef ref,
+  String key,
+  int price, {
+  Widget? preview,
+}) async {
   final wallet = ref.read(walletProvider);
   if (price == 0 || wallet.has(key)) return true;
   final l = AppLocalizations.of(context);
   final ok = await showDialog<bool>(
     context: context,
     builder: (c) => AlertDialog(
-      title: Text(l.unlockFor(price)),
+      icon: preview,
+      title: Text(l.unlockFor(price), textAlign: TextAlign.center),
       actions: [
         TextButton(onPressed: () => Navigator.pop(c, false), child: Text(l.cancel)),
         FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(l.buy)),
