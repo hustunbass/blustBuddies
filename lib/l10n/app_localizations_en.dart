@@ -1414,4 +1414,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rankedLabel => 'Ranked';
+
+  @override
+  String get signInWithApple => 'Sign in with Apple';
+
+  @override
+  String get signInWithGoogle => 'Sign in with Google';
+
+  @override
+  String get signInFailed => 'Sign-in failed. Try again.';
+
+  @override
+  String get signOutLabel => 'Sign out';
 }

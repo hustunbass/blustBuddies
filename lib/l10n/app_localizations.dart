@@ -2377,6 +2377,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ranked'**
   String get rankedLabel;
+
+  /// No description provided for @signInWithApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Apple'**
+  String get signInWithApple;
+
+  /// No description provided for @signInWithGoogle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in with Google'**
+  String get signInWithGoogle;
+
+  /// No description provided for @signInFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in failed. Try again.'**
+  String get signInFailed;
+
+  /// No description provided for @signOutLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out'**
+  String get signOutLabel;
 }
 
 class _AppLocalizationsDelegate

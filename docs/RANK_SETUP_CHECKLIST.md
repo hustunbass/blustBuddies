@@ -25,7 +25,8 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
   3. **Android**, package `com.hustunbas.blastbuddies`, **SHA-1** parmak izi ister (bkz. 4. adım). *Bana ver:* Android Client ID.
 
 ## 3. Supabase'te sağlayıcıları aç
-- [ ] **Authentication → Providers → Google**: aç, Web Client ID ve secret'ı gir. "Skip nonce checks" seçeneğini mobilde gerekirse aç (ben söylerim).
+- [ ] **Authentication → Providers → Google**: aç, Web Client ID ve secret'ı gir. **"Skip nonce checks"** seçeneğini **aç** (uygulama Google'dan nonce'suz token alıyor).
+- [ ] **Authentication → Providers → Email**: **kapat** (uygulamada e-posta girişi yok; açık kalırsa API üzerinden sahte hesap açılabilir).
 - [ ] **Authentication → Providers → Apple**: aç; **Client IDs** alanına bundle id'yi yaz: `com.hustunbas.blastbuddies` (iOS'ta uygulama içi giriş için yeterli).
 - [ ] **Authentication → URL Configuration → Redirect URLs**: `com.hustunbas.blastbuddies://login-callback` ekle.
 
@@ -55,9 +56,13 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 - [ ] Gizlilik politikası güncellemesi: taslağı ben yazarım, sen onaylarsın.
 - [ ] Apple review notları: ranked için test hesabı yerine "Sign in with Apple ile test edilebilir, hesapsız oynanabilir" notu yazarım.
 
+## Durum
+- [x] Supabase projesi, şema, Project URL ve publishable key tamam (bana verdin).
+- [x] Uygulamada Apple/Google giriş kodu yazıldı (branch `feature/ranked`). Apple, Supabase'te Apple sağlayıcısı açılınca çalışır. Google, aşağıdaki Client ID'ler gelince açılır (o zamana kadar Google butonu görünmez).
+
 ## Bana vereceklerin (özet)
-1. Supabase **Project URL**
-2. Supabase **publishable key** (`sb_publishable_...`)
+1. ~~Supabase Project URL~~ (alındı)
+2. ~~Supabase publishable key~~ (alındı)
 3. Google **Web Client ID**
 4. Google **iOS Client ID** + **REVERSED_CLIENT_ID**
 5. Google **Android Client ID**

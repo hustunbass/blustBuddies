@@ -9,7 +9,8 @@ import 'package:blast_buddies/features/online/online_game_view.dart';
 import 'package:blast_buddies/features/online/online_room_view.dart';
 import 'package:blast_buddies/features/online/quick_match_dialog.dart';
 import 'package:blast_buddies/features/rank/league_badge.dart';
-import 'package:blast_buddies/core/auth/auth_token.dart';
+import 'package:blast_buddies/core/auth/auth_provider.dart';
+import 'package:blast_buddies/core/auth/auth_service.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
 import 'package:blast_buddies/net/protocol.dart';
@@ -23,6 +24,36 @@ final onlineClientProvider = Provider<OnlineClient>((ref) {
   ref.onDispose(c.dispose);
   return c;
 });
+
+/// Which tab of the online lobby is open (true = ranked). Kept outside the
+/// widget because signing in reconnects and rebuilds the lobby.
+class RankedTabNotifier extends Notifier<bool> {
+  @override
+  bool build() => false;
+
+  /// Selects the ranked ([ranked] true) or casual tab.
+  void set(bool ranked) => state = ranked;
+}
+
+/// See [RankedTabNotifier].
+final onlineRankedTabProvider = NotifierProvider<RankedTabNotifier, bool>(RankedTabNotifier.new);
+
+/// Drops the connection and connects again with the current sign-in (used
+/// after signing in or out, so the server knows who the player is).
+Future<bool> reconnectOnline(ProviderContainer c, OnlineClient client) async {
+  final prefs = c.read(prefsProvider);
+  final name = c.read(profileProvider).name;
+  final st = c.read(settingsProvider);
+  final custom = (prefs.getString('onlineCustomServer') ?? '').trim();
+  await client.disconnect();
+  final token = await c.read(authProvider.notifier).freshToken();
+  return client.connect(
+    custom.isEmpty ? defaultServerUrl : custom,
+    name,
+    skin: [st.hat, st.face, st.color],
+    authToken: token,
+  );
+}
 
 /// Human readable room mode, e.g. "2 vs 2".
 String roomModeLabel(AppLocalizations l, int capacity, bool teams) =>
@@ -153,7 +184,7 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
       custom.isEmpty ? defaultServerUrl : custom,
       name,
       skin: [st.hat, st.face, st.color],
-      authToken: ref.read(authTokenProvider),
+      authToken: await ref.read(authProvider.notifier).freshToken(),
     );
     if (mounted) setState(() => _failed = !ok && !_cancelled);
   }
@@ -244,21 +275,38 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
   }
 }
 
-class _RoomListView extends StatefulWidget {
+class _RoomListView extends ConsumerStatefulWidget {
   const _RoomListView({required this.client, required this.onJoinCode});
 
   final OnlineClient client;
   final void Function(String code) onJoinCode;
 
   @override
-  State<_RoomListView> createState() => _RoomListViewState();
+  ConsumerState<_RoomListView> createState() => _RoomListViewState();
 }
 
-class _RoomListViewState extends State<_RoomListView> {
-  /// Ranked or casual: the player picks, casual is the default.
-  bool _ranked = false;
-
+class _RoomListViewState extends ConsumerState<_RoomListView> {
   OnlineClient get client => widget.client;
+
+  Future<void> _signIn(AuthProvider p) async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final l = AppLocalizations.of(context);
+    final result = await container.read(authProvider.notifier).signIn(p);
+    switch (result) {
+      case SignInResult.ok:
+        await reconnectOnline(container, client);
+      case SignInResult.cancelled:
+        break;
+      case SignInResult.failed:
+        showToast(l.signInFailed, kind: ToastKind.error);
+    }
+  }
+
+  Future<void> _signOut() async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    await container.read(authProvider.notifier).signOut();
+    await reconnectOnline(container, client);
+  }
 
   Future<void> _quick(BuildContext context) async {
     final cap = await showQuickMatchDialog(context);
@@ -290,17 +338,18 @@ class _RoomListViewState extends State<_RoomListView> {
   Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final rooms = client.rooms;
+    final ranked = ref.watch(onlineRankedTabProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l.rooms),
         backgroundColor: Colors.transparent,
         actions: [
-          if (!_ranked)
+          if (!ranked)
             IconButton(tooltip: l.joinByCode, onPressed: () => _byCode(context), icon: const Icon(Icons.vpn_key)),
           IconButton(tooltip: l.disconnect, onPressed: client.disconnect, icon: const Icon(Icons.wifi_off)),
         ],
       ),
-      floatingActionButton: _ranked
+      floatingActionButton: ranked
           ? null
           : Column(
         mainAxisSize: MainAxisSize.min,
@@ -332,15 +381,15 @@ class _RoomListViewState extends State<_RoomListView> {
                 ButtonSegment(value: false, icon: const Icon(Icons.groups), label: Text(l.casualMode)),
                 ButtonSegment(value: true, icon: const Icon(Icons.emoji_events), label: Text(l.rankedMode)),
               ],
-              selected: {_ranked},
+              selected: {ranked},
               onSelectionChanged: (s) {
                 if (!s.first && client.searchingRanked) client.cancelRanked();
-                setState(() => _ranked = s.first);
+                ref.read(onlineRankedTabProvider.notifier).set(s.first);
               },
             ),
           ),
-          if (_ranked)
-            Expanded(child: _RankedPanel(client: client))
+          if (ranked)
+            Expanded(child: _RankedPanel(client: client, onSignIn: _signIn, onSignOut: _signOut))
           else ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -372,15 +421,22 @@ class _RoomListViewState extends State<_RoomListView> {
 
 /// Ranked 1v1: rank card, search button and leaderboard. Needs a signed-in
 /// player; guests are asked to sign in (casual games stay open to everybody).
-class _RankedPanel extends StatelessWidget {
-  const _RankedPanel({required this.client});
+class _RankedPanel extends ConsumerWidget {
+  const _RankedPanel({required this.client, required this.onSignIn, required this.onSignOut});
 
   final OnlineClient client;
+  final void Function(AuthProvider provider) onSignIn;
+  final VoidCallback onSignOut;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l = AppLocalizations.of(context);
     final rank = client.rank;
+    final auth = ref.watch(authProvider);
+    final providers = [
+      for (final p in AuthProvider.values)
+        if (ref.read(authProvider.notifier).supports(p)) p,
+    ];
     return ListView(
       padding: const EdgeInsets.all(12),
       children: [
@@ -394,11 +450,27 @@ class _RankedPanel extends StatelessWidget {
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
                 Text(l.rankedSignInHint, style: const TextStyle(fontSize: 16)),
                 const SizedBox(height: 12),
-                FilledButton.icon(
-                  onPressed: () => showToast(l.signInSoon),
-                  icon: const Icon(Icons.login),
-                  label: Text(l.rankedSignIn),
-                ),
+                if (providers.isEmpty)
+                  Text(l.signInSoon, textAlign: TextAlign.center, style: const TextStyle(color: Colors.white70))
+                else
+                  for (final p in providers) ...[
+                    if (p == AuthProvider.apple)
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                            minimumSize: const Size.fromHeight(50), backgroundColor: Colors.white, foregroundColor: Colors.black),
+                        onPressed: auth.busy ? null : () => onSignIn(p),
+                        icon: const Icon(Icons.apple),
+                        label: Text(l.signInWithApple),
+                      )
+                    else
+                      OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(50)),
+                        onPressed: auth.busy ? null : () => onSignIn(p),
+                        icon: const Icon(Icons.login),
+                        label: Text(l.signInWithGoogle),
+                      ),
+                    const SizedBox(height: 8),
+                  ],
               ]),
             ),
           )
@@ -435,6 +507,12 @@ class _RankedPanel extends StatelessWidget {
           icon: const Icon(Icons.leaderboard),
           label: Text(l.leaderboard),
         ),
+        if (rank != null)
+          TextButton.icon(
+            onPressed: auth.busy ? null : onSignOut,
+            icon: const Icon(Icons.logout),
+            label: Text(l.signOutLabel),
+          ),
       ],
     );
   }

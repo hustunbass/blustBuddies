@@ -721,5 +721,9 @@
   "rankPromotionOffered": "Yükselme maçı açıldı!",
   "rankPlaced": "{league} ligine yerleştin!",
   "continueLabel": "Devam",
-  "rankedLabel": "Dereceli"
+  "rankedLabel": "Dereceli",
+  "signInWithApple": "Apple ile giriş yap",
+  "signInWithGoogle": "Google ile giriş yap",
+  "signInFailed": "Giriş başarısız. Tekrar dene.",
+  "signOutLabel": "Çıkış yap"
 }

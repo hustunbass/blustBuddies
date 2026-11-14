@@ -1,3 +1,5 @@
+import 'package:blast_buddies/core/auth/auth_provider.dart';
+import 'package:blast_buddies/core/auth/auth_service.dart';
 import 'package:blast_buddies/core/rank/rank.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
 import 'package:blast_buddies/core/theme.dart';
@@ -5,10 +7,22 @@ import 'package:blast_buddies/features/online/online_screen.dart';
 import 'package:blast_buddies/features/rank/league_badge.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
+import 'package:blast_buddies/net/server/supabase.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+class _TestTokens implements IdTokenSource {
+  @override
+  bool isSupported(AuthProvider p) => p == AuthProvider.apple;
+
+  @override
+  Future<IdCredential?> obtain(AuthProvider p) async => null;
+
+  @override
+  Future<void> signOut(AuthProvider p) async {}
+}
 
 Future<OnlineClient> pumpOnline(WidgetTester tester, {PublicRank? rank, bool searching = false}) async {
   SharedPreferences.setMockInitialValues({'walletInit': true, 'coin': 100});
@@ -25,6 +39,11 @@ Future<OnlineClient> pumpOnline(WidgetTester tester, {PublicRank? rank, bool sea
     overrides: [
       prefsProvider.overrideWithValue(sp),
       onlineClientProvider.overrideWithValue(client),
+      authServiceProvider.overrideWithValue(AuthService(
+        api: SupabaseApi('http://127.0.0.1:1', 'sb_publishable_test'),
+        store: MemorySessionStore(),
+        tokens: _TestTokens(),
+      )),
     ],
     child: MaterialApp(
       theme: buildTheme(),
@@ -51,7 +70,10 @@ void main() {
     await pumpOnline(tester);
     await tester.tap(find.text('Ranked'));
     await tester.pumpAndSettle();
-    expect(find.text('Sign in to play ranked'), findsOneWidget);
+    expect(find.textContaining('Ranked needs an account'), findsOneWidget);
+    expect(find.text('Sign in with Apple'), findsOneWidget);
+    expect(find.text('Sign in with Google'), findsNothing, reason: 'not offered where it is not set up');
+    expect(find.text('Sign out'), findsNothing);
     expect(find.text('Quick match'), findsNothing);
     expect(find.text('Find ranked match'), findsNothing);
   });
@@ -67,6 +89,8 @@ void main() {
     expect(find.text('Silver'), findsOneWidget);
     expect(find.text('40 TP'), findsOneWidget);
     expect(find.text('Find ranked match'), findsOneWidget);
+    expect(find.text('Sign out'), findsOneWidget);
+    expect(find.text('Sign in with Apple'), findsNothing);
   });
 
   testWidgets('placement games show their progress instead of a league', (tester) async {

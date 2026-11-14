@@ -1306,4 +1306,16 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get rankedLabel => 'Dereceli';
+
+  @override
+  String get signInWithApple => 'Apple ile giriş yap';
+
+  @override
+  String get signInWithGoogle => 'Google ile giriş yap';
+
+  @override
+  String get signInFailed => 'Giriş başarısız. Tekrar dene.';
+
+  @override
+  String get signOutLabel => 'Çıkış yap';
 }

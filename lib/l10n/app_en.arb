@@ -814,5 +814,9 @@
   "rankPlaced": "Placed in {league}!",
   "@rankPlaced": {"placeholders": {"league": {"type": "String"}}},
   "continueLabel": "Continue",
-  "rankedLabel": "Ranked"
+  "rankedLabel": "Ranked",
+  "signInWithApple": "Sign in with Apple",
+  "signInWithGoogle": "Sign in with Google",
+  "signInFailed": "Sign-in failed. Try again.",
+  "signOutLabel": "Sign out"
 }
