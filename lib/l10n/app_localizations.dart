@@ -2473,6 +2473,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Signed out.'**
   String get signedOutToast;
+
+  /// No description provided for @grantReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'A gift for you: +{coins} coins'**
+  String grantReceived(int coins);
 }
 
 class _AppLocalizationsDelegate

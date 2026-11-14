@@ -1359,4 +1359,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get signedOutToast => 'Çıkış yapıldı.';
+
+  @override
+  String grantReceived(int coins) {
+    return 'Sana bir hediye: +$coins coin';
+  }
 }

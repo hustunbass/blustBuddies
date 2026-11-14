@@ -38,6 +38,7 @@ class BlastServer {
     this.season = 1,
     this.rankedPairInterval = const Duration(seconds: 1),
     this.maxPairMatchesPerHour = 4,
+    this.grantsMinInterval = const Duration(seconds: 2),
     Random? random,
   }) : _rng = random ?? Random.secure();
 
@@ -89,6 +90,9 @@ class BlastServer {
   /// The same two players are not paired more often than this per hour
   /// (win-trading guard).
   final int maxPairMatchesPerHour;
+
+  /// Shortest time between two gift requests of the same player.
+  final Duration grantsMinInterval;
 
   bool get _rankedOn => auth != null && ranks != null;
 
@@ -206,6 +210,10 @@ class BlastServer {
       );
       return;
     }
+    if (req.uri.path == '/grants' || req.uri.path == '/grants/ack') {
+      await _grantsRequest(req);
+      return;
+    }
     if (req.uri.path == '/stats') {
       req.response
         ..headers.contentType = ContentType.json
@@ -218,6 +226,58 @@ class BlastServer {
       ..statusCode = ok ? HttpStatus.ok : HttpStatus.notFound
       ..write(ok ? 'blast-buddies ok' : 'not found');
     await req.response.close();
+  }
+
+  // -------------------------------------------------------------- grants
+
+  final Map<String, DateTime> _lastGrantCall = {};
+
+  Future<void> _reply(HttpRequest req, int status, Map<String, Object?> body) async {
+    req.response
+      ..statusCode = status
+      ..headers.contentType = ContentType.json
+      ..write(jsonEncode(body));
+    await req.response.close();
+  }
+
+  /// `POST /grants` lists the signed-in player's unconfirmed gifts; `POST
+  /// /grants/ack {"ids": [..]}` confirms the ones the app has credited. The
+  /// player is identified by `Authorization: Bearer <access token>`.
+  Future<void> _grantsRequest(HttpRequest req) async {
+    try {
+      if (req.method != 'POST') return await _reply(req, HttpStatus.methodNotAllowed, {'error': 'post only'});
+      final store = ranks, verifier = auth;
+      if (store == null || verifier == null) return await _reply(req, HttpStatus.notFound, {'error': 'unavailable'});
+      final header = req.headers.value(HttpHeaders.authorizationHeader) ?? '';
+      final token = header.startsWith('Bearer ') ? header.substring(7).trim() : '';
+      if (token.isEmpty || token.length > 4096) return await _reply(req, HttpStatus.unauthorized, {'error': 'sign in'});
+      final user = await verifier.verify(token).timeout(const Duration(seconds: 8));
+      if (user == null) return await _reply(req, HttpStatus.unauthorized, {'error': 'sign in'});
+      final now = DateTime.now();
+      final last = _lastGrantCall[user.id];
+      if (last != null && now.difference(last) < grantsMinInterval) {
+        return await _reply(req, HttpStatus.tooManyRequests, {'error': 'slow down'});
+      }
+      _lastGrantCall[user.id] = now;
+      if (_lastGrantCall.length > 5000) _lastGrantCall.clear();
+      if (req.uri.path == '/grants') {
+        final list = await store.pendingGrants(user.id);
+        return await _reply(req, HttpStatus.ok, {'grants': [for (final g in list) g.toJson()]});
+      }
+      final raw = await utf8.decoder.bind(req).join().timeout(const Duration(seconds: 5));
+      if (raw.length > Limits.messageBytes) return await _reply(req, HttpStatus.badRequest, {'error': 'too big'});
+      final body = jsonDecode(raw);
+      final ids = body is Map && body['ids'] is List
+          ? [for (final i in body['ids'] as List) if (i is int) i]
+          : <int>[];
+      await store.markGrantsClaimed(user.id, ids.take(50).toList());
+      return await _reply(req, HttpStatus.ok, {'ok': true});
+    } on FormatException {
+      await _reply(req, HttpStatus.badRequest, {'error': 'bad request'});
+    } on Object catch (e) {
+      log?.call('grants request failed: $e');
+      await _reply(req, HttpStatus.internalServerError, {'error': 'try again'});
+    }
   }
 
   // ----------------------------------------------------------- messaging

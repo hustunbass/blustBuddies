@@ -86,6 +86,24 @@ class LeaderboardEntry {
       };
 }
 
+/// Coins an admin gave to one player (a row of the `grants` table).
+class Grant {
+  /// Creates a grant.
+  const Grant({required this.id, required this.coins, this.note = ''});
+
+  /// Row id (also the idempotency key on the client).
+  final int id;
+
+  /// Coins to add.
+  final int coins;
+
+  /// Free text of the admin (not shown to the player).
+  final String note;
+
+  /// What the client receives.
+  Map<String, dynamic> toJson() => {'id': id, 'coins': coins};
+}
+
 /// Persistent ranking data.
 abstract class RankStore {
   /// The player's state, creating a new profile named [displayName] on first
@@ -97,6 +115,12 @@ abstract class RankStore {
 
   /// Best placed players first.
   Future<List<LeaderboardEntry>> leaderboard({int limit = 100});
+
+  /// Gifts for [userId] that have not been confirmed yet, oldest first.
+  Future<List<Grant>> pendingGrants(String userId);
+
+  /// Marks the gifts [ids] of [userId] as received (others are ignored).
+  Future<void> markGrantsClaimed(String userId, List<int> ids);
 
   /// Deletes the account with all its data (profile, history, sign-in).
   /// Deleting an account that does not exist is not an error.
@@ -143,6 +167,35 @@ class InMemoryRankStore implements RankStore {
 
   /// Ids of deleted accounts (tests).
   final List<String> deleted = [];
+
+  final List<({int id, String userId, int coins, bool claimed})> _grants = [];
+  int _nextGrant = 1;
+
+  /// Gives [userId] a gift of [coins] (tests); returns its id.
+  int addGrant(String userId, int coins) {
+    final id = _nextGrant++;
+    _grants.add((id: id, userId: userId, coins: coins, claimed: false));
+    return id;
+  }
+
+  @override
+  Future<List<Grant>> pendingGrants(String userId) async => [
+        for (final g in _grants)
+          if (g.userId == userId && !g.claimed) Grant(id: g.id, coins: g.coins),
+      ];
+
+  @override
+  Future<void> markGrantsClaimed(String userId, List<int> ids) async {
+    for (var i = 0; i < _grants.length; i++) {
+      final g = _grants[i];
+      if (g.userId == userId && ids.contains(g.id)) {
+        _grants[i] = (id: g.id, userId: g.userId, coins: g.coins, claimed: true);
+      }
+    }
+  }
+
+  /// Ids of the gifts confirmed so far (tests).
+  List<int> get claimedGrants => [for (final g in _grants) if (g.claimed) g.id];
 
   @override
   Future<List<LeaderboardEntry>> leaderboard({int limit = 100}) async {

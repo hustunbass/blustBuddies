@@ -1467,4 +1467,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signedOutToast => 'Signed out.';
+
+  @override
+  String grantReceived(int coins) {
+    return 'A gift for you: +$coins coins';
+  }
 }

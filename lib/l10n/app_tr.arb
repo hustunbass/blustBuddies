@@ -737,5 +737,6 @@
   "continueAsGuest": "Misafir olarak devam et",
   "loginGuestNote": "Misafir olarak dereceli maçlar dışında her şeyi oynayabilirsin. Daha sonra Ayarlar'dan giriş yapabilirsin.",
   "accountGuestHint": "Dereceli maç oynamak ve rankını korumak için giriş yap.",
-  "signedOutToast": "Çıkış yapıldı."
+  "signedOutToast": "Çıkış yapıldı.",
+  "grantReceived": "Sana bir hediye: +{coins} coin"
 }

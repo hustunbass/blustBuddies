@@ -11,6 +11,7 @@ import 'package:blast_buddies/core/auth/login_prompt.dart';
 import 'package:blast_buddies/core/profile/profile.dart';
 import 'package:blast_buddies/features/auth/login_screen.dart';
 import 'package:blast_buddies/core/daily/daily.dart';
+import 'package:blast_buddies/core/economy/grants.dart';
 import 'package:blast_buddies/core/economy/packages.dart';
 import 'package:blast_buddies/core/store/purchase_service.dart';
 import 'package:blast_buddies/core/store/store.dart';
@@ -85,6 +86,7 @@ class BlastBuddiesApp extends ConsumerStatefulWidget {
 
 class _BlastBuddiesAppState extends ConsumerState<BlastBuddiesApp> with WidgetsBindingObserver {
   late final GoRouter _router = buildRouter(needsLogin: _needsLogin);
+  AuthState? _previous;
 
   /// The login screen comes once, before the menu: not when the player has
   /// already decided or is signed in (the session is kept until sign-out), and
@@ -98,7 +100,11 @@ class _BlastBuddiesAppState extends ConsumerState<BlastBuddiesApp> with WidgetsB
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     // Back from the background, maybe after midnight: start the new day.
-    if (state == AppLifecycleState.resumed) ref.read(dailyProvider.notifier).refresh();
+    if (state == AppLifecycleState.resumed) {
+      ref.read(dailyProvider.notifier).refresh();
+      // Gifts may have arrived while the app was away.
+      if (ref.read(authProvider).signedIn) unawaited(claimGrants(ProviderScope.containerOf(context, listen: false)));
+    }
   }
 
   @override
@@ -121,6 +127,12 @@ class _BlastBuddiesAppState extends ConsumerState<BlastBuddiesApp> with WidgetsB
     ref.listen(authProvider, (_, next) {
       if (!next.ready) return;
       final session = next.session;
+      // Just signed in (or the stored session came back at launch): pick up
+      // gifts the admin left for this player.
+      if (session != null && _previous?.session == null) {
+        unawaited(claimGrants(ProviderScope.containerOf(context, listen: false)));
+      }
+      _previous = next;
       final kind = session == null
           ? AuthKind.guest
           : (session.provider == AuthProvider.apple ? AuthKind.apple : AuthKind.google);
@@ -185,6 +197,15 @@ class _StoreToastsState extends ConsumerState<_StoreToasts> {
   @override
   void initState() {
     super.initState();
+    ref.listenManual(grantNoticeProvider, (_, coins) {
+      if (coins <= 0 || !mounted) return;
+      showToast(
+        AppLocalizations.of(context).grantReceived(coins),
+        kind: ToastKind.coins,
+        leading: const CoinIcon(size: 28),
+      );
+      ref.read(grantNoticeProvider.notifier).set(0);
+    });
     _sub = ref.read(storeProvider.notifier).messages.listen((m) {
       if (!mounted) return;
       final l = AppLocalizations.of(context);

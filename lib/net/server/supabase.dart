@@ -124,6 +124,36 @@ class SupabaseRankStore implements RankStore {
   }
 
   @override
+  Future<List<Grant>> pendingGrants(String userId) async {
+    final id = Uri.encodeQueryComponent(userId);
+    final (status, body) = await api.request(
+      'GET',
+      '/rest/v1/grants?user_id=eq.$id&claimed_at=is.null&select=id,coins,note&order=id.asc&limit=20',
+    );
+    if (status != 200) throw HttpException('reading grants failed ($status): $body');
+    return [
+      for (final row in jsonDecode(body) as List)
+        () {
+          final j = (row as Map).cast<String, dynamic>();
+          return Grant(id: (j['id'] as num).toInt(), coins: (j['coins'] as num).toInt(), note: j['note'] as String? ?? '');
+        }(),
+    ];
+  }
+
+  @override
+  Future<void> markGrantsClaimed(String userId, List<int> ids) async {
+    if (ids.isEmpty) return;
+    final id = Uri.encodeQueryComponent(userId);
+    final (status, body) = await api.request(
+      'PATCH',
+      '/rest/v1/grants?user_id=eq.$id&id=in.(${ids.join(',')})&claimed_at=is.null',
+      body: {'claimed_at': DateTime.now().toUtc().toIso8601String()},
+      headers: {'Prefer': 'return=minimal'},
+    );
+    if (status >= 300) throw HttpException('confirming grants failed ($status): $body');
+  }
+
+  @override
   Future<void> deleteAccount(String userId) async {
     // Deleting the auth user cascades to the profile and the match history
     // (see schema.sql). Needs the secret key.

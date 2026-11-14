@@ -87,3 +87,22 @@ end $$;
 
 -- Only the service role may call it.
 revoke all on function public.record_ranked_match from public, anon, authenticated;
+
+
+-- Coins an admin gives to one player. Insert a row by hand (SQL editor or
+-- table editor); the app picks it up the next time the player is signed in
+-- and online, adds the coins and the server marks the row as claimed.
+--   insert into grants (user_id, coins, note) values ('<user uuid>', 5000, 'tester gift');
+create table if not exists public.grants (
+  id         bigint generated always as identity primary key,
+  user_id    uuid not null references auth.users (id) on delete cascade,
+  coins      int  not null check (coins > 0 and coins <= 1000000),
+  note       text not null default '',
+  created_at timestamptz not null default now(),
+  claimed_at timestamptz
+);
+
+create index if not exists grants_open_idx on public.grants (user_id) where claimed_at is null;
+
+-- Nobody but the game server (service role) reads or writes grants.
+alter table public.grants enable row level security;

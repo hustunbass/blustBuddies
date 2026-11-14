@@ -138,6 +138,28 @@ void main() {
     expect(b['p_a_mmr_before'], 1000);
   });
 
+  test('store: pending gifts are read and confirmed with a PATCH on exactly those ids', () async {
+    final store = SupabaseRankStore(SupabaseApi(url, 'sb_secret_k'));
+    fake.replies['/rest/v1/grants?user_id=eq.u-1'] = (200, '[{"id":4,"coins":500,"note":"hi"},{"id":7,"coins":250,"note":""}]');
+    final list = await store.pendingGrants('u-1');
+    expect(list.map((g) => (g.id, g.coins)), [(4, 500), (7, 250)]);
+    final get = fake.requests.single;
+    expect(get.path, contains('claimed_at=is.null'));
+    expect(get.path, contains('user_id=eq.u-1'));
+
+    fake.requests.clear();
+    await store.markGrantsClaimed('u-1', [4, 7]);
+    final patch = fake.requests.single;
+    expect(patch.method, 'PATCH');
+    expect(patch.path, contains('id=in.(4,7)'));
+    expect(patch.path, contains('user_id=eq.u-1'), reason: 'only this player\'s rows');
+    expect(jsonDecode(patch.body), containsPair('claimed_at', isA<String>()));
+
+    fake.requests.clear();
+    await store.markGrantsClaimed('u-1', []);
+    expect(fake.requests, isEmpty, reason: 'nothing to confirm');
+  });
+
   test('store: deleteAccount calls the admin API; 404 counts as done, errors are thrown', () async {
     final store = SupabaseRankStore(SupabaseApi(url, 'sb_secret_k'));
     fake.replies['/auth/v1/admin/users/u-1'] = (200, '{}');
