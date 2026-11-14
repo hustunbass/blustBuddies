@@ -358,6 +358,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get errServerFull => 'The server is full.';
 
   @override
+  String get errSignInRequired => 'Sign in to play ranked matches.';
+
+  @override
+  String get errAlreadyRanked =>
+      'This account is already searching or playing a ranked match.';
+
+  @override
   String get errVersion => 'App and server versions do not match.';
 
   @override

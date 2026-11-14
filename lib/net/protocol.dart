@@ -37,7 +37,9 @@ class Msg {
 
   // client -> server
 
-  /// `{name, v, skin: [hat, face, colour], resume?: token}` first message.
+  /// `{name, v, skin: [hat, face, colour], resume?: token, auth?: token}`
+  /// first message. `auth` is the Supabase access token of a signed-in player;
+  /// without it the player is a guest (no ranked play).
   /// `resume` is the `tok` of an earlier [welcome]: the server then hands the
   /// player's seat in a running match to this new connection.
   static const hello = 'hello';
@@ -65,6 +67,13 @@ class Msg {
 
   /// `{c: number}` latency probe; answered with [pong] echoing `c`.
   static const ping = 'ping';
+
+  /// `{on: bool}` join or leave the ranked 1v1 queue (needs a signed-in
+  /// player, see [hello] `auth`). Answered with [queue].
+  static const rankedQueue = 'rq';
+
+  /// `{}` ask for the leaderboard; answered with [leaderboard].
+  static const leaderboardRequest = 'lbq';
 
   /// `{on: bool}` the player watched a rewarded ad: their next match starts
   /// with [boostedStartBombs] bombs. Used up when that match begins.
@@ -101,10 +110,20 @@ class Msg {
   /// match begins (`boost[i]`: slot i starts with extra bombs).
   static const start = 'start';
 
+  /// `{on: bool, found?: bool, left?: bool}` ranked queue state: `on` while
+  /// searching, `found` when an opponent was matched (the room follows),
+  /// `left` when the opponent left before the start and the search resumed.
+  static const queue = 'queue';
+
+  /// `{top: [{name, league, tp, games, wins}]}` best players first.
+  static const leaderboard = 'lb';
+
   /// World snapshot (see `snapshot.dart`).
   static const snapshot = 's';
 
-  /// `{winner, team}` match finished (null = draw).
+  /// `{winner, team, rank?}` match finished (null = draw). `rank` is only in
+  /// ranked games: `{outcome, before, after, tpDelta, promoted, demoted,
+  /// promotionFailed, promotionOffered, placed}`.
   static const end = 'end';
 
   /// `{code}` request rejected, see [ErrorCode].
@@ -135,7 +154,13 @@ enum ErrorCode {
   tooManyAttempts,
 
   /// Server room limit reached.
-  serverFull;
+  serverFull,
+
+  /// Ranked play needs a signed-in player (or ranked is not enabled here).
+  signInRequired,
+
+  /// The same account is already searching or playing ranked elsewhere.
+  alreadyRanked;
 
   /// Parses [s] (unknown values map to [badRequest]).
   static ErrorCode parse(Object? s) =>
@@ -265,6 +290,7 @@ class RoomDetails {
     required this.slots,
     required this.phase,
     this.countdown,
+    this.ranked = false,
   });
 
   /// Parses JSON.
@@ -280,6 +306,7 @@ class RoomDetails {
         ],
         phase: RoomPhase.parse(j['phase']),
         countdown: (j['cd'] as num?)?.toDouble(),
+        ranked: j['ranked'] == true,
       );
 
   /// Room id.
@@ -306,6 +333,9 @@ class RoomDetails {
   /// Seconds until start while [phase] is [RoomPhase.countdown].
   final double? countdown;
 
+  /// A ranked 1v1 opened by the matchmaker (no rematch, no ad boost).
+  final bool ranked;
+
   /// Slot of the receiving client, or -1.
   int get mySlot => slots.indexWhere((m) => m?.you ?? false);
 
@@ -322,6 +352,7 @@ class RoomDetails {
         'slots': [for (final m in slots) m?.toJson()],
         'phase': phase.name,
         if (countdown != null) 'cd': countdown,
+        if (ranked) 'ranked': true,
       };
 }
 

@@ -357,6 +357,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get errServerFull => 'Sunucu dolu.';
 
   @override
+  String get errSignInRequired => 'Dereceli maçlar için giriş yapmalısın.';
+
+  @override
+  String get errAlreadyRanked =>
+      'Bu hesap zaten dereceli maç arıyor ya da oynuyor.';
+
+  @override
   String get errVersion => 'Uygulama ve sunucu sürümleri uyumsuz.';
 
   @override

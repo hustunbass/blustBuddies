@@ -7,9 +7,11 @@ import 'package:blast_buddies/core/cosmetics.dart';
 import 'package:blast_buddies/core/emotes.dart';
 import 'package:blast_buddies/core/grid/grid_pos.dart';
 import 'package:blast_buddies/core/grid/map_generator.dart';
+import 'package:blast_buddies/core/rank/rank.dart';
 import 'package:blast_buddies/features/game/logic/entities.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/net/protocol.dart';
+import 'package:blast_buddies/net/server/rank_store.dart';
 import 'package:blast_buddies/net/snapshot.dart';
 import 'package:crypto/crypto.dart';
 
@@ -31,6 +33,11 @@ class BlastServer {
     this.log,
     this.statsLogEvery = const Duration(minutes: 5),
     this.reconnectGrace = const Duration(seconds: 30),
+    this.auth,
+    this.ranks,
+    this.season = 1,
+    this.rankedPairInterval = const Duration(seconds: 1),
+    this.maxPairMatchesPerHour = 4,
     Random? random,
   }) : _rng = random ?? Random.secure();
 
@@ -64,6 +71,30 @@ class BlastServer {
   /// How long a player whose connection dropped mid-match keeps their seat
   /// (the buddy stands still) before being eliminated. Zero = no grace.
   final Duration reconnectGrace;
+
+  /// Verifies sign-in tokens. Together with [ranks] it switches ranked play
+  /// on; without them the server is casual-only.
+  final AuthVerifier? auth;
+
+  /// Persistent ranking data.
+  final RankStore? ranks;
+
+  /// Current ranked season number.
+  final int season;
+
+  /// How often waiting players are re-checked for a match (the accepted
+  /// rating gap grows while they wait).
+  final Duration rankedPairInterval;
+
+  /// The same two players are not paired more often than this per hour
+  /// (win-trading guard).
+  final int maxPairMatchesPerHour;
+
+  bool get _rankedOn => auth != null && ranks != null;
+
+  final List<_Client> _queue = [];
+  final List<(String, String, DateTime)> _recentPairs = [];
+  Timer? _pairTimer;
 
   final Random _rng;
   HttpServer? _http;
@@ -99,6 +130,7 @@ class BlastServer {
       'peakOnline': _peakOnline,
       'inMatch': matches.fold<int>(0, (n, r) => n + r.members.length),
       'rooms': _rooms.length,
+      'queued': _queue.length,
       'matches': matches.length,
       'lagMs': lag,
       'load': lag < 20 ? 'ok' : (lag < 50 ? 'busy' : 'overloaded'),
@@ -136,6 +168,9 @@ class BlastServer {
   Future<void> close() async {
     _lagTimer?.cancel();
     _statsTimer?.cancel();
+    _pairTimer?.cancel();
+    _pairTimer = null;
+    _queue.clear();
     for (final r in _rooms.values) {
       r.dispose();
     }
@@ -201,7 +236,7 @@ class BlastServer {
       return;
     }
     final type = m['t'];
-    if (c.name == null && type != Msg.hello) {
+    if ((c.name == null && type != Msg.hello) || c.helloPending) {
       _error(c, ErrorCode.badRequest);
       return;
     }
@@ -223,6 +258,10 @@ class BlastServer {
           _quick(c, m);
         case Msg.boost:
           _boost(c, m);
+        case Msg.rankedQueue:
+          _rankedQueue(c, m);
+        case Msg.leaderboardRequest:
+          _sendLeaderboard(c);
         case Msg.emote:
           _emote(c, m);
         case Msg.ping:
@@ -244,6 +283,7 @@ class BlastServer {
 
   void _onGone(_Client c) {
     if (!_clients.remove(c)) return;
+    _dequeue(c);
     final r = c.room;
     final match = r?.match;
     if (r != null && match != null && c.token != null && reconnectGrace > Duration.zero) {
@@ -293,6 +333,8 @@ class BlastServer {
       ..room = r
       ..name = old.name
       ..skin = old.skin
+      ..userId = old.userId
+      ..rank = old.rank
       ..token = token;
     _tokens[token] = c;
     old
@@ -319,22 +361,64 @@ class BlastServer {
     final resume = m['resume'];
     if (resume is String && _resume(c, resume)) return;
     final name = cleanText(m['name'], Limits.name);
-    c.name = name.isEmpty ? 'Player ${c.id}' : name;
     final sk = m['skin'];
+    Skin? skin;
     if (sk is List && sk.length == 3 && sk.every((e) => e is int)) {
-      c.skin = Cosmetics.skin(sk[0] as int, sk[1] as int, sk[2] as int);
+      skin = Cosmetics.skin(sk[0] as int, sk[1] as int, sk[2] as int);
     }
+    final token = m['auth'];
+    final hasToken = token is String && token.isNotEmpty;
+    if (hasToken && _rankedOn) {
+      // Verify the sign-in first; the welcome follows when that is done.
+      c.helloPending = true;
+      unawaited(_authenticate(token, name.isEmpty ? 'Player ${c.id}' : name).then((r) {
+        c.helloPending = false;
+        if (!_clients.contains(c)) return;
+        _completeHello(c, name, skin, r.$1, r.$2, authFailed: r.$1 == null);
+      }));
+      return;
+    }
+    _completeHello(c, name, skin, null, null, authFailed: hasToken);
+  }
+
+  Future<(AuthUser?, RankState?)> _authenticate(String token, String displayName) async {
+    try {
+      final user = await auth!.verify(token).timeout(const Duration(seconds: 8));
+      if (user == null) return (null, null);
+      final state = await ranks!.load(user.id, displayName).timeout(const Duration(seconds: 8));
+      return (user, state);
+    } on Object catch (e) {
+      log?.call('sign-in check failed: $e');
+      return (null, null);
+    }
+  }
+
+  void _completeHello(_Client c, String name, Skin? skin, AuthUser? user, RankState? rank,
+      {required bool authFailed}) {
+    c.name = name.isEmpty ? 'Player ${c.id}' : name;
+    if (skin != null) c.skin = skin;
+    c
+      ..userId = user?.id
+      ..rank = rank;
     final online = _clients.where((x) => x.name != null).length;
     if (online > _peakOnline) _peakOnline = online;
     _forget(c);
     c.token = _newToken();
     _tokens[c.token!] = c;
-    _send(c, {'t': Msg.welcome, 'id': c.id, 'ping': true, 'tok': c.token});
+    _send(c, {
+      't': Msg.welcome,
+      'id': c.id,
+      'ping': true,
+      'tok': c.token,
+      if (rank != null) 'rank': rank.publicJson(),
+      if (authFailed) 'auth': false,
+    });
     _sendRoomList(c);
   }
 
   List<Map<String, dynamic>> get _roomList => [
-        for (final r in _rooms.values) r.summary.toJson(),
+        for (final r in _rooms.values)
+          if (!r.ranked) r.summary.toJson(),
       ];
 
   void _sendRoomList(_Client c) => _send(c, {'t': Msg.rooms, 'rooms': _roomList});
@@ -373,6 +457,7 @@ class BlastServer {
       _error(c, ErrorCode.serverFull);
       return;
     }
+    _dequeue(c);
     _leave(c);
     final name = cleanText(m['name'], Limits.roomName);
     final password = cleanText(m['password'], Limits.password);
@@ -403,10 +488,11 @@ class BlastServer {
       _error(c, ErrorCode.badRequest);
       return;
     }
+    _dequeue(c);
     _leave(c);
     _Room? best;
     for (final r in _rooms.values) {
-      if (r.locked || r.teams || r.capacity != cap || r.phase != RoomPhase.lobby) continue;
+      if (r.ranked || r.locked || r.teams || r.capacity != cap || r.phase != RoomPhase.lobby) continue;
       if (r.filled == 0 || r.filled >= r.capacity) continue;
       if (best == null || r.filled > best.filled) best = r;
     }
@@ -466,7 +552,7 @@ class BlastServer {
 
   void _join(_Client c, Map<String, dynamic> m) {
     final r = _rooms[m['room']];
-    if (r == null) {
+    if (r == null || r.ranked) {
       _error(c, ErrorCode.roomNotFound);
       return;
     }
@@ -496,6 +582,7 @@ class BlastServer {
         return;
       }
     }
+    _dequeue(c);
     _leave(c);
     r.slots[r.slots.indexOf(null)] = c;
     c.room = r;
@@ -512,12 +599,27 @@ class BlastServer {
     c.room = null;
     if (r.phase == RoomPhase.countdown) _cancelCountdown(r);
     final match = r.match;
+    if (r.ranked && match == null) {
+      // Left a ranked room before the start: it is dissolved and the other
+      // player goes back to searching.
+      final others = r.members.toList();
+      r.dispose();
+      _rooms.remove(r.id);
+      for (final o in others) {
+        o.room = null;
+        if (_clients.contains(o)) _enqueue(o, left: true);
+      }
+      if (_clients.contains(c)) _sendRoomList(c);
+      _tryPair();
+      return;
+    }
     if (match != null) {
       for (final o in r.members) {
         _send(o, {'t': Msg.left, 'slot': slot});
       }
       final p = match.world.players[slot];
       if (p.alive) {
+        if (match.world.status == WorldStatus.playing) match.left = true;
         p.alive = false;
         match.pending.add(GameEvent(GameEventType.playerHit, p.x, p.y, p.id));
       }
@@ -536,6 +638,7 @@ class BlastServer {
   void _ready(_Client c, bool ready) {
     final r = c.room;
     if (r == null || r.phase == RoomPhase.playing) return;
+    if (r.ranked && !ready) return;
     if (ready) {
       r.ready.add(c);
     } else {
@@ -561,6 +664,151 @@ class BlastServer {
       ..countdownTimer = null
       ..countdownEnds = null
       ..phase = RoomPhase.lobby;
+  }
+
+  // -------------------------------------------------------------- ranked
+
+  void _rankedQueue(_Client c, Map<String, dynamic> m) {
+    if (m['on'] == false) {
+      _dequeue(c);
+      _send(c, {'t': Msg.queue, 'on': false});
+      return;
+    }
+    if (!_rankedOn || c.userId == null || c.rank == null) {
+      _error(c, ErrorCode.signInRequired);
+      return;
+    }
+    if (c.queuedAt != null) return;
+    final busy = _clients.any((o) =>
+        o != c && o.userId == c.userId && (o.queuedAt != null || (o.room?.ranked ?? false)));
+    if (busy) {
+      _error(c, ErrorCode.alreadyRanked);
+      return;
+    }
+    _leave(c);
+    _enqueue(c);
+    _tryPair();
+  }
+
+  void _enqueue(_Client c, {bool left = false}) {
+    c.queuedAt = DateTime.now();
+    _queue.add(c);
+    _send(c, {'t': Msg.queue, 'on': true, if (left) 'left': true});
+    _pairTimer ??= Timer.periodic(rankedPairInterval, (_) => _tryPair());
+  }
+
+  bool _dequeue(_Client c) {
+    c.queuedAt = null;
+    return _queue.remove(c);
+  }
+
+  /// Pairs waiting players by hidden rating. The accepted gap starts at 100
+  /// and grows by 50 for every 10 seconds the longer-waiting player has
+  /// waited, up to [RankRules.maxMatchGap].
+  void _tryPair() {
+    while (true) {
+      final pair = _findPair();
+      if (pair == null) break;
+      _startRanked(pair.$1, pair.$2);
+    }
+    if (_queue.isEmpty) {
+      _pairTimer?.cancel();
+      _pairTimer = null;
+    }
+  }
+
+  (_Client, _Client)? _findPair() {
+    final now = DateTime.now();
+    for (var i = 0; i < _queue.length; i++) {
+      for (var j = i + 1; j < _queue.length; j++) {
+        final a = _queue[i], b = _queue[j];
+        final waited = max(now.difference(a.queuedAt!).inSeconds, now.difference(b.queuedAt!).inSeconds);
+        final window = min(RankRules.maxMatchGap, 100 + 50 * (waited ~/ 10));
+        if ((a.rank!.mmr - b.rank!.mmr).abs() > window) continue;
+        if (_pairBlocked(a.userId!, b.userId!)) continue;
+        return (a, b);
+      }
+    }
+    return null;
+  }
+
+  bool _pairBlocked(String a, String b) {
+    final now = DateTime.now();
+    _recentPairs.removeWhere((p) => now.difference(p.$3) > const Duration(hours: 1));
+    final n = _recentPairs.where((p) => (p.$1 == a && p.$2 == b) || (p.$1 == b && p.$2 == a)).length;
+    return n >= maxPairMatchesPerHour;
+  }
+
+  void _startRanked(_Client a, _Client b) {
+    _dequeue(a);
+    _dequeue(b);
+    if (_rooms.length >= maxRooms) {
+      _error(a, ErrorCode.serverFull);
+      _error(b, ErrorCode.serverFull);
+      return;
+    }
+    // Spawn corners are not perfectly equal: who gets which is a coin toss.
+    final first = _rng.nextBool() ? a : b, second = identical(first, a) ? b : a;
+    final r = _Room(id: _newRoomId(), name: 'Ranked', capacity: 2, teams: false, ranked: true);
+    _rooms[r.id] = r;
+    r.slots[0] = first;
+    r.slots[1] = second;
+    first.room = r;
+    second.room = r;
+    _recentPairs.add((a.userId!, b.userId!, DateTime.now()));
+    for (final c in [first, second]) {
+      _send(c, {'t': Msg.queue, 'on': false, 'found': true});
+    }
+    log?.call('ranked room ${r.id}: ${a.name} (${a.rank!.mmr}) vs ${b.name} (${b.rank!.mmr})');
+    _broadcastRoom(r);
+    _ready(first, true);
+    _ready(second, true);
+  }
+
+  /// Applies the result of a finished ranked game, stores it and returns what
+  /// each player is told.
+  Map<_Client, Map<String, dynamic>> _settleRanked(_Match match) {
+    final cl = match.rankedClients, before = match.rankedBefore;
+    if (cl == null || before == null || ranks == null) return const {};
+    final w = match.world.winnerId;
+    final oa = w == null ? Outcome.draw : (w == 0 ? Outcome.win : Outcome.loss);
+    final ob = w == null ? Outcome.draw : (w == 1 ? Outcome.win : Outcome.loss);
+    final ca = Ranking.apply(before[0], before[1].mmr, oa);
+    final cb = Ranking.apply(before[1], before[0].mmr, ob);
+    cl[0].rank = ca.after;
+    cl[1].rank = cb.after;
+    final result = RankedResult(
+      season: season,
+      aId: cl[0].userId!,
+      bId: cl[1].userId!,
+      winnerId: w == null ? null : cl[w].userId,
+      reason: match.left ? 'leave' : (w == null ? 'timeout' : 'normal'),
+      aBefore: ca.before,
+      aAfter: ca.after,
+      bBefore: cb.before,
+      bAfter: cb.after,
+    );
+    unawaited(ranks!.recordMatch(result).catchError((Object e) {
+      log?.call('saving ranked result failed: $e');
+    }));
+    return {cl[0]: ca.toPublicJson(), cl[1]: cb.toPublicJson()};
+  }
+
+  void _sendLeaderboard(_Client c) {
+    final now = DateTime.now();
+    final last = c.lastBoard;
+    if (last != null && now.difference(last) < const Duration(seconds: 5)) return;
+    c.lastBoard = now;
+    final store = ranks;
+    if (store == null) {
+      _send(c, {'t': Msg.leaderboard, 'top': const []});
+      return;
+    }
+    store.leaderboard().then((rows) {
+      _send(c, {'t': Msg.leaderboard, 'top': [for (final e in rows) e.toPublicJson()]});
+    }).catchError((Object e) {
+      log?.call('leaderboard failed: $e');
+    });
   }
 
   // --------------------------------------------------------------- match
@@ -593,15 +841,23 @@ class BlastServer {
         }(),
     ];
     // Players who watched the advantage ad start with extra bombs, once.
-    final boosted = [for (final c in r.slots) c?.boost ?? false];
+    final boosted = [for (final c in r.slots) !r.ranked && (c?.boost ?? false)];
     for (var i = 0; i < world.players.length; i++) {
       world.players[i].skin = skins[i];
       if (boosted[i]) world.players[i].stats.maxBombs = boostedStartBombs;
     }
-    for (final c in r.slots) {
-      c?.boost = false;
+    if (!r.ranked) {
+      for (final c in r.slots) {
+        c?.boost = false;
+      }
     }
     final match = _Match(world, seed: seed, names: names, skins: skins, boosted: boosted);
+    if (r.ranked) {
+      final a = r.slots[0]!, b = r.slots[1]!;
+      match
+        ..rankedClients = [a, b]
+        ..rankedBefore = [a.rank!, b.rank!];
+    }
     r
       ..phase = RoomPhase.playing
       ..match = match;
@@ -665,8 +921,31 @@ class BlastServer {
       ..match = null
       ..phase = RoomPhase.lobby;
     r.ready.clear();
+    final rankInfo = r.ranked ? _settleRanked(match) : const <_Client, Map<String, dynamic>>{};
     for (final c in r.members) {
-      _send(c, {'t': Msg.end, 'winner': match.world.winnerId, 'team': match.world.winnerTeam});
+      _send(c, {
+        't': Msg.end,
+        'winner': match.world.winnerId,
+        'team': match.world.winnerTeam,
+        if (rankInfo[c] != null) 'rank': rankInfo[c],
+      });
+    }
+    if (r.ranked) {
+      // No rematch in ranked: the room is gone, everybody is back in the lobby.
+      for (final c in r.members.toList()) {
+        c.room = null;
+        if (_clients.contains(c)) {
+          _sendRoomList(c);
+        } else {
+          c.graceTimer?.cancel();
+          c.graceTimer = null;
+          _forget(c);
+        }
+      }
+      r.dispose();
+      _rooms.remove(r.id);
+      log?.call('ranked room ${r.id} over (winner ${match.world.winnerId})');
+      return;
     }
     _broadcastRoom(r);
     _broadcastRoomList();
@@ -715,14 +994,33 @@ class _Client {
 
   /// Next match starts with extra bombs (rewarded ad watched).
   bool boost = false;
+
+  /// Signed-in account id and ranking state (null for guests).
+  String? userId;
+  RankState? rank;
+
+  /// When the player entered the ranked queue (null = not searching).
+  DateTime? queuedAt;
+
+  /// True while the sign-in token of `hello` is being checked.
+  bool helloPending = false;
+  DateTime? lastBoard;
   final List<DateTime> failedPasswords = [];
 }
 
 class _Room {
-  _Room({required this.id, required this.name, required this.capacity, required this.teams})
-      : slots = List.filled(capacity, null);
+  _Room({
+    required this.id,
+    required this.name,
+    required this.capacity,
+    required this.teams,
+    this.ranked = false,
+  }) : slots = List.filled(capacity, null);
 
   final String id;
+
+  /// Opened by the ranked matchmaker (hidden from the room list).
+  final bool ranked;
   final String name;
   final int capacity;
   final bool teams;
@@ -767,6 +1065,7 @@ class _Room {
               : RoomMember(name: c.name!, ready: ready.contains(c), you: c == viewer, boost: c.boost),
       ],
       phase: phase,
+      ranked: ranked,
       countdown: ends == null
           ? null
           : max(0, ends.difference(DateTime.now()).inMilliseconds / 1000),
@@ -798,4 +1097,11 @@ class _Match {
   double last = 0;
   int ticks = 0;
   int lastSnapshotTick = 0;
+
+  /// Ranked games: the two players and their states before the game.
+  List<_Client>? rankedClients;
+  List<RankState>? rankedBefore;
+
+  /// Somebody left while the match was running.
+  bool left = false;
 }

@@ -34,6 +34,8 @@ String errorText(AppLocalizations l, ErrorCode c) => switch (c) {
       ErrorCode.inProgress => l.errInProgress,
       ErrorCode.tooManyAttempts => l.errTooManyAttempts,
       ErrorCode.serverFull => l.errServerFull,
+      ErrorCode.signInRequired => l.errSignInRequired,
+      ErrorCode.alreadyRanked => l.errAlreadyRanked,
       ErrorCode.versionMismatch => l.errVersion,
       ErrorCode.badRequest => l.errGeneric,
     };

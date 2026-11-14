@@ -118,6 +118,8 @@
   "errInProgress": "Maç zaten başladı.",
   "errTooManyAttempts": "Çok fazla hatalı deneme. Bir dakika sonra tekrar dene.",
   "errServerFull": "Sunucu dolu.",
+  "errSignInRequired": "Dereceli maçlar için giriş yapmalısın.",
+  "errAlreadyRanked": "Bu hesap zaten dereceli maç arıyor ya da oynuyor.",
   "errVersion": "Uygulama ve sunucu sürümleri uyumsuz.",
   "errGeneric": "İstek reddedildi.",
   "wardrobe": "Gardırop",

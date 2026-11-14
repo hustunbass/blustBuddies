@@ -40,7 +40,11 @@ All numbers live in `RankRules` ([lib/core/rank/rank.dart](../lib/core/rank/rank
 - [x] Rank engine (pure Dart) with tests: [lib/core/rank/rank.dart](../lib/core/rank/rank.dart), [test/core/rank_test.dart](../test/core/rank_test.dart)
 - [x] Database schema: [supabase/schema.sql](../supabase/schema.sql)
 
-**Needs you (accounts and consoles)**
+- [x] Server: ranked queue (MMR window 100 + 50 per 10 s, max 600), hidden ranked rooms, no ad boost, leaving counts as a loss, pair limit per hour, sign-in token check in `hello`, rank in `welcome`/`end`, leaderboard message. Tests: [test/net/ranked_test.dart](../test/net/ranked_test.dart)
+- [x] Supabase adapters (auth check, profile store, leaderboard) with request-shape tests: [lib/net/server/supabase.dart](../lib/net/server/supabase.dart)
+- [x] `bin/server.dart` turns ranked on when `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY` are set
+
+**Needs you (accounts and consoles)**: see [RANK_SETUP_CHECKLIST.md](RANK_SETUP_CHECKLIST.md)
 - [ ] Create the Supabase project; run `supabase/schema.sql`.
 - [ ] Apple: enable *Sign in with Apple* for the app id, create a Services ID and key.
 - [ ] Google: OAuth client ids (iOS, Android, Web) in Google Cloud.
@@ -49,13 +53,8 @@ All numbers live in `RankRules` ([lib/core/rank/rank.dart](../lib/core/rank/rank
 - [ ] Decide when to leave the free Render plan (cold starts hurt ranked).
 
 **Server**
-- [ ] Verify the Supabase access token sent in `hello` (JWT), reject ranked without it.
-- [ ] Profile load/save through Supabase REST (`record_ranked_match` RPC).
-- [ ] Ranked queue: pair by MMR, window 100 + 50 per 10 s waited, max 600.
-- [ ] Ranked room rules: no boost, no passwords; leaving a running match counts as a loss.
-- [ ] Rate limit and anti win-trading (same pair repeatedly, brand-new accounts).
-- [ ] Protocol: ranked flag, rank info in `welcome`/`room`/`end` (optional fields, old clients ignore them).
-- [ ] Server tests with an in-memory profile store.
+- [ ] Delete-account endpoint (store requirement) and rate limit for brand-new accounts.
+- [ ] Test against a real Supabase project once the keys exist.
 
 **App**
 - [ ] Sign-in screen (Apple, Google), sign out, delete account (store requirement).

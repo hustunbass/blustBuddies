@@ -722,6 +722,18 @@ abstract class AppLocalizations {
   /// **'The server is full.'**
   String get errServerFull;
 
+  /// No description provided for @errSignInRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play ranked matches.'**
+  String get errSignInRequired;
+
+  /// No description provided for @errAlreadyRanked.
+  ///
+  /// In en, this message translates to:
+  /// **'This account is already searching or playing a ranked match.'**
+  String get errAlreadyRanked;
+
   /// No description provided for @errVersion.
   ///
   /// In en, this message translates to:

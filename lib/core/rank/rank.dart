@@ -124,6 +124,42 @@ class RankState {
   /// True until the placement games are done.
   bool get placing => games < RankRules.placementGames;
 
+  /// Parses the stored form; missing or bad fields fall back to a new player.
+  factory RankState.fromJson(Map<String, dynamic> j) {
+    int i(String k, int d) => (j[k] as num?)?.toInt() ?? d;
+    final lg = i('league', 0).clamp(0, League.values.length - 1);
+    return RankState(
+      mmr: i('mmr', RankRules.startMmr),
+      games: i('games', 0),
+      wins: i('wins', 0),
+      league: League.values[lg],
+      tp: i('tp', 0),
+      promotion: j['promotion'] == true,
+      shield: i('shield', 0),
+    );
+  }
+
+  /// Stored form (database / server).
+  Map<String, dynamic> toJson() => {
+        'mmr': mmr,
+        'games': games,
+        'wins': wins,
+        'league': league.index,
+        'tp': tp,
+        'promotion': promotion,
+        'shield': shield,
+      };
+
+  /// What a player may see: the hidden rating is left out.
+  Map<String, dynamic> publicJson() => {
+        'league': league.index,
+        'tp': tp,
+        'promotion': promotion,
+        'placing': placing,
+        'games': games,
+        'placement': RankRules.placementGames,
+      };
+
   /// Copy with changes.
   RankState copyWith({
     int? mmr,
@@ -206,6 +242,19 @@ class RankChange {
 
   /// Hidden rating gained or lost.
   int get mmrDelta => after.mmr - before.mmr;
+
+  /// What the player is told after the game (no hidden rating).
+  Map<String, dynamic> toPublicJson() => {
+        'outcome': outcome.name,
+        'before': before.publicJson(),
+        'after': after.publicJson(),
+        'tpDelta': tpDelta,
+        'promoted': promoted,
+        'demoted': demoted,
+        'promotionFailed': promotionFailed,
+        'promotionOffered': promotionOffered,
+        'placed': placed,
+      };
 }
 
 /// Pure ranking rules for a ranked 1v1.

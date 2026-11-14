@@ -205,6 +205,8 @@
   "errInProgress": "The match has already started.",
   "errTooManyAttempts": "Too many wrong attempts. Try again in a minute.",
   "errServerFull": "The server is full.",
+  "errSignInRequired": "Sign in to play ranked matches.",
+  "errAlreadyRanked": "This account is already searching or playing a ranked match.",
   "errVersion": "App and server versions do not match.",
   "errGeneric": "Request rejected.",
   "wardrobe": "Wardrobe",
