@@ -22,7 +22,7 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 - [ ] **Credentials → Create credentials → OAuth client ID** ile üç tane oluştur:
   1. **Web application** → *Bana ver:* Client ID. Client secret'ı sadece Supabase'e gireceksin (3. adım).
   2. **iOS**, bundle id `com.hustunbas.blastbuddies` → *Bana ver:* iOS Client ID ve `REVERSED_CLIENT_ID` değeri.
-  3. **Android**, package `com.hustunbas.blastbuddies`, **SHA-1** parmak izi ister (bkz. 4. adım). *Bana ver:* Android Client ID.
+  3. *(Android'e geçince)* **Android**, package `com.hustunbas.blastbuddies`, **SHA-1** parmak izi ister (bkz. 5. adım). *Bana ver:* Android Client ID.
 
 ## 3. Supabase'te sağlayıcıları aç
 - [ ] **Authentication → Providers → Google**: aç, Web Client ID ve secret'ı gir. **"Skip nonce checks"** seçeneğini **aç** (uygulama Google'dan nonce'suz token alıyor).
@@ -35,7 +35,7 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 - [ ] Gerekirse provisioning profilini yenile (Xcode otomatik imzalıyorsa kendiliğinden olur).
 - Not: Google girişi sunduğumuz için Apple **Sign in with Apple**'ı da zorunlu tutuyor. İkisi de olacak.
 
-## 5. Android imzalama anahtarı (zaten eksikti, Google için de gerekli)
+## 5. Android imzalama anahtarı (ŞİMDİLİK ATLANDI: önce iOS, Android sonra)
 - [ ] Upload keystore oluştur (bir kez):
   `keytool -genkey -v -keystore ~/boompals-upload.jks -alias upload -keyalg RSA -keysize 2048 -validity 10000`
   Şifreleri ve dosyayı güvenli yerde sakla, **kaybedersen Play'e güncelleme veremezsin**.
@@ -65,8 +65,8 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 2. ~~Supabase publishable key~~ (alındı)
 3. Google **Web Client ID**
 4. Google **iOS Client ID** + **REVERSED_CLIENT_ID**
-5. Google **Android Client ID**
-6. Android upload keystore'un **yolu**
+5. *(Android'e geçince)* Google **Android Client ID**
+6. *(Android'e geçince)* Android upload keystore'un **yolu**
 7. Render'da planı yükseltip yükseltmeyeceğin (evet/hayır)
 
 Hepsini bir kerede göndermen gerekmiyor. 1 ve 2'yi alınca uygulama tarafındaki
