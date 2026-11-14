@@ -9,10 +9,12 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
   - Bölge: **Europe (Frankfurt)** (oyun sunucusuyla aynı bölge, hızlı olur).
   - Veritabanı şifresini bir yere kaydet (bana gerekmiyor).
 - [ ] **SQL Editor**'ü aç, [supabase/schema.sql](../supabase/schema.sql) dosyasının tamamını yapıştırıp **Run** de.
-- [ ] **Project Settings → API** sayfasından:
-  - **Project URL** → *Bana ver.*
-  - **anon public key** → *Bana ver.* (herkese açık anahtar, uygulamaya da konacak)
-  - **service_role key** → *Bana verme.* Sadece 5. adımda Render'a gireceksin.
+- [ ] Projenin sayfasında üstteki **Connect** butonuna bas:
+  - **Project URL** (`https://xxxx.supabase.co`) → *Bana ver.*
+  - **Publishable key** (`sb_publishable_...`, eski adıyla anon key) → *Bana ver.* (herkese açık anahtar, uygulamaya da konacak)
+- [ ] Soldan **Settings → API Keys** → "Publishable and secret API keys" sekmesi:
+  - **Secret key** (`sb_secret_...`, eski adıyla service_role) → *Bana verme.* Sadece 6. adımda Render'a gireceksin.
+- Not: Panelde "Settings → API" diye ayrı sayfa artık yok. Eski `eyJ...` anahtarları "Legacy" sekmesinde, yenilerini kullanıyoruz.
 
 ## 2. Google ile giriş
 - [ ] https://console.cloud.google.com → proje seç ya da oluştur.
@@ -42,8 +44,8 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 ## 6. Sunucu (Render)
 - [ ] Render panelinde `blast-buddies-eu` servisi → **Environment** → şu üç değişkeni ekle:
   - `SUPABASE_URL` = Project URL
-  - `SUPABASE_ANON_KEY` = anon public key
-  - `SUPABASE_SERVICE_KEY` = service_role key  ← sadece buraya
+  - `SUPABASE_ANON_KEY` = publishable key
+  - `SUPABASE_SERVICE_KEY` = secret key (`sb_secret_...`)  ← sadece buraya
 - [ ] Servisi yeniden deploy et. Log'da `ranked play: ON (Supabase)` yazmalı.
 - [ ] **Karar ver:** ücretsiz plan uyuyor, ilk bağlantıda ~1 dk uyanma süresi rank'lı maçta kötü deneyim. Aylık yaklaşık 7 $ olan Starter plana geçmek rank için önerilir.
 
@@ -55,7 +57,7 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 
 ## Bana vereceklerin (özet)
 1. Supabase **Project URL**
-2. Supabase **anon public key**
+2. Supabase **publishable key** (`sb_publishable_...`)
 3. Google **Web Client ID**
 4. Google **iOS Client ID** + **REVERSED_CLIENT_ID**
 5. Google **Android Client ID**

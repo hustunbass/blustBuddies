@@ -58,6 +58,25 @@ void main() {
     expect(r.headers['authorization'], 'Bearer user-jwt');
   });
 
+  test('new sb_ keys go in apikey only; legacy JWT keys are also sent as bearer', () async {
+    fake.replies['/rest/v1/profiles?id=eq.u-9'] = (200, '[]');
+    fake.replies['/rest/v1/profiles?on_conflict'] = (201, '');
+    await SupabaseRankStore(SupabaseApi(url, 'sb_secret_abc')).load('u-9', 'Ann');
+    expect(fake.requests.first.headers['apikey'], 'sb_secret_abc');
+    expect(fake.requests.first.headers['authorization'], '', reason: 'no bearer for sb_ keys');
+
+    fake.requests.clear();
+    await SupabaseRankStore(SupabaseApi(url, 'eyJlegacy')).load('u-9', 'Ann');
+    expect(fake.requests.first.headers['authorization'], 'Bearer eyJlegacy');
+
+    // A player's token is a bearer even with a publishable key.
+    fake.requests.clear();
+    fake.replies['/auth/v1/user'] = (200, '{"id":"u-1"}');
+    await SupabaseAuth(SupabaseApi(url, 'sb_publishable_x')).verify('user-jwt');
+    expect(fake.requests.single.headers['apikey'], 'sb_publishable_x');
+    expect(fake.requests.single.headers['authorization'], 'Bearer user-jwt');
+  });
+
   test('auth: rejected token and garbage give null', () async {
     fake.replies['/auth/v1/user'] = (401, '{"msg":"bad"}');
     expect(await SupabaseAuth(SupabaseApi(url, 'k')).verify('x'), isNull);

@@ -33,8 +33,12 @@ class SupabaseApi {
     final req = await _http.openUrl(method, Uri.parse('$_base$path')).timeout(const Duration(seconds: 8));
     req.headers
       ..set('apikey', key)
-      ..set('Authorization', 'Bearer ${bearer ?? key}')
       ..set('Content-Type', 'application/json');
+    // The new `sb_publishable_...` / `sb_secret_...` keys are not JWTs and go
+    // in `apikey` only; the old anon/service_role keys are JWTs and are also
+    // sent as the bearer. A player's own access token is always a bearer.
+    final auth = bearer ?? (key.startsWith('sb_') ? null : key);
+    if (auth != null) req.headers.set('Authorization', 'Bearer $auth');
     headers.forEach(req.headers.set);
     if (body != null) req.add(utf8.encode(jsonEncode(body)));
     final res = await req.close().timeout(const Duration(seconds: 8));
