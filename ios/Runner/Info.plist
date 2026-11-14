@@ -4,6 +4,21 @@
 	<dict>
 		<key>GADApplicationIdentifier</key>
 		<string>ca-app-pub-9207046302495275~6196109695</string>
+		<key>GIDClientID</key>
+		<string>303139648750-qs4ghhpo9r76kt66l710hjptt2njvg36.apps.googleusercontent.com</string>
+		<key>GIDServerClientID</key>
+		<string>303139648750-molpjckmh8ebl830he7e9h2betks2q0p.apps.googleusercontent.com</string>
+		<key>CFBundleURLTypes</key>
+		<array>
+			<dict>
+				<key>CFBundleTypeRole</key>
+				<string>Editor</string>
+				<key>CFBundleURLSchemes</key>
+				<array>
+					<string>com.googleusercontent.apps.303139648750-qs4ghhpo9r76kt66l710hjptt2njvg36</string>
+				</array>
+			</dict>
+		</array>
 		<key>NSUserTrackingUsageDescription</key>
 		<string>This identifier is used to show you more relevant ads. You can say no and still play for free.</string>
 		<key>SKAdNetworkItems</key>

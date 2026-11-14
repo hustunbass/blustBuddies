@@ -58,13 +58,14 @@ paneline gir. Bana sadece "Bana ver" yazan açık değerleri ver.
 
 ## Durum
 - [x] Supabase projesi, şema, Project URL ve publishable key tamam (bana verdin).
+- [x] Google iOS ve Web Client ID'leri koda ve `Info.plist`'e işlendi.
 - [x] Uygulamada Apple/Google giriş kodu yazıldı (branch `feature/ranked`). Apple, Supabase'te Apple sağlayıcısı açılınca çalışır. Google, aşağıdaki Client ID'ler gelince açılır (o zamana kadar Google butonu görünmez).
 
 ## Bana vereceklerin (özet)
 1. ~~Supabase Project URL~~ (alındı)
 2. ~~Supabase publishable key~~ (alındı)
-3. Google **Web Client ID**
-4. Google **iOS Client ID** + **REVERSED_CLIENT_ID**
+3. ~~Google Web Client ID~~ (alındı)
+4. ~~Google iOS Client ID~~ (alındı, REVERSED_CLIENT_ID ondan türetildi)
 5. *(Android'e geçince)* Google **Android Client ID**
 6. *(Android'e geçince)* Android upload keystore'un **yolu**
 7. Render'da planı yükseltip yükseltmeyeceğin (evet/hayır)
