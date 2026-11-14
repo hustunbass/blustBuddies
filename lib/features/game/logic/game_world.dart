@@ -534,6 +534,19 @@ class GameWorld {
     _events.add(GameEvent(GameEventType.bombPlaced, c.x + .5, c.y + .5, p.id));
   }
 
+  /// Whether player [id] overlaps cell ([cx], [cy]).
+  bool playerOverlapsCell(int id, int cx, int cy) => _overlapsCell(players[id], cx, cy);
+
+  /// Online clients only (the server does this in its tick): stops letting
+  /// player [id] walk through bombs it has already stepped off.
+  void pruneBombPass(int id) {
+    if (id >= players.length) return;
+    final p = players[id];
+    for (final b in bombs) {
+      if (b.passIds.contains(id) && !_overlapsCell(p, b.col, b.row)) b.passIds.remove(id);
+    }
+  }
+
   bool _overlapsCell(Player p, int cx, int cy) =>
       (p.x - (cx + .5)).abs() < .5 + half && (p.y - (cy + .5)).abs() < .5 + half;
 

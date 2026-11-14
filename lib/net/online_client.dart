@@ -318,6 +318,7 @@ class OnlineMatch implements RemoteSession {
   void _advanceLocal(Player p, double dt) {
     if (p.alive) {
       p.moveDir = _sentDir;
+      world.pruneBombPass(localId);
       world.predictMove(localId, dt);
     }
     // Blend server corrections in over roughly 100 ms.

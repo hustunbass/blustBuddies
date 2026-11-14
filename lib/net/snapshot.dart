@@ -84,20 +84,35 @@ void applySnapshot(GameWorld w, Map<String, dynamic> m) {
     w.flameTime[l[0] as int] = _d(l[1]);
   }
 
+  // The wire format has no `passIds` (who may still walk through a bomb they
+  // just dropped). Without them a predicting client treats the bomb under its
+  // own feet as a wall, stalls, and is yanked forward when it steps off.
+  // Known bombs keep their set; new ones start with whoever overlaps them
+  // (resolved below, once the players have their positions).
+  final oldPass = {
+    for (final b in w.bombs) (b.col, b.row, b.ownerId): b.passIds,
+  };
+  final fresh = <Bomb>[];
   w.bombs
     ..clear()
     ..addAll([
       for (final b in m['b'] as List)
-        Bomb(
-          col: (b as List)[0] as int,
-          row: b[1] as int,
-          fuse: _d(b[2]),
-          ownerId: b[5] as int,
-          range: b[6] as int,
-          passIds: {},
-        )
-          ..slideDir = Dir.values[b[3] as int]
-          ..slideProgress = _d(b[4]),
+        () {
+          final col = (b as List)[0] as int, row = b[1] as int, owner = b[5] as int;
+          final known = oldPass[(col, row, owner)];
+          final bomb = Bomb(
+            col: col,
+            row: row,
+            fuse: _d(b[2]),
+            ownerId: owner,
+            range: b[6] as int,
+            passIds: known == null ? <int>{} : Set<int>.of(known),
+          )
+            ..slideDir = Dir.values[b[3] as int]
+            ..slideProgress = _d(b[4]);
+          if (known == null) fresh.add(bomb);
+          return bomb;
+        }(),
     ]);
 
   w.powerUps
@@ -126,6 +141,12 @@ void applySnapshot(GameWorld w, Map<String, dynamic> m) {
       ..canKick = l[11] == 1
       ..ghost = l.length > 12 ? _d(l[12]) : 0
       ..canDetonate = l.length > 13 && l[13] == 1;
+  }
+
+  for (final b in fresh) {
+    for (final p in w.players) {
+      if (p.alive && w.playerOverlapsCell(p.id, b.col, b.row)) b.passIds.add(p.id);
+    }
   }
 
   for (final e in m['e'] as List) {

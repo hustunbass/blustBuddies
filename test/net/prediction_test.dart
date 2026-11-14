@@ -34,7 +34,10 @@ class _Link {
     t += dt;
     while (_up.isNotEmpty && _up.first.$1 <= t) {
       final m = _up.removeAt(0).$2;
-      if (m['t'] == Msg.input) server.setMove(0, Dir.values[m['d'] as int]);
+      if (m['t'] == Msg.input) {
+        server.setMove(0, Dir.values[m['d'] as int]);
+        if (m['b'] == true) server.requestBomb(0);
+      }
     }
     server.tick(dt);
     if (++_ticks % 2 == 0) {
@@ -77,6 +80,30 @@ void main() {
     }
     expect(l.cx, closeTo(l.sx, 0.02));
     expect(l.cy, closeTo(l.sy, 0.02));
+  });
+
+  test('walking off a freshly dropped bomb is smooth (no stall, no lunge)', () {
+    final l = _Link();
+    for (var i = 0; i < 20; i++) {
+      l.step();
+    }
+    l.client.bomb();
+    l.client.move(Dir.right);
+    final steps = <double>[];
+    var prev = l.cx;
+    for (var i = 0; i < 40; i++) {
+      l.step();
+      steps.add(l.cx - prev);
+      prev = l.cx;
+    }
+    expect(l.server.bombs, isNotEmpty, reason: 'the server placed the bomb');
+    final nominal = l.client.world.players[0].stats.speed / 60;
+    // Only look at frames where the player is still free to run.
+    final run = steps.take(15).toList();
+    for (final d in run) {
+      expect(d, greaterThan(nominal * 0.5), reason: 'stalled on the bomb: $run');
+      expect(d, lessThan(nominal * 1.6), reason: 'yanked forward: $run');
+    }
   });
 
   test('large disagreement snaps the local player to the server', () {
