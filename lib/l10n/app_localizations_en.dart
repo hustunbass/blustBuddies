@@ -1426,4 +1426,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signOutLabel => 'Sign out';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountTitle => 'Delete your account?';
+
+  @override
+  String get deleteAccountBody =>
+      'This permanently deletes your account, your rank and your ranked match history. It cannot be undone. Casual play stays available without an account.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete';
+
+  @override
+  String get deleteAccountFailed =>
+      'Could not delete the account. Try again in a moment.';
+
+  @override
+  String get accountDeletedToast => 'Your account was deleted.';
 }

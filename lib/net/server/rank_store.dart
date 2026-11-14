@@ -97,6 +97,10 @@ abstract class RankStore {
 
   /// Best placed players first.
   Future<List<LeaderboardEntry>> leaderboard({int limit = 100});
+
+  /// Deletes the account with all its data (profile, history, sign-in).
+  /// Deleting an account that does not exist is not an error.
+  Future<void> deleteAccount(String userId);
 }
 
 /// Keeps everything in memory (tests, local runs). Lost on restart.
@@ -128,6 +132,17 @@ class InMemoryRankStore implements RankStore {
     _states[r.bId] = r.bAfter;
     history.add(r);
   }
+
+  @override
+  Future<void> deleteAccount(String userId) async {
+    _states.remove(userId);
+    _names.remove(userId);
+    history.removeWhere((r) => r.aId == userId || r.bId == userId);
+    deleted.add(userId);
+  }
+
+  /// Ids of deleted accounts (tests).
+  final List<String> deleted = [];
 
   @override
   Future<List<LeaderboardEntry>> leaderboard({int limit = 100}) async {

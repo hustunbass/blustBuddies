@@ -105,6 +105,20 @@ void main() {
     expect(store.history, isEmpty);
   });
 
+  test('deleteAccount deletes it on the server and the player is a guest afterwards', () async {
+    final a = await connect('Ann', token: 'dev:ann');
+    expect(a.rank, isNotNull);
+    expect(await a.deleteAccount(), isTrue);
+    expect(a.rank, isNull);
+    expect(store.deleted, ['ann']);
+    expect(await a.deleteAccount(), isFalse, reason: 'nothing left to delete');
+  });
+
+  test('guests cannot delete', () async {
+    final g = await connect('Guest');
+    expect(await g.deleteAccount(), isFalse);
+  });
+
   test('leaderboard request fills the list', () async {
     store.put('x', const RankState(mmr: 1400, games: 12, wins: 9, league: League.gold, tp: 40), name: 'Xena');
     final a = await connect('Ann');

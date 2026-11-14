@@ -130,6 +130,7 @@ class BlastServer {
       'peakOnline': _peakOnline,
       'inMatch': matches.fold<int>(0, (n, r) => n + r.members.length),
       'rooms': _rooms.length,
+      'ranked': _rankedOn,
       'queued': _queue.length,
       'matches': matches.length,
       'lagMs': lag,
@@ -262,6 +263,8 @@ class BlastServer {
           _rankedQueue(c, m);
         case Msg.leaderboardRequest:
           _sendLeaderboard(c);
+        case Msg.deleteAccount:
+          _deleteAccount(c);
         case Msg.emote:
           _emote(c, m);
         case Msg.ping:
@@ -794,6 +797,37 @@ class BlastServer {
     return {cl[0]: ca.toPublicJson(), cl[1]: cb.toPublicJson()};
   }
 
+  /// Deletes the signed-in player's account. Whatever they were doing in
+  /// ranked ends first; every connection of that account becomes a guest.
+  void _deleteAccount(_Client c) {
+    final id = c.userId, store = ranks;
+    if (id == null || store == null) {
+      _error(c, ErrorCode.signInRequired);
+      return;
+    }
+    if (c.deletingAccount) return;
+    c.deletingAccount = true;
+    _dequeue(c);
+    if (c.room?.ranked ?? false) _leave(c);
+    store.deleteAccount(id).then((_) {
+      for (final o in _clients) {
+        if (o.userId == id) {
+          _dequeue(o);
+          o
+            ..userId = null
+            ..rank = null;
+        }
+      }
+      c.deletingAccount = false;
+      log?.call('account deleted: $id');
+      _send(c, {'t': Msg.accountDeleted});
+    }).catchError((Object e) {
+      c.deletingAccount = false;
+      log?.call('deleting account failed: $e');
+      _error(c, ErrorCode.accountDeleteFailed);
+    });
+  }
+
   void _sendLeaderboard(_Client c) {
     final now = DateTime.now();
     final last = c.lastBoard;
@@ -1004,6 +1038,9 @@ class _Client {
 
   /// True while the sign-in token of `hello` is being checked.
   bool helloPending = false;
+
+  /// An account deletion is running.
+  bool deletingAccount = false;
   DateTime? lastBoard;
   final List<DateTime> failedPasswords = [];
 }

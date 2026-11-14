@@ -75,6 +75,10 @@ class Msg {
   /// `{}` ask for the leaderboard; answered with [leaderboard].
   static const leaderboardRequest = 'lbq';
 
+  /// `{}` delete the signed-in player's account and all ranked data for good.
+  /// Answered with [accountDeleted] (or an error).
+  static const deleteAccount = 'delacc';
+
   /// `{on: bool}` the player watched a rewarded ad: their next match starts
   /// with [boostedStartBombs] bombs. Used up when that match begins.
   static const boost = 'boost';
@@ -118,6 +122,9 @@ class Msg {
   /// `{top: [{name, league, tp, games, wins}]}` best players first.
   static const leaderboard = 'lb';
 
+  /// `{}` the account was deleted; the connection continues as a guest.
+  static const accountDeleted = 'accdel';
+
   /// World snapshot (see `snapshot.dart`).
   static const snapshot = 's';
 
@@ -160,7 +167,10 @@ enum ErrorCode {
   signInRequired,
 
   /// The same account is already searching or playing ranked elsewhere.
-  alreadyRanked;
+  alreadyRanked,
+
+  /// The account could not be deleted right now; try again.
+  accountDeleteFailed;
 
   /// Parses [s] (unknown values map to [badRequest]).
   static ErrorCode parse(Object? s) =>

@@ -1318,4 +1318,24 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get signOutLabel => 'Çıkış yap';
+
+  @override
+  String get deleteAccount => 'Hesabı sil';
+
+  @override
+  String get deleteAccountTitle => 'Hesabın silinsin mi?';
+
+  @override
+  String get deleteAccountBody =>
+      'Hesabın, rankın ve dereceli maç geçmişin kalıcı olarak silinir. Bu işlem geri alınamaz. Derecesiz oyun hesapsız devam eder.';
+
+  @override
+  String get deleteAccountConfirm => 'Sil';
+
+  @override
+  String get deleteAccountFailed =>
+      'Hesap silinemedi. Biraz sonra tekrar dene.';
+
+  @override
+  String get accountDeletedToast => 'Hesabın silindi.';
 }

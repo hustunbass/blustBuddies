@@ -93,6 +93,32 @@ void main() {
     expect(find.text('Sign in with Apple'), findsNothing);
   });
 
+  testWidgets('signed-in players can delete their account, after a confirmation', (tester) async {
+    await pumpOnline(
+      tester,
+      rank: const PublicRank(league: League.silver, tp: 40, promotion: false, placing: false, games: 12),
+    );
+    await tester.tap(find.text('Ranked'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete account'), findsOneWidget);
+    await tester.ensureVisible(find.text('Delete account'));
+    await tester.tap(find.text('Delete account'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete your account?'), findsOneWidget);
+    expect(find.textContaining('cannot be undone'), findsOneWidget);
+    await tester.tap(find.text('Cancel'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete your account?'), findsNothing);
+    expect(find.text('Delete account'), findsOneWidget, reason: 'cancelled: still signed in');
+  });
+
+  testWidgets('guests see no delete button', (tester) async {
+    await pumpOnline(tester);
+    await tester.tap(find.text('Ranked'));
+    await tester.pumpAndSettle();
+    expect(find.text('Delete account'), findsNothing);
+  });
+
   testWidgets('placement games show their progress instead of a league', (tester) async {
     await pumpOnline(
       tester,

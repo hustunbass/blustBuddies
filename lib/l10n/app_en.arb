@@ -818,5 +818,11 @@
   "signInWithApple": "Sign in with Apple",
   "signInWithGoogle": "Sign in with Google",
   "signInFailed": "Sign-in failed. Try again.",
-  "signOutLabel": "Sign out"
+  "signOutLabel": "Sign out",
+  "deleteAccount": "Delete account",
+  "deleteAccountTitle": "Delete your account?",
+  "deleteAccountBody": "This permanently deletes your account, your rank and your ranked match history. It cannot be undone. Casual play stays available without an account.",
+  "deleteAccountConfirm": "Delete",
+  "deleteAccountFailed": "Could not delete the account. Try again in a moment.",
+  "accountDeletedToast": "Your account was deleted."
 }

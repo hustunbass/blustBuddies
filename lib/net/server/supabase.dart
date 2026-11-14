@@ -124,6 +124,15 @@ class SupabaseRankStore implements RankStore {
   }
 
   @override
+  Future<void> deleteAccount(String userId) async {
+    // Deleting the auth user cascades to the profile and the match history
+    // (see schema.sql). Needs the secret key.
+    final (status, body) = await api.request('DELETE', '/auth/v1/admin/users/${Uri.encodeComponent(userId)}');
+    if (status == 404) return; // already gone
+    if (status >= 300) throw HttpException('deleting account failed ($status): $body');
+  }
+
+  @override
   Future<List<LeaderboardEntry>> leaderboard({int limit = 100}) async {
     final (status, body) = await api.request(
       'GET',

@@ -725,5 +725,11 @@
   "signInWithApple": "Apple ile giriş yap",
   "signInWithGoogle": "Google ile giriş yap",
   "signInFailed": "Giriş başarısız. Tekrar dene.",
-  "signOutLabel": "Çıkış yap"
+  "signOutLabel": "Çıkış yap",
+  "deleteAccount": "Hesabı sil",
+  "deleteAccountTitle": "Hesabın silinsin mi?",
+  "deleteAccountBody": "Hesabın, rankın ve dereceli maç geçmişin kalıcı olarak silinir. Bu işlem geri alınamaz. Derecesiz oyun hesapsız devam eder.",
+  "deleteAccountConfirm": "Sil",
+  "deleteAccountFailed": "Hesap silinemedi. Biraz sonra tekrar dene.",
+  "accountDeletedToast": "Hesabın silindi."
 }

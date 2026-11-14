@@ -679,6 +679,21 @@ class OnlineClient extends ChangeNotifier {
   /// Stops the ranked search.
   void cancelRanked() => _send({'t': Msg.rankedQueue, 'on': false});
 
+  Completer<bool>? _deleteAck;
+
+  /// Deletes the signed-in player's account on the server (profile, rank,
+  /// history, sign-in). True once the server confirmed it.
+  Future<bool> deleteAccount() async {
+    if (status != OnlineStatus.connected || rank == null) return false;
+    final ack = _deleteAck = Completer<bool>();
+    _send({'t': Msg.deleteAccount});
+    try {
+      return await ack.future.timeout(const Duration(seconds: 20), onTimeout: () => false);
+    } finally {
+      _deleteAck = null;
+    }
+  }
+
   /// Asks the server for the leaderboard (answer arrives as [leaderboard]).
   void requestLeaderboard() => _send({'t': Msg.leaderboardRequest});
 
@@ -817,6 +832,12 @@ class OnlineClient extends ChangeNotifier {
         searchingRanked = m['on'] == true;
         // The opponent left before the start: that room is gone.
         if (m['left'] == true) room = null;
+      case Msg.accountDeleted:
+        rank = null;
+        searchingRanked = false;
+        rankResult = null;
+        final ack = _deleteAck;
+        if (ack != null && !ack.isCompleted) ack.complete(true);
       case Msg.leaderboard:
         leaderboard = [
           for (final e in (m['top'] as List? ?? const []))
@@ -825,6 +846,11 @@ class OnlineClient extends ChangeNotifier {
       case Msg.error:
         final code = ErrorCode.parse(m['code']);
         if (code == ErrorCode.versionMismatch) _completeWelcome(false);
+        final del = _deleteAck;
+        if (del != null && !del.isCompleted &&
+            (code == ErrorCode.accountDeleteFailed || code == ErrorCode.signInRequired)) {
+          del.complete(false);
+        }
         _errors.add(code);
       default:
         return;

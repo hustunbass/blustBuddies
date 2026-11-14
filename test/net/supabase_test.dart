@@ -138,6 +138,22 @@ void main() {
     expect(b['p_a_mmr_before'], 1000);
   });
 
+  test('store: deleteAccount calls the admin API; 404 counts as done, errors are thrown', () async {
+    final store = SupabaseRankStore(SupabaseApi(url, 'sb_secret_k'));
+    fake.replies['/auth/v1/admin/users/u-1'] = (200, '{}');
+    await store.deleteAccount('u-1');
+    final r = fake.requests.single;
+    expect(r.method, 'DELETE');
+    expect(r.path, '/auth/v1/admin/users/u-1');
+    expect(r.headers['apikey'], 'sb_secret_k');
+
+    fake.replies['/auth/v1/admin/users/u-gone'] = (404, '{"msg":"User not found"}');
+    await store.deleteAccount('u-gone');
+
+    fake.replies['/auth/v1/admin/users/u-bad'] = (500, 'boom');
+    await expectLater(store.deleteAccount('u-bad'), throwsA(isA<HttpException>()));
+  });
+
   test('store: leaderboard rows are parsed', () async {
     final store = SupabaseRankStore(SupabaseApi(url, 'k'));
     fake.replies['/rest/v1/leaderboard'] = (

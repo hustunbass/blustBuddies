@@ -69,6 +69,7 @@ String errorText(AppLocalizations l, ErrorCode c) => switch (c) {
       ErrorCode.serverFull => l.errServerFull,
       ErrorCode.signInRequired => l.errSignInRequired,
       ErrorCode.alreadyRanked => l.errAlreadyRanked,
+      ErrorCode.accountDeleteFailed => l.deleteAccountFailed,
       ErrorCode.versionMismatch => l.errVersion,
       ErrorCode.badRequest => l.errGeneric,
     };
@@ -308,6 +309,36 @@ class _RoomListViewState extends ConsumerState<_RoomListView> {
     await reconnectOnline(container, client);
   }
 
+  /// Asks, deletes the account on the server, signs out and reconnects as a
+  /// guest. Required by the stores for every app that creates accounts.
+  Future<void> _deleteAccount() async {
+    final container = ProviderScope.containerOf(context, listen: false);
+    final l = AppLocalizations.of(context);
+    final sure = await showDialog<bool>(
+      context: context,
+      builder: (dialog) => AlertDialog(
+        title: Text(l.deleteAccountTitle),
+        content: Text(l.deleteAccountBody),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(dialog, false), child: Text(l.cancel)),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
+            onPressed: () => Navigator.pop(dialog, true),
+            child: Text(l.deleteAccountConfirm),
+          ),
+        ],
+      ),
+    );
+    if (sure != true) return;
+    if (!await client.deleteAccount()) {
+      showToast(l.deleteAccountFailed, kind: ToastKind.error);
+      return;
+    }
+    await container.read(authProvider.notifier).signOut();
+    showToast(l.accountDeletedToast, kind: ToastKind.success);
+    await reconnectOnline(container, client);
+  }
+
   Future<void> _quick(BuildContext context) async {
     final cap = await showQuickMatchDialog(context);
     if (cap != null) client.quickMatch(cap);
@@ -389,7 +420,7 @@ class _RoomListViewState extends ConsumerState<_RoomListView> {
             ),
           ),
           if (ranked)
-            Expanded(child: _RankedPanel(client: client, onSignIn: _signIn, onSignOut: _signOut))
+            Expanded(child: _RankedPanel(client: client, onSignIn: _signIn, onSignOut: _signOut, onDeleteAccount: _deleteAccount))
           else ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -422,11 +453,17 @@ class _RoomListViewState extends ConsumerState<_RoomListView> {
 /// Ranked 1v1: rank card, search button and leaderboard. Needs a signed-in
 /// player; guests are asked to sign in (casual games stay open to everybody).
 class _RankedPanel extends ConsumerWidget {
-  const _RankedPanel({required this.client, required this.onSignIn, required this.onSignOut});
+  const _RankedPanel({
+    required this.client,
+    required this.onSignIn,
+    required this.onSignOut,
+    required this.onDeleteAccount,
+  });
 
   final OnlineClient client;
   final void Function(AuthProvider provider) onSignIn;
   final VoidCallback onSignOut;
+  final VoidCallback onDeleteAccount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -512,6 +549,13 @@ class _RankedPanel extends ConsumerWidget {
             onPressed: auth.busy ? null : onSignOut,
             icon: const Icon(Icons.logout),
             label: Text(l.signOutLabel),
+          ),
+        if (rank != null)
+          TextButton.icon(
+            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
+            onPressed: auth.busy ? null : onDeleteAccount,
+            icon: const Icon(Icons.delete_forever),
+            label: Text(l.deleteAccount),
           ),
       ],
     );

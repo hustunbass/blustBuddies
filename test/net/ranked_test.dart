@@ -38,6 +38,11 @@ Future<void> until(bool Function() cond, {Duration timeout = const Duration(seco
   }
 }
 
+class _FailingStore extends InMemoryRankStore {
+  @override
+  Future<void> deleteAccount(String userId) async => throw const HttpException('boom');
+}
+
 void main() {
   late BlastServer server;
   late InMemoryRankStore store;
@@ -193,6 +198,46 @@ void main() {
     await until(() => server.stats()['queued'] == 1);
     a2.send({'t': Msg.rankedQueue, 'on': true});
     await until(() => a2.has(Msg.error, (m) => m['code'] == 'alreadyRanked'));
+  });
+
+  test('deleting the account removes all data and turns the player into a guest', () async {
+    final a = await connect('Ann', token: 'dev:ann');
+    final a2 = await connect('Ann phone', token: 'dev:ann');
+    a.send({'t': Msg.rankedQueue, 'on': true});
+    await until(() => server.stats()['queued'] == 1);
+
+    a.send({'t': Msg.deleteAccount});
+    await until(() => a.has(Msg.accountDeleted));
+    expect(store.deleted, ['ann']);
+    expect(store.stateOf('ann'), isNull);
+    expect(server.stats()['queued'], 0, reason: 'leaves the queue');
+
+    // Both connections of that account are guests now.
+    a.send({'t': Msg.rankedQueue, 'on': true});
+    a2.send({'t': Msg.rankedQueue, 'on': true});
+    await until(() => a.has(Msg.error, (m) => m['code'] == 'signInRequired'));
+    await until(() => a2.has(Msg.error, (m) => m['code'] == 'signInRequired'));
+  });
+
+  test('a guest cannot delete an account', () async {
+    final g = await connect('Guest');
+    g.send({'t': Msg.deleteAccount});
+    await until(() => g.has(Msg.error, (m) => m['code'] == 'signInRequired'));
+    expect(g.has(Msg.accountDeleted), isFalse);
+  });
+
+  test('a store failure is reported and nothing changes', () async {
+    await server.close();
+    final failing = _FailingStore();
+    server = BlastServer(auth: DevAuthVerifier(), ranks: failing);
+    url = 'ws://127.0.0.1:${await server.start(port: 0, address: '127.0.0.1')}';
+    final a = await connect('Ann', token: 'dev:ann');
+    a.send({'t': Msg.deleteAccount});
+    await until(() => a.has(Msg.error, (m) => m['code'] == 'accountDeleteFailed'));
+    expect(a.has(Msg.accountDeleted), isFalse);
+    // Still signed in: can retry.
+    a.send({'t': Msg.rankedQueue, 'on': true});
+    await until(() => a.has(Msg.queue, (m) => m['on'] == true));
   });
 
   test('leaderboard lists placed players only', () async {
