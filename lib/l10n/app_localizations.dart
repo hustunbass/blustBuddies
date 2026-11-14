@@ -2179,6 +2179,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Play the tutorial'**
   String get howToTutorial;
+
+  /// No description provided for @rankedMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked'**
+  String get rankedMode;
+
+  /// No description provided for @casualMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Casual'**
+  String get casualMode;
+
+  /// No description provided for @rankedIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked 1v1: climb from Bronze to the Champions League. Your result changes your rank.'**
+  String get rankedIntro;
+
+  /// No description provided for @casualIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Casual games never change your rank.'**
+  String get casualIntro;
+
+  /// No description provided for @rankedSignIn.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play ranked'**
+  String get rankedSignIn;
+
+  /// No description provided for @rankedSignInHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked needs an account so your rank is kept. Casual games work without one.'**
+  String get rankedSignInHint;
+
+  /// No description provided for @signInSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in is coming soon.'**
+  String get signInSoon;
+
+  /// No description provided for @findRanked.
+  ///
+  /// In en, this message translates to:
+  /// **'Find ranked match'**
+  String get findRanked;
+
+  /// No description provided for @searchingRanked.
+  ///
+  /// In en, this message translates to:
+  /// **'Searching for an opponent…'**
+  String get searchingRanked;
+
+  /// No description provided for @cancelSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelSearch;
+
+  /// No description provided for @rankedOpponentLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Opponent left. Searching again…'**
+  String get rankedOpponentLeft;
+
+  /// No description provided for @leaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Leaderboard'**
+  String get leaderboard;
+
+  /// No description provided for @noLeaderboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Nobody is ranked yet.'**
+  String get noLeaderboard;
+
+  /// No description provided for @placementProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Placement {done}/{total}'**
+  String placementProgress(int done, int total);
+
+  /// No description provided for @placementHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Play {total} ranked games to get your league.'**
+  String placementHint(int total);
+
+  /// No description provided for @promotionMatch.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotion match'**
+  String get promotionMatch;
+
+  /// No description provided for @promotionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Win the next game to move up a league.'**
+  String get promotionHint;
+
+  /// No description provided for @tpLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{tp} TP'**
+  String tpLabel(int tp);
+
+  /// No description provided for @leagueBronze.
+  ///
+  /// In en, this message translates to:
+  /// **'Bronze'**
+  String get leagueBronze;
+
+  /// No description provided for @leagueSilver.
+  ///
+  /// In en, this message translates to:
+  /// **'Silver'**
+  String get leagueSilver;
+
+  /// No description provided for @leagueGold.
+  ///
+  /// In en, this message translates to:
+  /// **'Gold'**
+  String get leagueGold;
+
+  /// No description provided for @leagueDiamond.
+  ///
+  /// In en, this message translates to:
+  /// **'Diamond'**
+  String get leagueDiamond;
+
+  /// No description provided for @leagueChampion.
+  ///
+  /// In en, this message translates to:
+  /// **'Champions League'**
+  String get leagueChampion;
+
+  /// No description provided for @rankedResultWin.
+  ///
+  /// In en, this message translates to:
+  /// **'Victory'**
+  String get rankedResultWin;
+
+  /// No description provided for @rankedResultLoss.
+  ///
+  /// In en, this message translates to:
+  /// **'Defeat'**
+  String get rankedResultLoss;
+
+  /// No description provided for @rankedResultDraw.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw'**
+  String get rankedResultDraw;
+
+  /// No description provided for @rankPromoted.
+  ///
+  /// In en, this message translates to:
+  /// **'Promoted to {league}!'**
+  String rankPromoted(String league);
+
+  /// No description provided for @rankDemoted.
+  ///
+  /// In en, this message translates to:
+  /// **'Dropped to {league}.'**
+  String rankDemoted(String league);
+
+  /// No description provided for @rankPromotionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotion match lost. Try again.'**
+  String get rankPromotionFailed;
+
+  /// No description provided for @rankPromotionOffered.
+  ///
+  /// In en, this message translates to:
+  /// **'Promotion match unlocked!'**
+  String get rankPromotionOffered;
+
+  /// No description provided for @rankPlaced.
+  ///
+  /// In en, this message translates to:
+  /// **'Placed in {league}!'**
+  String rankPlaced(String league);
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @rankedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranked'**
+  String get rankedLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -8,6 +8,7 @@ import 'package:blast_buddies/features/game/logic/entities.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/net/protocol.dart';
+import 'package:blast_buddies/core/rank/rank.dart';
 import 'package:blast_buddies/net/snapshot.dart';
 import 'package:flutter/foundation.dart';
 
@@ -402,6 +403,8 @@ class OnlineClient extends ChangeNotifier {
   Completer<bool>? _welcome;
   final StreamController<ErrorCode> _errors = StreamController.broadcast();
 
+  String? _authToken;
+
   /// Connection state.
   OnlineStatus status = OnlineStatus.disconnected;
 
@@ -422,6 +425,21 @@ class OnlineClient extends ChangeNotifier {
   /// server forgets the flag).
   bool boosted = false;
 
+  /// The player's rank, known when signed in (null for guests).
+  PublicRank? rank;
+
+  /// True when a sign-in token was sent but the server did not accept it.
+  bool authRejected = false;
+
+  /// Searching for a ranked 1v1 opponent.
+  bool searchingRanked = false;
+
+  /// What the last ranked game did to the rank (null after casual games).
+  RankResult? rankResult;
+
+  /// Last leaderboard received.
+  List<LeaderboardRow> leaderboard = const [];
+
   /// Winner slot of the last match (null = draw).
   int? winner;
 
@@ -432,12 +450,16 @@ class OnlineClient extends ChangeNotifier {
   Stream<ErrorCode> get errors => _errors.stream;
 
   /// Connects to [address] as [name]. Returns false on failure.
-  Future<bool> connect(String address, String name, {List<int>? skin}) async {
+  ///
+  /// [authToken] is the player's Supabase access token; with it the player can
+  /// play ranked, without it they are a guest.
+  Future<bool> connect(String address, String name, {List<int>? skin, String? authToken}) async {
     final uri = parseServerAddress(address);
     if (uri == null || status != OnlineStatus.disconnected) return false;
     _address = address;
     _name = name;
     _skin = skin;
+    _authToken = authToken;
     _token = null;
     status = OnlineStatus.connecting;
     lostConnection = false;
@@ -458,6 +480,7 @@ class OnlineClient extends ChangeNotifier {
         'name': cleanText(name, Limits.name),
         'v': protocolVersion,
         if (skin != null) 'skin': skin,
+        if (authToken != null && authToken.isNotEmpty) 'auth': authToken,
       });
       final ok = await _welcome!.future.timeout(const Duration(seconds: 6), onTimeout: () => false);
       if (!ok) await disconnect();
@@ -529,6 +552,8 @@ class OnlineClient extends ChangeNotifier {
     status = OnlineStatus.disconnected;
     waking = false;
     boosted = false;
+    searchingRanked = false;
+    rank = null;
     rooms = const [];
     room = null;
     match?.disconnected = !(match?.ended ?? true);
@@ -600,6 +625,7 @@ class OnlineClient extends ChangeNotifier {
           'v': protocolVersion,
           'resume': token,
           if (_skin != null) 'skin': _skin,
+          if (_authToken != null && _authToken!.isNotEmpty) 'auth': _authToken,
         });
         final ok = await _welcome!.future.timeout(const Duration(seconds: 6), onTimeout: () => false);
         if (ok && _resumed) {
@@ -646,6 +672,15 @@ class OnlineClient extends ChangeNotifier {
   /// Joins a public waiting room of [capacity] players or opens one; the
   /// match starts as soon as it is full.
   void quickMatch(int capacity) => _send({'t': Msg.quick, 'capacity': capacity});
+
+  /// Looks for a ranked 1v1 opponent (needs a signed-in player).
+  void rankedSearch() => _send({'t': Msg.rankedQueue, 'on': true});
+
+  /// Stops the ranked search.
+  void cancelRanked() => _send({'t': Msg.rankedQueue, 'on': false});
+
+  /// Asks the server for the leaderboard (answer arrives as [leaderboard]).
+  void requestLeaderboard() => _send({'t': Msg.leaderboardRequest});
 
   /// Joins room [id].
   void joinRoom(String id, {String password = ''}) =>
@@ -705,6 +740,11 @@ class OnlineClient extends ChangeNotifier {
         final tok = m['tok'];
         if (tok is String) _token = tok;
         _resumed = m['resumed'] == true;
+        if (!_resumed) {
+          final r = m['rank'];
+          rank = r is Map ? PublicRank.fromJson(r.cast<String, dynamic>()) : null;
+          authRejected = m['auth'] == false;
+        }
         final sent = _helloSentAt;
         if (sent != null) rtt = (_now - sent).clamp(0.02, 1.0);
         if (m['ping'] == true) {
@@ -736,6 +776,8 @@ class OnlineClient extends ChangeNotifier {
         }
         winner = null;
         winnerTeam = null;
+        rankResult = null;
+        searchingRanked = false;
         // The server used the advantage up for this match.
         boosted = false;
         match = OnlineMatch(
@@ -767,7 +809,19 @@ class OnlineClient extends ChangeNotifier {
       case Msg.end:
         winner = m['winner'] as int?;
         winnerTeam = m['team'] as int?;
+        final rr = m['rank'];
+        rankResult = rr is Map ? RankResult.fromJson(rr.cast<String, dynamic>()) : null;
+        if (rankResult != null) rank = rankResult!.after;
         match?.ended = true;
+      case Msg.queue:
+        searchingRanked = m['on'] == true;
+        // The opponent left before the start: that room is gone.
+        if (m['left'] == true) room = null;
+      case Msg.leaderboard:
+        leaderboard = [
+          for (final e in (m['top'] as List? ?? const []))
+            LeaderboardRow.fromJson((e as Map).cast<String, dynamic>()),
+        ];
       case Msg.error:
         final code = ErrorCode.parse(m['code']);
         if (code == ErrorCode.versionMismatch) _completeWelcome(false);

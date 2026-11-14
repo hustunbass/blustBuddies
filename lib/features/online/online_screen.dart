@@ -8,6 +8,8 @@ import 'package:blast_buddies/features/online/boost_button.dart';
 import 'package:blast_buddies/features/online/online_game_view.dart';
 import 'package:blast_buddies/features/online/online_room_view.dart';
 import 'package:blast_buddies/features/online/quick_match_dialog.dart';
+import 'package:blast_buddies/features/rank/league_badge.dart';
+import 'package:blast_buddies/core/auth/auth_token.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
 import 'package:blast_buddies/net/protocol.dart';
@@ -151,6 +153,7 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
       custom.isEmpty ? defaultServerUrl : custom,
       name,
       skin: [st.hat, st.face, st.color],
+      authToken: ref.read(authTokenProvider),
     );
     if (mounted) setState(() => _failed = !ok && !_cancelled);
   }
@@ -241,11 +244,21 @@ class _ConnectViewState extends ConsumerState<_ConnectView> {
   }
 }
 
-class _RoomListView extends StatelessWidget {
+class _RoomListView extends StatefulWidget {
   const _RoomListView({required this.client, required this.onJoinCode});
 
   final OnlineClient client;
   final void Function(String code) onJoinCode;
+
+  @override
+  State<_RoomListView> createState() => _RoomListViewState();
+}
+
+class _RoomListViewState extends State<_RoomListView> {
+  /// Ranked or casual: the player picks, casual is the default.
+  bool _ranked = false;
+
+  OnlineClient get client => widget.client;
 
   Future<void> _quick(BuildContext context) async {
     final cap = await showQuickMatchDialog(context);
@@ -254,7 +267,7 @@ class _RoomListView extends StatelessWidget {
 
   Future<void> _byCode(BuildContext context) async {
     final code = await showDialog<String>(context: context, builder: (_) => const _CodeDialog());
-    if (code != null && code.isNotEmpty) onJoinCode(code);
+    if (code != null && code.isNotEmpty) widget.onJoinCode(code);
   }
 
   Future<void> _join(BuildContext context, RoomSummary r) async {
@@ -282,11 +295,14 @@ class _RoomListView extends StatelessWidget {
         title: Text(l.rooms),
         backgroundColor: Colors.transparent,
         actions: [
-          IconButton(tooltip: l.joinByCode, onPressed: () => _byCode(context), icon: const Icon(Icons.vpn_key)),
+          if (!_ranked)
+            IconButton(tooltip: l.joinByCode, onPressed: () => _byCode(context), icon: const Icon(Icons.vpn_key)),
           IconButton(tooltip: l.disconnect, onPressed: client.disconnect, icon: const Icon(Icons.wifi_off)),
         ],
       ),
-      floatingActionButton: Column(
+      floatingActionButton: _ranked
+          ? null
+          : Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
@@ -311,6 +327,27 @@ class _RoomListView extends StatelessWidget {
         child: Column(children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: SegmentedButton<bool>(
+              segments: [
+                ButtonSegment(value: false, icon: const Icon(Icons.groups), label: Text(l.casualMode)),
+                ButtonSegment(value: true, icon: const Icon(Icons.emoji_events), label: Text(l.rankedMode)),
+              ],
+              selected: {_ranked},
+              onSelectionChanged: (s) {
+                if (!s.first && client.searchingRanked) client.cancelRanked();
+                setState(() => _ranked = s.first);
+              },
+            ),
+          ),
+          if (_ranked)
+            Expanded(child: _RankedPanel(client: client))
+          else ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: Text(l.casualIntro, style: const TextStyle(color: Colors.white54)),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
             child: BoostButton(client: client),
           ),
           Expanded(
@@ -326,8 +363,79 @@ class _RoomListView extends StatelessWidget {
                     },
                   ),
           ),
+          ],
         ]),
       ),
+    );
+  }
+}
+
+/// Ranked 1v1: rank card, search button and leaderboard. Needs a signed-in
+/// player; guests are asked to sign in (casual games stay open to everybody).
+class _RankedPanel extends StatelessWidget {
+  const _RankedPanel({required this.client});
+
+  final OnlineClient client;
+
+  @override
+  Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context);
+    final rank = client.rank;
+    return ListView(
+      padding: const EdgeInsets.all(12),
+      children: [
+        Text(l.rankedIntro, style: const TextStyle(color: Colors.white70)),
+        const SizedBox(height: 12),
+        if (rank == null)
+          Card(
+            margin: EdgeInsets.zero,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                Text(l.rankedSignInHint, style: const TextStyle(fontSize: 16)),
+                const SizedBox(height: 12),
+                FilledButton.icon(
+                  onPressed: () => showToast(l.signInSoon),
+                  icon: const Icon(Icons.login),
+                  label: Text(l.rankedSignIn),
+                ),
+              ]),
+            ),
+          )
+        else ...[
+          RankCard(rank: rank),
+          const SizedBox(height: 12),
+          if (client.searchingRanked)
+            Card(
+              margin: EdgeInsets.zero,
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                  Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                    const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 3)),
+                    const SizedBox(width: 12),
+                    Flexible(child: Text(l.searchingRanked, style: const TextStyle(fontSize: 18))),
+                  ]),
+                  const SizedBox(height: 12),
+                  OutlinedButton(onPressed: client.cancelRanked, child: Text(l.cancelSearch)),
+                ]),
+              ),
+            )
+          else
+            FilledButton.icon(
+              style: FilledButton.styleFrom(minimumSize: const Size.fromHeight(56)),
+              onPressed: client.rankedSearch,
+              icon: const Icon(Icons.sports_martial_arts),
+              label: Text(l.findRanked, style: const TextStyle(fontSize: 18)),
+            ),
+        ],
+        const SizedBox(height: 8),
+        TextButton.icon(
+          onPressed: () => showLeaderboard(context, client),
+          icon: const Icon(Icons.leaderboard),
+          label: Text(l.leaderboard),
+        ),
+      ],
     );
   }
 }

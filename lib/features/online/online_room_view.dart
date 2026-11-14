@@ -65,17 +65,25 @@ class OnlineRoomView extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800, color: Colors.amber)),
                     const SizedBox(height: 6),
-                    Center(
-                      child: TextButton.icon(
-                        onPressed: () {
-                          Clipboard.setData(ClipboardData(text: room.id));
-                          showToast(l.codeCopied, kind: ToastKind.success);
-                        },
-                        icon: const Icon(Icons.copy, size: 16),
-                        label: Text(l.roomCode(room.id),
-                            style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700)),
+                    if (room.ranked)
+                      Center(
+                        child: Chip(
+                          avatar: const Icon(Icons.emoji_events, size: 18),
+                          label: Text(l.rankedLabel),
+                        ),
+                      )
+                    else
+                      Center(
+                        child: TextButton.icon(
+                          onPressed: () {
+                            Clipboard.setData(ClipboardData(text: room.id));
+                            showToast(l.codeCopied, kind: ToastKind.success);
+                          },
+                          icon: const Icon(Icons.copy, size: 16),
+                          label: Text(l.roomCode(room.id),
+                              style: const TextStyle(letterSpacing: 2, fontWeight: FontWeight.w700)),
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 6),
                     for (var i = 0; i < room.capacity; i++) _SlotTile(slot: i, room: room),
                     const SizedBox(height: 16),
@@ -85,19 +93,21 @@ class OnlineRoomView extends StatelessWidget {
                       child: Semantics(liveRegion: true, child: status),
                     ),
                     const SizedBox(height: 16),
-                    if (room.phase != RoomPhase.playing) ...[
+                    // Ranked rooms start by themselves: no ad boost, no ready toggle.
+                    if (room.phase != RoomPhase.playing && !room.ranked) ...[
                       BoostButton(client: client),
                       const SizedBox(height: 10),
                     ],
-                    FilledButton.icon(
-                      style: FilledButton.styleFrom(
-                        backgroundColor: ready ? Colors.blueGrey : Colors.green,
-                        minimumSize: const Size.fromHeight(52),
+                    if (!room.ranked)
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: ready ? Colors.blueGrey : Colors.green,
+                          minimumSize: const Size.fromHeight(52),
+                        ),
+                        onPressed: me == null ? null : () => client.setReady(!ready),
+                        icon: Icon(ready ? Icons.close : Icons.check),
+                        label: Text(ready ? l.cancelReady : l.imReady, style: const TextStyle(fontSize: 18)),
                       ),
-                      onPressed: me == null ? null : () => client.setReady(!ready),
-                      icon: Icon(ready ? Icons.close : Icons.check),
-                      label: Text(ready ? l.cancelReady : l.imReady, style: const TextStyle(fontSize: 18)),
-                    ),
                     const SizedBox(height: 8),
                     TextButton.icon(
                       onPressed: client.leaveRoom,

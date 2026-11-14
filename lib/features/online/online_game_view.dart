@@ -1,10 +1,12 @@
 import 'dart:async';
 
 import 'package:blast_buddies/core/audio/audio_service.dart';
+import 'package:blast_buddies/core/rank/rank.dart';
 import 'package:blast_buddies/core/settings/stats.dart';
 import 'package:blast_buddies/core/ui/toast.dart';
 import 'package:blast_buddies/features/game/logic/game_world.dart';
 import 'package:blast_buddies/features/menu/achievement_toast.dart';
+import 'package:blast_buddies/features/rank/league_badge.dart';
 import 'package:blast_buddies/features/game/ui/blast_game.dart';
 import 'package:blast_buddies/features/game/ui/game_stage.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
@@ -209,6 +211,18 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
                             child: Text(l.resume),
                           ),
                           FilledButton.tonal(onPressed: widget.client.leaveRoom, child: Text(l.leaveMatch)),
+                        ],
+                      ),
+                    _Overlay.finished when widget.client.rankResult != null => ResultPanel(
+                        title: switch (widget.client.rankResult!.outcome) {
+                          Outcome.win => l.rankedResultWin,
+                          Outcome.loss => l.rankedResultLoss,
+                          Outcome.draw => l.rankedResultDraw,
+                        },
+                        header: RankChangeView(result: widget.client.rankResult!),
+                        actions: [
+                          // No rematch in ranked: the room is gone.
+                          FilledButton(onPressed: widget.client.leaveRoom, child: Text(l.continueLabel)),
                         ],
                       ),
                     _Overlay.finished => ResultPanel(

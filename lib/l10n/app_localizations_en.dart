@@ -1301,4 +1301,117 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get howToTutorial => 'Play the tutorial';
+
+  @override
+  String get rankedMode => 'Ranked';
+
+  @override
+  String get casualMode => 'Casual';
+
+  @override
+  String get rankedIntro =>
+      'Ranked 1v1: climb from Bronze to the Champions League. Your result changes your rank.';
+
+  @override
+  String get casualIntro => 'Casual games never change your rank.';
+
+  @override
+  String get rankedSignIn => 'Sign in to play ranked';
+
+  @override
+  String get rankedSignInHint =>
+      'Ranked needs an account so your rank is kept. Casual games work without one.';
+
+  @override
+  String get signInSoon => 'Sign-in is coming soon.';
+
+  @override
+  String get findRanked => 'Find ranked match';
+
+  @override
+  String get searchingRanked => 'Searching for an opponent…';
+
+  @override
+  String get cancelSearch => 'Cancel';
+
+  @override
+  String get rankedOpponentLeft => 'Opponent left. Searching again…';
+
+  @override
+  String get leaderboard => 'Leaderboard';
+
+  @override
+  String get noLeaderboard => 'Nobody is ranked yet.';
+
+  @override
+  String placementProgress(int done, int total) {
+    return 'Placement $done/$total';
+  }
+
+  @override
+  String placementHint(int total) {
+    return 'Play $total ranked games to get your league.';
+  }
+
+  @override
+  String get promotionMatch => 'Promotion match';
+
+  @override
+  String get promotionHint => 'Win the next game to move up a league.';
+
+  @override
+  String tpLabel(int tp) {
+    return '$tp TP';
+  }
+
+  @override
+  String get leagueBronze => 'Bronze';
+
+  @override
+  String get leagueSilver => 'Silver';
+
+  @override
+  String get leagueGold => 'Gold';
+
+  @override
+  String get leagueDiamond => 'Diamond';
+
+  @override
+  String get leagueChampion => 'Champions League';
+
+  @override
+  String get rankedResultWin => 'Victory';
+
+  @override
+  String get rankedResultLoss => 'Defeat';
+
+  @override
+  String get rankedResultDraw => 'Draw';
+
+  @override
+  String rankPromoted(String league) {
+    return 'Promoted to $league!';
+  }
+
+  @override
+  String rankDemoted(String league) {
+    return 'Dropped to $league.';
+  }
+
+  @override
+  String get rankPromotionFailed => 'Promotion match lost. Try again.';
+
+  @override
+  String get rankPromotionOffered => 'Promotion match unlocked!';
+
+  @override
+  String rankPlaced(String league) {
+    return 'Placed in $league!';
+  }
+
+  @override
+  String get continueLabel => 'Continue';
+
+  @override
+  String get rankedLabel => 'Ranked';
 }

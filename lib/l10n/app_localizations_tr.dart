@@ -1193,4 +1193,117 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get howToTutorial => 'Öğreticiyi oyna';
+
+  @override
+  String get rankedMode => 'Dereceli';
+
+  @override
+  String get casualMode => 'Derecesiz';
+
+  @override
+  String get rankedIntro =>
+      'Dereceli 1v1: Bronz\'dan Şampiyonlar Ligi\'ne tırman. Sonucun rankını değiştirir.';
+
+  @override
+  String get casualIntro => 'Derecesiz maçlar rankını hiç değiştirmez.';
+
+  @override
+  String get rankedSignIn => 'Dereceli için giriş yap';
+
+  @override
+  String get rankedSignInHint =>
+      'Dereceli için hesap gerekir, böylece rankın saklanır. Derecesiz maçlar hesapsız oynanır.';
+
+  @override
+  String get signInSoon => 'Giriş yakında geliyor.';
+
+  @override
+  String get findRanked => 'Dereceli maç ara';
+
+  @override
+  String get searchingRanked => 'Rakip aranıyor…';
+
+  @override
+  String get cancelSearch => 'İptal';
+
+  @override
+  String get rankedOpponentLeft => 'Rakip ayrıldı. Yeniden aranıyor…';
+
+  @override
+  String get leaderboard => 'Sıralama';
+
+  @override
+  String get noLeaderboard => 'Henüz sıralamada kimse yok.';
+
+  @override
+  String placementProgress(int done, int total) {
+    return 'Yerleştirme $done/$total';
+  }
+
+  @override
+  String placementHint(int total) {
+    return 'Ligini almak için $total dereceli maç oyna.';
+  }
+
+  @override
+  String get promotionMatch => 'Yükselme maçı';
+
+  @override
+  String get promotionHint => 'Bir üst lige çıkmak için sıradaki maçı kazan.';
+
+  @override
+  String tpLabel(int tp) {
+    return '$tp TP';
+  }
+
+  @override
+  String get leagueBronze => 'Bronz';
+
+  @override
+  String get leagueSilver => 'Gümüş';
+
+  @override
+  String get leagueGold => 'Altın';
+
+  @override
+  String get leagueDiamond => 'Elmas';
+
+  @override
+  String get leagueChampion => 'Şampiyonlar Ligi';
+
+  @override
+  String get rankedResultWin => 'Zafer';
+
+  @override
+  String get rankedResultLoss => 'Yenilgi';
+
+  @override
+  String get rankedResultDraw => 'Berabere';
+
+  @override
+  String rankPromoted(String league) {
+    return '$league ligine yükseldin!';
+  }
+
+  @override
+  String rankDemoted(String league) {
+    return '$league ligine düştün.';
+  }
+
+  @override
+  String get rankPromotionFailed => 'Yükselme maçı kaybedildi. Tekrar dene.';
+
+  @override
+  String get rankPromotionOffered => 'Yükselme maçı açıldı!';
+
+  @override
+  String rankPlaced(String league) {
+    return '$league ligine yerleştin!';
+  }
+
+  @override
+  String get continueLabel => 'Devam';
+
+  @override
+  String get rankedLabel => 'Dereceli';
 }

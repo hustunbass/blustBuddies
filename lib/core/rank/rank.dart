@@ -376,3 +376,130 @@ class Ranking {
     );
   }
 }
+
+/// A player's rank as the server tells it (the hidden rating is never sent).
+class PublicRank {
+  /// Creates a view.
+  const PublicRank({
+    required this.league,
+    required this.tp,
+    required this.promotion,
+    required this.placing,
+    required this.games,
+    this.placement = RankRules.placementGames,
+  });
+
+  /// Parses the server's `publicJson`.
+  factory PublicRank.fromJson(Map<String, dynamic> j) => PublicRank(
+        league: League.values[((j['league'] as num?)?.toInt() ?? 0).clamp(0, League.values.length - 1)],
+        tp: (j['tp'] as num?)?.toInt() ?? 0,
+        promotion: j['promotion'] == true,
+        placing: j['placing'] == true,
+        games: (j['games'] as num?)?.toInt() ?? 0,
+        placement: (j['placement'] as num?)?.toInt() ?? RankRules.placementGames,
+      );
+
+  /// Current league (meaningless while [placing]).
+  final League league;
+
+  /// Experience points inside the league.
+  final int tp;
+
+  /// The next ranked game is a promotion match.
+  final bool promotion;
+
+  /// Still in the placement games.
+  final bool placing;
+
+  /// Ranked games played.
+  final int games;
+
+  /// Placement games in total.
+  final int placement;
+}
+
+/// What a finished ranked game did to the local player.
+class RankResult {
+  /// Creates a result.
+  const RankResult({
+    required this.outcome,
+    required this.before,
+    required this.after,
+    required this.tpDelta,
+    this.promoted = false,
+    this.demoted = false,
+    this.promotionFailed = false,
+    this.promotionOffered = false,
+    this.placed = false,
+  });
+
+  /// Parses the `rank` field of an `end` message.
+  factory RankResult.fromJson(Map<String, dynamic> j) => RankResult(
+        outcome: Outcome.values.firstWhere((o) => o.name == j['outcome'], orElse: () => Outcome.draw),
+        before: PublicRank.fromJson((j['before'] as Map).cast<String, dynamic>()),
+        after: PublicRank.fromJson((j['after'] as Map).cast<String, dynamic>()),
+        tpDelta: (j['tpDelta'] as num?)?.toInt() ?? 0,
+        promoted: j['promoted'] == true,
+        demoted: j['demoted'] == true,
+        promotionFailed: j['promotionFailed'] == true,
+        promotionOffered: j['promotionOffered'] == true,
+        placed: j['placed'] == true,
+      );
+
+  /// Win, loss or draw.
+  final Outcome outcome;
+
+  /// Rank before and after.
+  final PublicRank before, after;
+
+  /// TP change (league changes aside).
+  final int tpDelta;
+
+  /// Won a promotion match.
+  final bool promoted;
+
+  /// Dropped a league.
+  final bool demoted;
+
+  /// Lost a promotion match.
+  final bool promotionFailed;
+
+  /// Reached the TP target: a promotion match is next.
+  final bool promotionOffered;
+
+  /// Finished the placement games.
+  final bool placed;
+}
+
+/// One leaderboard row.
+class LeaderboardRow {
+  /// Creates a row.
+  const LeaderboardRow({
+    required this.name,
+    required this.league,
+    required this.tp,
+    required this.games,
+    required this.wins,
+  });
+
+  /// Parses a row of the `lb` message.
+  factory LeaderboardRow.fromJson(Map<String, dynamic> j) => LeaderboardRow(
+        name: j['name'] as String? ?? '?',
+        league: League.values[((j['league'] as num?)?.toInt() ?? 0).clamp(0, League.values.length - 1)],
+        tp: (j['tp'] as num?)?.toInt() ?? 0,
+        games: (j['games'] as num?)?.toInt() ?? 0,
+        wins: (j['wins'] as num?)?.toInt() ?? 0,
+      );
+
+  /// Display name.
+  final String name;
+
+  /// League and TP.
+  final League league;
+
+  /// Experience points.
+  final int tp;
+
+  /// Games and wins.
+  final int games, wins;
+}

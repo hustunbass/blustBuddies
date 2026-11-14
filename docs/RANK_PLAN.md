@@ -44,6 +44,8 @@ All numbers live in `RankRules` ([lib/core/rank/rank.dart](../lib/core/rank/rank
 - [x] Supabase adapters (auth check, profile store, leaderboard) with request-shape tests: [lib/net/server/supabase.dart](../lib/net/server/supabase.dart)
 - [x] `bin/server.dart` turns ranked on when `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_KEY` are set
 
+- [x] Ranked vs casual choice in the app: Online lobby has a *Casual | Ranked* switch. Casual (default) = rooms, quick match, codes, ad boost, never touches the rank. Ranked = separate queue, 1v1 only, needs sign-in. Client plumbing (`auth` in hello, rank, queue, rank result, leaderboard), league badge, rank card, result screen with TP change. Tests: [test/net/ranked_client_test.dart](../test/net/ranked_client_test.dart), [test/features/ranked_ui_test.dart](../test/features/ranked_ui_test.dart)
+
 **Needs you (accounts and consoles)**: see [RANK_SETUP_CHECKLIST.md](RANK_SETUP_CHECKLIST.md)
 - [ ] Create the Supabase project; run `supabase/schema.sql`.
 - [ ] Apple: enable *Sign in with Apple* for the app id, create a Services ID and key.
@@ -57,11 +59,9 @@ All numbers live in `RankRules` ([lib/core/rank/rank.dart](../lib/core/rank/rank
 - [ ] Test against a real Supabase project once the keys exist.
 
 **App**
-- [ ] Sign-in screen (Apple, Google), sign out, delete account (store requirement).
-- [ ] Ranked tab in Online: league badge, TP bar, "Find ranked match".
-- [ ] Promotion match banner; result screen with TP and league change.
-- [ ] Leaderboard screen; profile shows league.
-- [ ] League badge art, TR/EN strings.
+- [ ] Sign-in itself (Apple, Google via Supabase): the *Sign in to play ranked* button is a placeholder ("coming soon") until the keys exist. It must store the token in `authTokenProvider` and reconnect.
+- [ ] Sign out, delete account (store requirement).
+- [ ] Profile shows the league; custom league badge art (current badges are icon based).
 
 **Release**
 - [ ] Update privacy policy, App Privacy labels, Play Data safety (accounts, game results).
