@@ -11,6 +11,7 @@ import 'package:blast_buddies/features/online/quick_match_dialog.dart';
 import 'package:blast_buddies/features/rank/league_badge.dart';
 import 'package:blast_buddies/core/auth/auth_provider.dart';
 import 'package:blast_buddies/core/auth/auth_service.dart';
+import 'package:blast_buddies/features/auth/account_actions.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:blast_buddies/net/online_client.dart';
 import 'package:blast_buddies/net/protocol.dart';
@@ -37,23 +38,6 @@ class RankedTabNotifier extends Notifier<bool> {
 
 /// See [RankedTabNotifier].
 final onlineRankedTabProvider = NotifierProvider<RankedTabNotifier, bool>(RankedTabNotifier.new);
-
-/// Drops the connection and connects again with the current sign-in (used
-/// after signing in or out, so the server knows who the player is).
-Future<bool> reconnectOnline(ProviderContainer c, OnlineClient client) async {
-  final prefs = c.read(prefsProvider);
-  final name = c.read(profileProvider).name;
-  final st = c.read(settingsProvider);
-  final custom = (prefs.getString('onlineCustomServer') ?? '').trim();
-  await client.disconnect();
-  final token = await c.read(authProvider.notifier).freshToken();
-  return client.connect(
-    custom.isEmpty ? defaultServerUrl : custom,
-    name,
-    skin: [st.hat, st.face, st.color],
-    authToken: token,
-  );
-}
 
 /// Human readable room mode, e.g. "2 vs 2".
 String roomModeLabel(AppLocalizations l, int capacity, bool teams) =>
@@ -292,51 +276,8 @@ class _RoomListViewState extends ConsumerState<_RoomListView> {
   Future<void> _signIn(AuthProvider p) async {
     final container = ProviderScope.containerOf(context, listen: false);
     final l = AppLocalizations.of(context);
-    final result = await container.read(authProvider.notifier).signIn(p);
-    switch (result) {
-      case SignInResult.ok:
-        await reconnectOnline(container, client);
-      case SignInResult.cancelled:
-        break;
-      case SignInResult.failed:
-        showToast(l.signInFailed, kind: ToastKind.error);
-    }
-  }
-
-  Future<void> _signOut() async {
-    final container = ProviderScope.containerOf(context, listen: false);
-    await container.read(authProvider.notifier).signOut();
-    await reconnectOnline(container, client);
-  }
-
-  /// Asks, deletes the account on the server, signs out and reconnects as a
-  /// guest. Required by the stores for every app that creates accounts.
-  Future<void> _deleteAccount() async {
-    final container = ProviderScope.containerOf(context, listen: false);
-    final l = AppLocalizations.of(context);
-    final sure = await showDialog<bool>(
-      context: context,
-      builder: (dialog) => AlertDialog(
-        title: Text(l.deleteAccountTitle),
-        content: Text(l.deleteAccountBody),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(dialog, false), child: Text(l.cancel)),
-          FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: Colors.red.shade700),
-            onPressed: () => Navigator.pop(dialog, true),
-            child: Text(l.deleteAccountConfirm),
-          ),
-        ],
-      ),
-    );
-    if (sure != true) return;
-    if (!await client.deleteAccount()) {
-      showToast(l.deleteAccountFailed, kind: ToastKind.error);
-      return;
-    }
-    await container.read(authProvider.notifier).signOut();
-    showToast(l.accountDeletedToast, kind: ToastKind.success);
-    await reconnectOnline(container, client);
+    final result = await signInFlow(container, p);
+    if (result == SignInResult.failed) showToast(l.signInFailed, kind: ToastKind.error);
   }
 
   Future<void> _quick(BuildContext context) async {
@@ -420,7 +361,7 @@ class _RoomListViewState extends ConsumerState<_RoomListView> {
             ),
           ),
           if (ranked)
-            Expanded(child: _RankedPanel(client: client, onSignIn: _signIn, onSignOut: _signOut, onDeleteAccount: _deleteAccount))
+            Expanded(child: _RankedPanel(client: client, onSignIn: _signIn))
           else ...[
           Padding(
             padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
@@ -453,17 +394,10 @@ class _RoomListViewState extends ConsumerState<_RoomListView> {
 /// Ranked 1v1: rank card, search button and leaderboard. Needs a signed-in
 /// player; guests are asked to sign in (casual games stay open to everybody).
 class _RankedPanel extends ConsumerWidget {
-  const _RankedPanel({
-    required this.client,
-    required this.onSignIn,
-    required this.onSignOut,
-    required this.onDeleteAccount,
-  });
+  const _RankedPanel({required this.client, required this.onSignIn});
 
   final OnlineClient client;
   final void Function(AuthProvider provider) onSignIn;
-  final VoidCallback onSignOut;
-  final VoidCallback onDeleteAccount;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -544,19 +478,6 @@ class _RankedPanel extends ConsumerWidget {
           icon: const Icon(Icons.leaderboard),
           label: Text(l.leaderboard),
         ),
-        if (rank != null)
-          TextButton.icon(
-            onPressed: auth.busy ? null : onSignOut,
-            icon: const Icon(Icons.logout),
-            label: Text(l.signOutLabel),
-          ),
-        if (rank != null)
-          TextButton.icon(
-            style: TextButton.styleFrom(foregroundColor: Colors.redAccent),
-            onPressed: auth.busy ? null : onDeleteAccount,
-            icon: const Icon(Icons.delete_forever),
-            label: Text(l.deleteAccount),
-          ),
       ],
     );
   }

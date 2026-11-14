@@ -129,6 +129,18 @@ class ProfileNotifier extends Notifier<ProfileData> {
     return name;
   }
 
+  /// Back to a guest profile after signing out or deleting the account. A
+  /// name the player chose is kept; an account-style default name becomes a
+  /// guest default again.
+  Future<void> unlinkAccount() async {
+    if (state.kind == AuthKind.guest) return;
+    final name = state.customName ? state.name : PlayerNames.suggest(AuthKind.guest, rng: rng);
+    state = ProfileData(name: name, kind: AuthKind.guest, customName: state.customName);
+    final p = ref.read(prefsProvider);
+    await p.setString('authKind', AuthKind.guest.name);
+    await p.setString('username', name);
+  }
+
   /// Called after a successful Apple/Google sign-in. A name the player chose
   /// is kept; an auto-generated guest name becomes an account-style default.
   Future<void> linkAccount(AuthKind kind) async {

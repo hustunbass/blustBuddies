@@ -5,6 +5,11 @@ import 'package:blast_buddies/core/ads/ad_service.dart';
 import 'package:blast_buddies/core/ads/admob_service.dart';
 import 'package:blast_buddies/core/ads/ads_removed.dart';
 import 'package:blast_buddies/core/audio/audio_service.dart';
+import 'package:blast_buddies/core/auth/auth_provider.dart';
+import 'package:blast_buddies/core/auth/auth_service.dart';
+import 'package:blast_buddies/core/auth/login_prompt.dart';
+import 'package:blast_buddies/core/profile/profile.dart';
+import 'package:blast_buddies/features/auth/login_screen.dart';
 import 'package:blast_buddies/core/daily/daily.dart';
 import 'package:blast_buddies/core/economy/packages.dart';
 import 'package:blast_buddies/core/store/purchase_service.dart';
@@ -35,10 +40,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// Builds the app router.
-GoRouter buildRouter() => GoRouter(
+/// Builds the app router. [needsLogin] says whether the first-launch login
+/// screen still has to be shown before the menu.
+GoRouter buildRouter({bool Function()? needsLogin}) => GoRouter(
+      redirect: (_, state) => state.matchedLocation == '/' && (needsLogin?.call() ?? false) ? '/login' : null,
       routes: [
         GoRoute(path: '/', builder: (_, _) => const MenuScreen()),
+        GoRoute(path: '/login', builder: (_, _) => const LoginScreen()),
         GoRoute(
           path: '/levels',
           builder: (_, _) => LevelSelectScreen(
@@ -76,7 +84,16 @@ class BlastBuddiesApp extends ConsumerStatefulWidget {
 }
 
 class _BlastBuddiesAppState extends ConsumerState<BlastBuddiesApp> with WidgetsBindingObserver {
-  final GoRouter _router = buildRouter();
+  late final GoRouter _router = buildRouter(needsLogin: _needsLogin);
+
+  /// The login screen comes once, before the menu: not when the player has
+  /// already decided or is signed in (the session is kept until sign-out), and
+  /// not on devices where no sign-in method is available.
+  bool _needsLogin() {
+    if (ref.read(loginPromptDoneProvider) || ref.read(authProvider).signedIn) return false;
+    final auth = ref.read(authProvider.notifier);
+    return AuthProvider.values.any(auth.supports);
+  }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
@@ -99,6 +116,18 @@ class _BlastBuddiesAppState extends ConsumerState<BlastBuddiesApp> with WidgetsB
 
   @override
   Widget build(BuildContext context) {
+    // The profile mirrors the sign-in (shows "Signed in with Apple", account
+    // style default name); also corrects it when a session was restored or lost.
+    ref.listen(authProvider, (_, next) {
+      if (!next.ready) return;
+      final session = next.session;
+      final kind = session == null
+          ? AuthKind.guest
+          : (session.provider == AuthProvider.apple ? AuthKind.apple : AuthKind.google);
+      if (ref.read(profileProvider).kind == kind) return;
+      final profile = ref.read(profileProvider.notifier);
+      unawaited(kind == AuthKind.guest ? profile.unlinkAccount() : profile.linkAccount(kind));
+    });
     return MaterialApp.router(
       onGenerateTitle: (c) => AppLocalizations.of(c).appTitle,
       theme: buildTheme(),

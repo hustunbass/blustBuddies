@@ -1446,4 +1446,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get accountDeletedToast => 'Your account was deleted.';
+
+  @override
+  String get loginTitle => 'Welcome to Boom Pals';
+
+  @override
+  String get loginSubtitle =>
+      'Sign in to keep your rank and play ranked 1v1 matches. You stay signed in until you sign out.';
+
+  @override
+  String get continueAsGuest => 'Continue as guest';
+
+  @override
+  String get loginGuestNote =>
+      'As a guest you can play everything except ranked matches. You can sign in later in Settings.';
+
+  @override
+  String get accountGuestHint =>
+      'Sign in to play ranked matches and keep your rank.';
+
+  @override
+  String get signedOutToast => 'Signed out.';
 }

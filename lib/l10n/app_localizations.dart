@@ -2437,6 +2437,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Your account was deleted.'**
   String get accountDeletedToast;
+
+  /// No description provided for @loginTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome to Boom Pals'**
+  String get loginTitle;
+
+  /// No description provided for @loginSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to keep your rank and play ranked 1v1 matches. You stay signed in until you sign out.'**
+  String get loginSubtitle;
+
+  /// No description provided for @continueAsGuest.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue as guest'**
+  String get continueAsGuest;
+
+  /// No description provided for @loginGuestNote.
+  ///
+  /// In en, this message translates to:
+  /// **'As a guest you can play everything except ranked matches. You can sign in later in Settings.'**
+  String get loginGuestNote;
+
+  /// No description provided for @accountGuestHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to play ranked matches and keep your rank.'**
+  String get accountGuestHint;
+
+  /// No description provided for @signedOutToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out.'**
+  String get signedOutToast;
 }
 
 class _AppLocalizationsDelegate

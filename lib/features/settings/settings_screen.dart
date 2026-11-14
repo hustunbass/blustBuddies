@@ -1,5 +1,6 @@
 import 'package:blast_buddies/core/audio/audio_service.dart';
 import 'package:blast_buddies/core/settings/settings.dart';
+import 'package:blast_buddies/features/auth/account_section.dart';
 import 'package:blast_buddies/features/profile/profile_widgets.dart';
 import 'package:blast_buddies/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -23,6 +24,7 @@ class SettingsScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(12),
           children: [
             const AccountTile(),
+            const AccountSection(),
             const Divider(),
             SwitchListTile(
               title: Text(l.sound),

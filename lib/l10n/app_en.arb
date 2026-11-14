@@ -824,5 +824,11 @@
   "deleteAccountBody": "This permanently deletes your account, your rank and your ranked match history. It cannot be undone. Casual play stays available without an account.",
   "deleteAccountConfirm": "Delete",
   "deleteAccountFailed": "Could not delete the account. Try again in a moment.",
-  "accountDeletedToast": "Your account was deleted."
+  "accountDeletedToast": "Your account was deleted.",
+  "loginTitle": "Welcome to Boom Pals",
+  "loginSubtitle": "Sign in to keep your rank and play ranked 1v1 matches. You stay signed in until you sign out.",
+  "continueAsGuest": "Continue as guest",
+  "loginGuestNote": "As a guest you can play everything except ranked matches. You can sign in later in Settings.",
+  "accountGuestHint": "Sign in to play ranked matches and keep your rank.",
+  "signedOutToast": "Signed out."
 }

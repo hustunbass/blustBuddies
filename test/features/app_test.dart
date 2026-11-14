@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 Future<ProviderContainer> pumpApp(WidgetTester tester, {Map<String, Object> prefs = const {}}) async {
   // Most tests are not about the first-run welcome offer.
-  SharedPreferences.setMockInitialValues({'onboardingOffered': true, ...prefs});
+  SharedPreferences.setMockInitialValues({'onboardingOffered': true, 'loginPromptDone': true, ...prefs});
   final sp = await SharedPreferences.getInstance();
   final container = ProviderContainer(overrides: [prefsProvider.overrideWithValue(sp)]);
   addTearDown(container.dispose);

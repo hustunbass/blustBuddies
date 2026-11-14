@@ -74,6 +74,7 @@ void main() {
     expect(find.text('Sign in with Apple'), findsOneWidget);
     expect(find.text('Sign in with Google'), findsNothing, reason: 'not offered where it is not set up');
     expect(find.text('Sign out'), findsNothing);
+    expect(find.text('Delete account'), findsNothing);
     expect(find.text('Quick match'), findsNothing);
     expect(find.text('Find ranked match'), findsNothing);
   });
@@ -89,33 +90,8 @@ void main() {
     expect(find.text('Silver'), findsOneWidget);
     expect(find.text('40 TP'), findsOneWidget);
     expect(find.text('Find ranked match'), findsOneWidget);
-    expect(find.text('Sign out'), findsOneWidget);
     expect(find.text('Sign in with Apple'), findsNothing);
-  });
-
-  testWidgets('signed-in players can delete their account, after a confirmation', (tester) async {
-    await pumpOnline(
-      tester,
-      rank: const PublicRank(league: League.silver, tp: 40, promotion: false, placing: false, games: 12),
-    );
-    await tester.tap(find.text('Ranked'));
-    await tester.pumpAndSettle();
-    expect(find.text('Delete account'), findsOneWidget);
-    await tester.ensureVisible(find.text('Delete account'));
-    await tester.tap(find.text('Delete account'));
-    await tester.pumpAndSettle();
-    expect(find.text('Delete your account?'), findsOneWidget);
-    expect(find.textContaining('cannot be undone'), findsOneWidget);
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(find.text('Delete your account?'), findsNothing);
-    expect(find.text('Delete account'), findsOneWidget, reason: 'cancelled: still signed in');
-  });
-
-  testWidgets('guests see no delete button', (tester) async {
-    await pumpOnline(tester);
-    await tester.tap(find.text('Ranked'));
-    await tester.pumpAndSettle();
+    expect(find.text('Sign out'), findsNothing, reason: 'sign-out and delete live in Settings now');
     expect(find.text('Delete account'), findsNothing);
   });
 

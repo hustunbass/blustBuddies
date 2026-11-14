@@ -1338,4 +1338,25 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get accountDeletedToast => 'Hesabın silindi.';
+
+  @override
+  String get loginTitle => 'Boom Pals\'e hoş geldin';
+
+  @override
+  String get loginSubtitle =>
+      'Rankını korumak ve dereceli 1v1 oynamak için giriş yap. Çıkış yapmadığın sürece giriş yapılı kalırsın.';
+
+  @override
+  String get continueAsGuest => 'Misafir olarak devam et';
+
+  @override
+  String get loginGuestNote =>
+      'Misafir olarak dereceli maçlar dışında her şeyi oynayabilirsin. Daha sonra Ayarlar\'dan giriş yapabilirsin.';
+
+  @override
+  String get accountGuestHint =>
+      'Dereceli maç oynamak ve rankını korumak için giriş yap.';
+
+  @override
+  String get signedOutToast => 'Çıkış yapıldı.';
 }

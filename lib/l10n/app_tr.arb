@@ -731,5 +731,11 @@
   "deleteAccountBody": "Hesabın, rankın ve dereceli maç geçmişin kalıcı olarak silinir. Bu işlem geri alınamaz. Derecesiz oyun hesapsız devam eder.",
   "deleteAccountConfirm": "Sil",
   "deleteAccountFailed": "Hesap silinemedi. Biraz sonra tekrar dene.",
-  "accountDeletedToast": "Hesabın silindi."
+  "accountDeletedToast": "Hesabın silindi.",
+  "loginTitle": "Boom Pals'e hoş geldin",
+  "loginSubtitle": "Rankını korumak ve dereceli 1v1 oynamak için giriş yap. Çıkış yapmadığın sürece giriş yapılı kalırsın.",
+  "continueAsGuest": "Misafir olarak devam et",
+  "loginGuestNote": "Misafir olarak dereceli maçlar dışında her şeyi oynayabilirsin. Daha sonra Ayarlar'dan giriş yapabilirsin.",
+  "accountGuestHint": "Dereceli maç oynamak ve rankını korumak için giriş yap.",
+  "signedOutToast": "Çıkış yapıldı."
 }

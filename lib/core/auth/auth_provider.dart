@@ -47,9 +47,15 @@ class AuthState {
 class AuthNotifier extends Notifier<AuthState> {
   AuthService get _service => ref.read(authServiceProvider);
 
+  /// Completes when the session stored by an earlier launch has been loaded
+  /// (and refreshed if it was old). Tokens are only handed out after that, so
+  /// opening Online right at launch never connects as a guest by mistake.
+  Future<void> restored = Future.value();
+
   @override
   AuthState build() {
-    unawaited(_restore());
+    restored = _restore();
+    unawaited(restored);
     return const AuthState();
   }
 
@@ -86,6 +92,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
   /// A token that is valid now (refreshed if necessary), or null.
   Future<String?> freshToken() async {
+    await restored;
     final t = await _service.freshToken();
     final s = _service.session;
     if (s?.accessToken != state.session?.accessToken) state = AuthState(session: s, ready: state.ready);
