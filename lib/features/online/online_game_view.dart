@@ -37,10 +37,16 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
   final Map<String, int> _delta = {};
   StreamSubscription<int>? _left;
   StreamSubscription<(int, bool)>? _away;
+  final ValueNotifier<int> _pingMs = ValueNotifier(0);
+  Timer? _pingTimer;
 
   @override
   void initState() {
     super.initState();
+    _pingMs.value = (widget.client.rtt * 1000).round();
+    _pingTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+      _pingMs.value = (widget.client.rtt * 1000).round();
+    });
     _audio = ref.read(audioProvider);
     _audio.startMusic();
     _left = widget.match.leftSlots.listen((slot) {
@@ -110,6 +116,8 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
 
   @override
   void dispose() {
+    _pingTimer?.cancel();
+    _pingMs.dispose();
     _audio.stopMusic();
     unawaited(_left?.cancel());
     unawaited(_away?.cancel());
@@ -145,6 +153,28 @@ class _OnlineGameViewState extends ConsumerState<OnlineGameView> {
                 names: match.names,
                 teams: match.world.teams,
                 onPause: () => _overlay.value = _Overlay.menu,
+              ),
+              Positioned(
+                top: 2,
+                right: 6,
+                child: IgnorePointer(
+                  child: ValueListenableBuilder<int>(
+                    valueListenable: _pingMs,
+                    builder: (_, ms, _) => Text(
+                      '$ms ms',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: ms < 80
+                            ? Colors.greenAccent
+                            : ms < 150
+                                ? Colors.amberAccent
+                                : Colors.redAccent,
+                        shadows: const [Shadow(blurRadius: 2, color: Colors.black87)],
+                      ),
+                    ),
+                  ),
+                ),
               ),
               ValueListenableBuilder<_Overlay>(
                 valueListenable: _overlay,

@@ -139,17 +139,33 @@ class _FloatingJoystickState extends State<FloatingJoystick> {
   Dir _dir = Dir.none;
   int? _pointer;
 
+  /// Size of the zone the stick lives in; the ring never leaves it, so it
+  /// cannot follow the thumb up over the map.
+  Size? _bounds;
+
+  Offset _keepInside(Offset o) {
+    final b = _bounds;
+    if (b == null) return o;
+    final r = widget.size / 2;
+    return Offset(
+      o.dx.clamp(r, max(r, b.width - r)).toDouble(),
+      o.dy.clamp(r, max(r, b.height - r)).toDouble(),
+    );
+  }
+
   void _move(Offset local) {
-    final o = _origin;
+    var o = _origin;
     if (o == null) return;
     final r = widget.size / 2;
     var v = local - o;
     if (v.distance > r) {
       // Drag the stick along when the thumb leaves the ring.
-      final excess = v - v / v.distance * r;
-      _origin = o + excess;
-      v = v / v.distance * r;
+      o = o + (v - v / v.distance * r);
     }
+    o = _keepInside(o);
+    v = local - o;
+    if (v.distance > r) v = v / v.distance * r;
+    _origin = o;
     var d = Dir.none;
     if (v.distance > r * 0.28) {
       d = v.dx.abs() > v.dy.abs() ? (v.dx > 0 ? Dir.right : Dir.left) : (v.dy > 0 ? Dir.down : Dir.up);
@@ -178,6 +194,7 @@ class _FloatingJoystickState extends State<FloatingJoystick> {
     return Semantics(
       label: widget.semanticLabel,
       child: LayoutBuilder(builder: (context, c) {
+        _bounds = Size(c.maxWidth, c.maxHeight);
         final rest = widget.home ??
             widget.alignment
                 .inscribe(Size.square(widget.size), Offset.zero & Size(c.maxWidth, c.maxHeight))
@@ -187,7 +204,7 @@ class _FloatingJoystickState extends State<FloatingJoystick> {
           onPointerDown: (e) {
             if (_pointer != null) return;
             _pointer = e.pointer;
-            _origin = e.localPosition;
+            _origin = _keepInside(e.localPosition);
             _move(e.localPosition);
           },
           onPointerMove: (e) {
@@ -199,9 +216,11 @@ class _FloatingJoystickState extends State<FloatingJoystick> {
           onPointerCancel: (e) {
             if (e.pointer == _pointer) _release();
           },
-          child: CustomPaint(
-            size: Size(c.maxWidth, c.maxHeight),
-            painter: _FloatingPainter(_origin ?? rest, _knob, widget.size, active: _origin != null),
+          child: ClipRect(
+            child: CustomPaint(
+              size: Size(c.maxWidth, c.maxHeight),
+              painter: _FloatingPainter(_origin ?? rest, _knob, widget.size, active: _origin != null),
+            ),
           ),
         );
       }),
